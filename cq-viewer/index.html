@@ -18,9 +18,11 @@
 			control: 'trackball',
 		};
 
-		function render(shapes, states) {
+		function render(model) {
 			viewer?.clear();
-			viewer.render(...viewer.renderTessellatedShapes(shapes, states, options), states, options);
+			const [ shapes, states ] = model;
+			const [ group, tree ] = viewer.renderTessellatedShapes(shapes, states, options);
+			viewer.render(group, tree, states, options);
 		}
 
 		function nc(change) {
@@ -38,7 +40,7 @@
 				if (key == 'options') {
 					updateView(event.data.options);
 				} else if (key == 'model') {
-					render(event.data.model.shapes, event.data.model.states);
+					render(event.data.model);
 				}
 			});
 		});
