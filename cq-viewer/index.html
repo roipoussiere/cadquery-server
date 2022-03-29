@@ -5,49 +5,18 @@
 	<meta charset="utf-8" />
 	<title>CadQuery Viewer</title>
 	<link rel="stylesheet" href="{{cq-view-css}}" />
-
 	<script src="{{cq-view-example}}"></script>
 
 	<script type="module">
 		import { Viewer } from '{{cq-view-js}}';
 
-		const options = {
+		let options = {
 			cadWidth: 620,
 			height: 540,
 			treeWidth: 220,
 			theme: 'browser',
 			glass: true,
-			pinning: false,
-			ambientIntensity: 0.75,
-			directIntensity: 0.15,
-			edgeColor: 0x707070,
-			defaultOpacity: 0.5,
-			normalLen: 0,
 			control: 'trackball',
-			ortho: true,
-			ticks: 10,
-			// transparent: true,
-			// blackEdges: true,
-			axes: true,
-			// axes0: true,
-			// grid: [true, false, true],
-			// clipIntersection: true,
-			// clipPlaneHelpers: true,
-			// clipNormal0: [-0.7, 0.25, -0.66],
-			// clipNormal2: [-0.8, -0.4, -0.5],
-			// clipSlider0: 20,
-			// clipSlider1: 10,
-			// clipSlider2: 30,
-			rotateSpeed: 1.0,
-			zoomSpeed: 0.5,
-			panSpeed: 0.5,
-			tools: true,
-			timeit: false,
-			// position: [529.033598621696, -60.76490228572615, 833.5255981339967],
-			// quaternion: [0.1279694269733356, 0.17808830219432778, 0.792315727012021, 0.5693366061576142],
-			// target: [133.7552476361796, -193.79076438378323, -47.35882179018034],
-			// zoom: 0.8
-			collapse: 1,
 		};
 
 		function render(shapes, states) {
@@ -56,15 +25,24 @@
 		}
 
 		function nc(change) {
-			console.debug('cadquery viewer:', JSON.stringify(change, null, 2));
+			console.debug('viewer info:', JSON.stringify(change, null, 2));
 		}
 
-		var viewer = null;
-		const container = document.getElementById('cad_view');
-		container.innerHTML = '';
-		viewer = new Viewer(container, options, nc);
-		render(...hexapod);
+		function updateView() {
+			container.innerHTML = '';
+			viewer = new Viewer(container, options, nc);
+			render(...hexapod);
+		}
 
+		window.addEventListener('message', event => {
+			console.debug('received options:', JSON.stringify(event.data, null, 2));
+			options = Object.assign({}, options, event.data);
+			updateView();
+		});
+
+		const container = document.getElementById('cad_view');
+		let viewer = null;
+		updateView();
 		console.log('Loaded', new Date());
 	</script>
 </head>
