@@ -28,16 +28,21 @@
 			console.debug('viewer info:', JSON.stringify(change, null, 2));
 		}
 
-		function updateView() {
+		function updateView(new_options) {
 			container.innerHTML = '';
-			viewer = new Viewer(container, options, nc);
+			viewer = new Viewer(container, Object.assign({}, options, new_options), nc);
 			render(...hexapod);
 		}
 
 		window.addEventListener('message', event => {
-			console.debug('received options:', JSON.stringify(event.data, null, 2));
-			options = Object.assign({}, options, event.data);
-			updateView();
+			Object.keys(event.data).forEach(key => {
+				switch(key) {
+					case 'options':
+						updateView(event.data.options);
+					case 'model':
+						render(...event.data.model);
+				}
+			});
 		});
 
 		const container = document.getElementById('cad_view');
