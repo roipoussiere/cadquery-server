@@ -24,7 +24,7 @@
 		}
 
 		function nc(change) {
-			console.debug('viewer info:', JSON.stringify(change, null, 2));
+			// console.debug('viewer info:', JSON.stringify(change, null, 2));
 		}
 
 		function updateView(new_options) {
@@ -33,20 +33,18 @@
 		}
 
 		window.addEventListener('message', event => {
+			// console.debug('received data:', JSON.stringify(event.data.model, null, 2));
 			Object.keys(event.data).forEach(key => {
-				switch(key) {
-					case 'options':
-						updateView(event.data.options);
-					case 'model':
-						render(...event.data.model);
+				if (key == 'options') {
+					updateView(event.data.options);
+				} else if (key == 'model') {
+					render(event.data.model.shapes, event.data.model.states);
 				}
 			});
 		});
 
 		const container = document.getElementById('cad_view');
 		let viewer = null;
-		updateView();
-		console.log('Loaded', new Date());
 	</script>
 </head>
 
