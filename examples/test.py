@@ -1,11 +1,3 @@
-import cadquery as cq
-from jupyter_cadquery.utils import numpy_to_json
-from jupyter_cadquery.cad_objects import to_assembly
-from jupyter_cadquery.base import _tessellate_group
-
-def show(model):
-    print(numpy_to_json(_tessellate_group(to_assembly(model))))
-
 height = 60.0
 width = 80.0
 thickness = 10.0
