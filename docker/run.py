@@ -16,7 +16,7 @@ def show(model):
 
 
 @app.route('/', methods = [ 'GET', 'POST' ])
-def hello_world():
+def root():
     if request.method == 'GET':
         return 'Please send a CadQuery Python script in a POST request.\n'
     elif request.method == 'POST':
