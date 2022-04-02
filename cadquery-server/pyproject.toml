@@ -2,7 +2,16 @@
 name = "cadquery-server"
 version = "0.1.0"
 description = "A web server that listen for a CadQuery code and return a low-level threejs object representing the generated model."
-authors = ["Roipoussiere <roipoussiere@protonmail.com>"]
+license = "MIT"
+authors = ["Roipoussiere"]
+readme = "./README.md"
+homepage = "https://open-vsx.org/extension/roipoussiere/cadquery"
+repository = "https://framagit.org/roipoussiere/cadquery-vscode"
+keywords = ["cad", "cadquery", "3d", "parametric", "modeling"]
+classifiers = [
+    "Framework :: Flask",
+    "Topic :: Multimedia :: Graphics :: 3D Modeling"
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -10,6 +19,9 @@ jupyter-cadquery = "^3.0.0"
 cadquery-massembly = "^0.9.0"
 matplotlib = "^3.5.1"
 Flask = "^2.1.1"
+
+[tool.poetry.scripts]
+cq-server = "cadquery_server.server:run"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
