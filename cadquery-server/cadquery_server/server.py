@@ -10,9 +10,9 @@ app = Flask(__name__)
 json_result = '[{}, {}]'
 
 
-# def show(model):
-#     global json_result
-#     json_result = numpy_to_json(_tessellate_group(to_assembly(model)))
+def show(model):
+    global json_result
+    json_result = numpy_to_json(_tessellate_group(to_assembly(model)))
 
 
 @app.route('/', methods = [ 'GET', 'POST' ])
