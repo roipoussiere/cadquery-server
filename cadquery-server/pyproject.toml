@@ -1,0 +1,12 @@
+[tool.poetry]
+name = "cadquery-server"
+version = "0.1.0"
+description = "A web server that listen for a CadQuery code and return a low-level threejs object representing the generated model."
+authors = ["Roipoussiere <roipoussiere@protonmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
