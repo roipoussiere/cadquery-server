@@ -5,7 +5,11 @@ description = "A web server that listen for a CadQuery code and return a low-lev
 authors = ["Roipoussiere <roipoussiere@protonmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
+jupyter-cadquery = "^3.0.0"
+cadquery-massembly = "^0.9.0"
+matplotlib = "^3.5.1"
+Flask = "^2.1.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
