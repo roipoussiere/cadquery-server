@@ -18,7 +18,7 @@ RUN conda create -n cq -c default -c conda-forge -c cadquery python=3.8 cadquery
 
 RUN . "/opt/conda/etc/profile.d/conda.sh" && \
     conda activate cq && \
-    pip install jupyter-cadquery==3.0.0 cadquery-massembly~=0.9 matplotlib==3.3 flask==2.1 && \
+    pip install cadquery-server && \
     find / -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
 
 WORKDIR /home/cq
@@ -26,6 +26,4 @@ USER cq
 
 ENV PATH="/opt/conda/envs/cq/bin:${PATH}"
 
-ADD run.py /
-
-CMD python /run.py
+CMD cq-server
