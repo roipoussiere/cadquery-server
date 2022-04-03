@@ -1,7 +1,4 @@
 import cadquery
-from jupyter_cadquery.utils import numpy_to_json
-from jupyter_cadquery.cad_objects import to_assembly
-from jupyter_cadquery.base import _tessellate_group
 
 from flask import Flask, request
 
@@ -11,6 +8,10 @@ json_result = '[{}, {}]'
 
 
 def show(model):
+    from jupyter_cadquery.utils import numpy_to_json
+    from jupyter_cadquery.cad_objects import to_assembly
+    from jupyter_cadquery.base import _tessellate_group
+
     global json_result
     json_result = numpy_to_json(_tessellate_group(to_assembly(model)))
 
