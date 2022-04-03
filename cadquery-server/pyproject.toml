@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "cadquery-server"
 version = "0.1.1"
-description = "A web server that listen for a CadQuery code and return a low-level threejs object representing the generated model."
+description = "A server that executes a given CadQuery code and returns the generated model as a threejs object."
 license = "MIT"
 authors = ["Roipoussiere"]
 readme = "./README.md"
@@ -21,7 +21,7 @@ matplotlib = "^3.5.1"
 Flask = "^2.1.1"
 
 [tool.poetry.scripts]
-cq-server = "cadquery_server.server:run"
+cq-server = "cadquery_server.server:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

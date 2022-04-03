@@ -1,5 +1,6 @@
-import cadquery
+import argparse
 
+import cadquery
 from flask import Flask, request
 
 
@@ -25,5 +26,16 @@ def root():
         return json_result
 
 
-def run():
-    app.run(host='0.0.0.0', debug=False)
+def run(port: int):
+    app.run(host='0.0.0.0', port=port, debug=False)
+
+def main():
+    parser = argparse.ArgumentParser(description='A server that executes a given CadQuery code and returns the generated model as a threejs object.')
+    parser.add_argument('-p', '--port', type=int, default=5000, help='Server port')
+    args = parser.parse_args()
+
+    run(args.port)
+
+
+if __name__ == '__main__':
+    main()
