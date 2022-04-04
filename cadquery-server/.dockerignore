@@ -1,0 +1,8 @@
+# generated package files to publish
+/dist
+
+# generated Python cache files
+/src/__pycache__
+
+# Dockerfiles
+/Dockerfile*
