@@ -8,6 +8,9 @@ readme = "./README.md"
 homepage = "https://open-vsx.org/extension/roipoussiere/cadquery"
 repository = "https://framagit.org/roipoussiere/cadquery-vscode"
 keywords = ["cad", "cadquery", "3d", "parametric", "modeling"]
+packages = [
+    { include = "src" }
+]
 classifiers = [
     "Framework :: Flask",
     "Topic :: Multimedia :: Graphics :: 3D Modeling"
