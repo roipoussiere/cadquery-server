@@ -22,7 +22,7 @@ def root():
     if request.method == 'GET':
         return 'Please send a CadQuery Python script in a POST request.\n'
     elif request.method == 'POST':
-        exec(request.get_data().decode())
+        exec(request.get_data().decode(), globals())
         return json_result
 
 
