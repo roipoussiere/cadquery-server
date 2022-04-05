@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cadquery-server"
-version = "0.1.2"
+version = "0.1.3"
 description = "A web server that executes a given CadQuery code and returns the generated model as a threejs object."
 license = "MIT"
 authors = ["Roipoussiere"]
