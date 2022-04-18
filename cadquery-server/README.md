@@ -8,8 +8,6 @@ It has been created for the [Cadquery VSCode extension](https://open-vsx.org/ext
 
     pip install cq-server
 
-Note that you must have CadQuery installed on your system (if not, you might be interested by [the docker image](https://hub.docker.com/r/cadquery/cadquery-server)).
-
 ## Usage
 
 ### Starting the server
