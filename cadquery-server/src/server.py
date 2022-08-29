@@ -2,6 +2,7 @@ import os
 import sys
 import argparse
 import traceback
+import importlib
 
 from flask import Flask
 
@@ -9,6 +10,8 @@ from flask import Flask
 DEFAULT_MODULE_NAME = 'main'
 MODEL_VARIABLE_NAME = 'result'
 
+
+module = None
 app = Flask(__name__)
 
 
@@ -19,11 +22,17 @@ def show(model):
 
     return numpy_to_json(_tessellate_group(to_assembly(model)))
 
-
 @app.route('/<module_name>', methods = [ 'GET' ])
 def root(module_name=DEFAULT_MODULE_NAME):
+    global module
+
     try:
-        module = __import__(module_name)
+        if module:
+            print('reloading module %s...' % module_name)
+            importlib.reload(module)
+        else:
+            print('importing module %s...' % module_name)
+            module = importlib.import_module(module_name)
 
     except ModuleNotFoundError:
         return 'Can not import module "%s".' % module_name, 404
