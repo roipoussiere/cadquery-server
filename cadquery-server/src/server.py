@@ -1,11 +1,13 @@
+import os
+import sys
 import argparse
 
-import cadquery
-from flask import Flask, request
+from flask import Flask
 
+
+DEFAULT_MODULE_NAME = 'main'
 
 app = Flask(__name__)
-json_result = '[{}, {}]'
 
 
 def show(model):
@@ -13,26 +15,32 @@ def show(model):
     from jupyter_cadquery.cad_objects import to_assembly
     from jupyter_cadquery.base import _tessellate_group
 
-    global json_result
-    json_result = numpy_to_json(_tessellate_group(to_assembly(model)))
+    return numpy_to_json(_tessellate_group(to_assembly(model)))
 
 
-@app.route('/', methods = [ 'GET', 'POST' ])
-def root():
-    if request.method == 'GET':
-        return 'Please send a CadQuery Python script in a POST request.\n'
-    elif request.method == 'POST':
-        exec(request.get_data().decode(), globals())
-        return json_result
+@app.route('/<module_name>', methods = [ 'GET' ])
+def root(module_name=DEFAULT_MODULE_NAME):
+    try:
+        module = __import__(module_name)
+    except ModuleNotFoundError:
+        return 'Can not import module "%s".' % module_name, 404
 
+    model = getattr(module, 'result')
+    return show(model)
 
 def run(port: int):
+    import cadquery
+
     app.run(host='0.0.0.0', port=port, debug=False)
 
 def main():
-    parser = argparse.ArgumentParser(description='A web server that executes a given CadQuery code and returns the generated model as a threejs object.')
+    parser = argparse.ArgumentParser(description='A web server that renders a 3d model of a CadQuery script loaded dynamically.')
+    parser.add_argument('dir', help='Path of the directory containing CadQuery scripts')
     parser.add_argument('-p', '--port', type=int, default=5000, help='Server port')
     args = parser.parse_args()
+
+    modules_path = os.path.abspath(os.path.join(os.getcwd(), args.dir))
+    sys.path.insert(1, modules_path)
 
     run(args.port)
 
