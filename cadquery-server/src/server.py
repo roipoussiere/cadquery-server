@@ -4,7 +4,7 @@ import argparse
 import traceback
 import importlib
 
-from flask import Flask
+from flask import Flask, request
 
 
 DEFAULT_MODULE_NAME = 'main'
@@ -22,16 +22,18 @@ def show(model):
 
     return numpy_to_json(_tessellate_group(to_assembly(model)))
 
-@app.route('/<module_name>', methods = [ 'GET' ])
-def root(module_name=DEFAULT_MODULE_NAME):
+@app.route('/', methods = [ 'GET' ])
+def root():
     global module
+
+    module_name = request.args.get('mod', DEFAULT_MODULE_NAME)
 
     try:
         if module:
-            print('reloading module %s...' % module_name)
+            print('Reloading module %s...' % module_name)
             importlib.reload(module)
         else:
-            print('importing module %s...' % module_name)
+            print('Importing module %s...' % module_name)
             module = importlib.import_module(module_name)
 
     except ModuleNotFoundError:
