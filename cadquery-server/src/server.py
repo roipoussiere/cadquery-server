@@ -1,11 +1,13 @@
 import os
 import sys
 import argparse
+import traceback
 
 from flask import Flask
 
 
 DEFAULT_MODULE_NAME = 'main'
+MODEL_VARIABLE_NAME = 'result'
 
 app = Flask(__name__)
 
@@ -22,10 +24,25 @@ def show(model):
 def root(module_name=DEFAULT_MODULE_NAME):
     try:
         module = __import__(module_name)
+
     except ModuleNotFoundError:
         return 'Can not import module "%s".' % module_name, 404
 
-    model = getattr(module, 'result')
+    except Exception as error:
+        error_title = type(error).__name__
+        stacktrace = traceback.format_exc()
+
+        print(error_title + ': ' + str(error), '\n', stacktrace, file=sys.stderr)
+        return '<h1>' + error_title + '</h1><p>' + str(error) + '</p><pre>' + stacktrace + '</pre>', 400
+
+    try:
+        model = getattr(module, MODEL_VARIABLE_NAME)
+    except AttributeError:
+        error = 'Variable "%s" is required to render the model.' % MODEL_VARIABLE_NAME
+
+        print(error, file=sys.stderr)
+        return error, 400
+
     return show(model)
 
 def run(port: int):
