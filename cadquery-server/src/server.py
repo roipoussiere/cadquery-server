@@ -7,13 +7,9 @@ import importlib
 from flask import Flask, request
 
 
-DEFAULT_MODULE_NAME = 'main'
-MODEL_VARIABLE_NAME = 'result'
-
-
 module = None
+args = None
 app = Flask(__name__)
-
 
 def show(model):
     from jupyter_cadquery.utils import numpy_to_json
@@ -26,7 +22,7 @@ def show(model):
 def root():
     global module
 
-    module_name = request.args.get('mod', DEFAULT_MODULE_NAME)
+    module_name = request.args.get('mod', args.main)
 
     try:
         if module:
@@ -47,9 +43,9 @@ def root():
         return '<h1>' + error_title + '</h1><p>' + str(error) + '</p><pre>' + stacktrace + '</pre>', 400
 
     try:
-        model = getattr(module, MODEL_VARIABLE_NAME)
+        model = getattr(module, args.render)
     except AttributeError:
-        error = 'Variable "%s" is required to render the model.' % MODEL_VARIABLE_NAME
+        error = 'Variable "%s" is required to render the model.' % args.render
 
         print(error, file=sys.stderr)
         return error, 400
@@ -62,9 +58,18 @@ def run(port: int):
     app.run(host='0.0.0.0', port=port, debug=False)
 
 def main():
-    parser = argparse.ArgumentParser(description='A web server that renders a 3d model of a CadQuery script loaded dynamically.')
-    parser.add_argument('dir', help='Path of the directory containing CadQuery scripts')
-    parser.add_argument('-p', '--port', type=int, default=5000, help='Server port')
+    global args
+
+    parser = argparse.ArgumentParser(
+            description='A web server that renders a 3d model of a CadQuery script loaded dynamically.')
+    parser.add_argument('-p', '--port', type=int, default=5000,
+        help='Server port (default: current 5000).')
+    parser.add_argument('-d', '--dir', default='.',
+        help='Path of the directory containing CadQuery scripts (default: current dir).')
+    parser.add_argument('-m', '--main', default='main',
+        help='Main module (default: main).')
+    parser.add_argument('-r', '--render', default='result',
+        help='Variable name of the model to render (default: result).')
     args = parser.parse_args()
 
     modules_path = os.path.abspath(os.path.join(os.getcwd(), args.dir))
