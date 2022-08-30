@@ -13,7 +13,11 @@
 	<script type="module">
 		import { update_model } from "{{ url_for('static', filename='viewer.js') }}";
 		const update = () => update_model('{{ module }}', '{{ object }}');
-		window.addEventListener('DOMContentLoaded', () => update());
+		window.addEventListener('DOMContentLoaded', () => {
+			update();
+			const reload_button = document.getElementsByClassName('tcv_reset')[0];
+			reload_button.addEventListener('click', event => update());
+		});
 	</script>
 </body>
 
