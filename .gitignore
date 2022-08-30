@@ -1,0 +1,8 @@
+# Generated Python cache files
+__pycache__
+
+# Generated package files to publish module
+/dist
+
+# Files used for development
+___*
