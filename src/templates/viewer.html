@@ -4,20 +4,17 @@
 <head>
 	<meta charset="utf-8" />
 	<title>CadQuery Viewer</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='vendor/three-cad-viewer.esm.css') }}" />
 	<link rel="stylesheet" href="{{ url_for('static', filename='viewer.css') }}" />
-	<script src="{{ url_for('static', filename='viewer.js') }}"></script>
 </head>
 
 <body>
-	<h1>CadQuery Viewer</h1>
-	<h2>module: {{ module }}, object: {{ object }}</h2>
-	<script>
-update = () => updateJson('{{ module }}', '{{ object }}');
-window.addEventListener("DOMContentLoaded", () => update());
+	<div id="cad_view"></div>
+	<script type="module">
+		import { update_model } from "{{ url_for('static', filename='viewer.js') }}";
+		const update = () => update_model('{{ module }}', '{{ object }}');
+		window.addEventListener('DOMContentLoaded', () => update());
 	</script>
-
-	<button onclick="update();">update</button>
-	<pre id="json">[]</pre>
 </body>
 
 </html>
