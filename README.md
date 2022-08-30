@@ -28,7 +28,6 @@ CLI options:
 - `-d`, `--dir`: Path of the directory containing CadQuery scripts (default: ".");
 - `-m`, `--module`: Default module (default: "main");
 - `-o`, `--object`: Default rendered object variable name (default: "result");
-- `-f`, `--format`: Default output format (default: "json").
 
 This list might not be up to date, please use `-h` to list all options.
 

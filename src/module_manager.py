@@ -10,11 +10,10 @@ WATCH_PERIOD = 0.5
 
 
 class CadQueryModuleManager:
-    def __init__(self, dir, default_module_name, default_object_var, default_format):
+    def __init__(self, dir, default_module_name, default_object_var):
         self.dir = dir
         self.default_module_name = default_module_name
         self.default_object_var = default_object_var
-        self.default_format = default_format
 
         self.module = None
         self.watching_file = ''
@@ -47,22 +46,17 @@ class CadQueryModuleManager:
                 self.last_timestamp = timestamp
             time.sleep(WATCH_PERIOD)
 
-    def render(self, module_name, object_var, format):
+    def render_json(self, module_name, object_var):
         if not module_name:
             module_name = self.default_module_name
         if not object_var:
             object_var = self.default_object_var
-        if not format:
-            format = self.default_format
 
         self.update_watching_file(module_name)
         self.load_module(module_name)
         model = self.get_model(object_var)
 
-        if format == 'json':
-            return self.model_to_json(model)
-        else:
-            raise CadQueryModuleManagerError('Output format "%s" is not supported.' % format)
+        return self.model_to_json(model)
 
     def model_to_json(self, model):
         from jupyter_cadquery.utils import numpy_to_json

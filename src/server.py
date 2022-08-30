@@ -23,7 +23,7 @@ def run(port, module_manager):
         object_var_name = request.args.get('object')
 
         try:
-            return module_manager.render(module_name, object_var_name, 'json')
+            return module_manager.render_json(module_name, object_var_name)
         except CadQueryModuleManagerError as err:
             response = {
                 'msg': err.message,
