@@ -7,75 +7,114 @@ import importlib
 from flask import Flask, request
 
 
-module = None
-args = None
-app = Flask(__name__)
+DEFAULT_PORT = 5000
+DEFAULT_DIR = '.'
+DEFAULT_MAIN = 'main'
+DEFAULT_MODEL_VAR = 'result'
 
-def show(model):
-    from jupyter_cadquery.utils import numpy_to_json
-    from jupyter_cadquery.cad_objects import to_assembly
-    from jupyter_cadquery.base import _tessellate_group
 
-    return numpy_to_json(_tessellate_group(to_assembly(model)))
+class CadQueryModuleManagerError(Exception):
+    def __init__(self, message, stacktrace=''):
+        self.message = message
+        self.stacktrace = stacktrace
 
-@app.route('/', methods = [ 'GET' ])
-def root():
-    global module
+        print(message, file=sys.stderr)
+        if stacktrace:
+            print(stacktrace, file=sys.stderr)
 
-    module_name = request.args.get('mod', args.main)
+        super().__init__(self.message)
 
-    try:
-        if module:
-            print('Reloading module %s...' % module_name)
-            importlib.reload(module)
-        else:
-            print('Importing module %s...' % module_name)
-            module = importlib.import_module(module_name)
 
-    except ModuleNotFoundError:
-        return 'Can not import module "%s".' % module_name, 404
+class CadQueryModuleManager:
+    def __init__(self, dir=DEFAULT_DIR, main=DEFAULT_MAIN, model_var=DEFAULT_MODEL_VAR):
+        self.dir = dir
+        self.main = main
+        self.model_var = model_var
 
-    except Exception as error:
-        error_title = type(error).__name__
-        stacktrace = traceback.format_exc()
+        self.module = None
 
-        print(error_title + ': ' + str(error), '\n', stacktrace, file=sys.stderr)
-        return '<h1>' + error_title + '</h1><p>' + str(error) + '</p><pre>' + stacktrace + '</pre>', 400
+    def init(self):
+        print('Importing CadQuery...', end=' ', flush=True)
+        import cadquery
+        print('done.')
 
-    try:
-        model = getattr(module, args.render)
-    except AttributeError:
-        error = 'Variable "%s" is required to render the model.' % args.render
+        modules_path = os.path.abspath(os.path.join(os.getcwd(), self.dir))
+        sys.path.insert(1, modules_path)
 
-        print(error, file=sys.stderr)
-        return error, 400
+    def render_module(self, module_name):
+        self.load_module(module_name)
+        model = self.get_model()
+        return self.render_model(model)
 
-    return show(model)
+    def render_model(self, model):
+        from jupyter_cadquery.utils import numpy_to_json
+        from jupyter_cadquery.cad_objects import to_assembly
+        from jupyter_cadquery.base import _tessellate_group
 
-def run(port: int):
-    import cadquery
+        return numpy_to_json(_tessellate_group(to_assembly(model)))
 
-    app.run(host='0.0.0.0', port=port, debug=False)
+    def load_module(self, module_name):
+        if not module_name:
+            module_name = self.main
 
-def main():
-    global args
+        try:
+            if self.module:
+                print('Reloading module %s...' % module_name)
+                importlib.reload(self.module)
+            else:
+                print('Importing module %s...' % module_name)
+                self.module = importlib.import_module(module_name)
 
+        except ModuleNotFoundError:
+            raise CadQueryModuleManagerError('Can not import module "%s".' % module_name)
+
+        except Exception as error:
+            raise CadQueryModuleManagerError(type(error).__name__ + ': ' + str(error), traceback.format_exc())
+
+    def get_model(self):
+        try:
+            return getattr(self.module, self.model_var)
+        except AttributeError:
+            raise CadQueryModuleManagerError('Variable "%s" is required to render the model.' % self.model_var)
+
+
+def parse_args():
     parser = argparse.ArgumentParser(
             description='A web server that renders a 3d model of a CadQuery script loaded dynamically.')
+
     parser.add_argument('-p', '--port', type=int, default=5000,
-        help='Server port (default: current 5000).')
+        help='Server port (default: 5000).')
     parser.add_argument('-d', '--dir', default='.',
         help='Path of the directory containing CadQuery scripts (default: current dir).')
     parser.add_argument('-m', '--main', default='main',
         help='Main module (default: main).')
     parser.add_argument('-r', '--render', default='result',
         help='Variable name of the model to render (default: result).')
-    args = parser.parse_args()
 
-    modules_path = os.path.abspath(os.path.join(os.getcwd(), args.dir))
-    sys.path.insert(1, modules_path)
+    return parser.parse_args()
 
-    run(args.port)
+
+app = Flask(__name__)
+
+def run_cadquery_server(port, dir, main, render):
+    cqmm = CadQueryModuleManager(dir, main, render)
+    cqmm.init()
+
+    @app.route('/', methods = [ 'GET' ])
+    def root():
+        try:
+            return cqmm.render_module(request.args.get('mod'))
+        except CadQueryModuleManagerError as err:
+            response = '<p>%s</p>' % err.message
+            if err.stacktrace:
+                response += '<pre>%s</pre>' % err.stacktrace
+            return response, 400
+
+    app.run(host='0.0.0.0', port=port, debug=False)
+
+def main():
+    args = parse_args()
+    run_cadquery_server(args.port, args.dir, args.main, args.render)
 
 
 if __name__ == '__main__':
