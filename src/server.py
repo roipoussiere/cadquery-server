@@ -3,7 +3,7 @@ from flask import Flask, request, render_template
 from .module_manager import CadQueryModuleManagerError
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 
 
 def run(port, module_manager):
@@ -13,8 +13,8 @@ def run(port, module_manager):
     def root():
         return render_template(
             'viewer.html',
-            module=request.args.get('module'),
-            object=request.args.get('object')
+            module=request.args.get('module', module_manager.default_module_name),
+            object=request.args.get('object', module_manager.default_object_var)
         )
 
     @app.route('/json', methods = [ 'GET' ])
