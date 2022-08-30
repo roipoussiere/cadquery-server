@@ -2,6 +2,10 @@ import os
 import sys
 import traceback
 import importlib
+import threading
+
+
+WATCH_PERIOD = 0.5
 
 
 class CadQueryModuleManager:
@@ -12,6 +16,11 @@ class CadQueryModuleManager:
         self.default_format = default_format
 
         self.module = None
+        self.watching_file = ''
+        self.last_timestamp = 0
+
+    def update_watching_file(self, module_name):
+        self.watching_file = os.path.join(self.dir, module_name + '.py')
 
     def init(self):
         print('Importing CadQuery...', end=' ', flush=True)
@@ -21,6 +30,17 @@ class CadQueryModuleManager:
         modules_path = os.path.abspath(os.path.join(os.getcwd(), self.dir))
         sys.path.insert(1, modules_path)
 
+        self.check_file()
+
+    def check_file(self):
+        if self.watching_file:
+            timestamp = os.stat(self.watching_file).st_mtime
+            if timestamp != self.last_timestamp:
+                if self.last_timestamp != 0:
+                    print('File %s updated.' % self.watching_file)
+                self.last_timestamp = timestamp
+        threading.Timer(WATCH_PERIOD, self.check_file).start()
+
     def render(self, module_name, object_var, format):
         if not module_name:
             module_name = self.default_module_name
@@ -29,15 +49,16 @@ class CadQueryModuleManager:
         if not format:
             format = self.default_format
 
+        self.update_watching_file(module_name)
         self.load_module(module_name)
         model = self.get_model(object_var)
 
         if format == 'json':
-            return self.render_json(model)
+            return self.model_to_json(model)
         else:
             raise CadQueryModuleManagerError('Output format "%s" is not supported.' % format)
 
-    def render_json(self, model):
+    def model_to_json(self, model):
         from jupyter_cadquery.utils import numpy_to_json
         from jupyter_cadquery.cad_objects import to_assembly
         from jupyter_cadquery.base import _tessellate_group
