@@ -3,6 +3,7 @@ import sys
 import traceback
 import importlib
 import threading
+import time
 
 
 WATCH_PERIOD = 0.5
@@ -30,16 +31,21 @@ class CadQueryModuleManager:
         modules_path = os.path.abspath(os.path.join(os.getcwd(), self.dir))
         sys.path.insert(1, modules_path)
 
-        self.check_file()
+        watchdog = threading.Thread(target=self.check_file, daemon=True)
+        watchdog.start()
 
     def check_file(self):
-        if self.watching_file:
-            timestamp = os.stat(self.watching_file).st_mtime
+        while(True):
+            if not self.watching_file:
+                time.sleep(WATCH_PERIOD)
+                continue
+
+            timestamp = os.path.getmtime(self.watching_file)
             if timestamp != self.last_timestamp:
                 if self.last_timestamp != 0:
                     print('File %s updated.' % self.watching_file)
                 self.last_timestamp = timestamp
-        threading.Timer(WATCH_PERIOD, self.check_file).start()
+            time.sleep(WATCH_PERIOD)
 
     def render(self, module_name, object_var, format):
         if not module_name:
