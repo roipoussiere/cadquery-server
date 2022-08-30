@@ -19,11 +19,11 @@ def run(port, module_manager):
 
     @app.route('/json', methods = [ 'GET' ])
     def json():
-        module_name = request.args.get('module')
-        object_var_name = request.args.get('object')
+        module_manager.module_name = request.args.get('module')
+        module_manager.object_var = request.args.get('object')
 
         try:
-            return module_manager.render_json(module_name, object_var_name)
+            return module_manager.render_json()
         except CadQueryModuleManagerError as err:
             response = {
                 'msg': err.message,

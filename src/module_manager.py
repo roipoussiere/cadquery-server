@@ -1,4 +1,5 @@
 import os
+import os.path as op
 import sys
 import traceback
 import importlib
@@ -10,51 +11,43 @@ WATCH_PERIOD = 0.5
 
 
 class CadQueryModuleManager:
-    def __init__(self, dir, default_module_name, default_object_var):
-        self.dir = dir
+    def __init__(self, modules_path, default_module_name, default_object_var):
         self.default_module_name = default_module_name
         self.default_object_var = default_object_var
 
+        self.module_name = self.default_module_name
+        self.object_var = self.default_object_var
+        self.modules_path = op.abspath(op.join(os.getcwd(), modules_path))
         self.module = None
-        self.watching_file = ''
         self.last_timestamp = 0
-
-    def update_watching_file(self, module_name):
-        self.watching_file = os.path.join(self.dir, module_name + '.py')
 
     def init(self):
         print('Importing CadQuery...', end=' ', flush=True)
         import cadquery
         print('done.')
 
-        modules_path = os.path.abspath(os.path.join(os.getcwd(), self.dir))
-        sys.path.insert(1, modules_path)
+        sys.path.insert(1, self.modules_path)
 
         watchdog = threading.Thread(target=self.check_file, daemon=True)
         watchdog.start()
 
     def check_file(self):
         while(True):
-            if not self.watching_file:
+            if not self.module:
                 time.sleep(WATCH_PERIOD)
                 continue
 
-            timestamp = os.path.getmtime(self.watching_file)
+            timestamp = op.getmtime(self.module.__file__)
             if timestamp != self.last_timestamp:
                 if self.last_timestamp != 0:
-                    print('File %s updated.' % self.watching_file)
+                    print('File %s updated.' % self.module.__file__)
+                    self.load_module()
                 self.last_timestamp = timestamp
             time.sleep(WATCH_PERIOD)
 
-    def render_json(self, module_name, object_var):
-        if not module_name:
-            module_name = self.default_module_name
-        if not object_var:
-            object_var = self.default_object_var
-
-        self.update_watching_file(module_name)
-        self.load_module(module_name)
-        model = self.get_model(object_var)
+    def render_json(self):
+        self.load_module()
+        model = self.get_model()
 
         return self.model_to_json(model)
 
@@ -65,26 +58,28 @@ class CadQueryModuleManager:
 
         return numpy_to_json(_tessellate_group(to_assembly(model)))
 
-    def load_module(self, module_name):
+    def load_module(self):
         try:
-            if self.module:
-                print('Reloading module %s...' % module_name)
+            if self.module and self.module_name == self.module.__name__:
+                print('Reloading module %s...' % self.module_name)
                 importlib.reload(self.module)
             else:
-                print('Importing module %s...' % module_name)
-                self.module = importlib.import_module(module_name)
+                print('Importing module %s...' % self.module_name)
+                self.module = importlib.import_module(self.module_name)
 
         except ModuleNotFoundError:
-            raise CadQueryModuleManagerError('Can not import module "%s".' % module_name)
+            raise CadQueryModuleManagerError('Can not import module "%s" from %s.'
+                % (self.module_name, self.modules_path))
 
         except Exception as error:
             raise CadQueryModuleManagerError(type(error).__name__ + ': ' + str(error), traceback.format_exc())
 
-    def get_model(self, model_var):
+    def get_model(self):
         try:
-            return getattr(self.module, model_var)
+            return getattr(self.module, self.object_var)
         except AttributeError:
-            raise CadQueryModuleManagerError('3d object variable "%s" is not found in the module.' % self.default_object_var)
+            raise CadQueryModuleManagerError('Variable "%s" not found in the module %s.'
+                % (self.object_var, self.module_name))
 
 
 class CadQueryModuleManagerError(Exception):
