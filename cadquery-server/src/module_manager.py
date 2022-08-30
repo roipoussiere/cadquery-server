@@ -5,10 +5,11 @@ import importlib
 
 
 class CadQueryModuleManager:
-    def __init__(self, dir, main, model_var):
+    def __init__(self, dir, main, model_var, output):
         self.dir = dir
         self.main = main
         self.model_var = model_var
+        self.output = output
 
         self.module = None
 
@@ -20,12 +21,21 @@ class CadQueryModuleManager:
         modules_path = os.path.abspath(os.path.join(os.getcwd(), self.dir))
         sys.path.insert(1, modules_path)
 
-    def render_module(self, module_name):
+    def render(self, module_name, output):
+        if not module_name:
+            module_name = self.main
+        if not output:
+            output = self.output
+
         self.load_module(module_name)
         model = self.get_model()
-        return self.render_model(model)
 
-    def render_model(self, model):
+        if output == 'json':
+            return self.render_json(model)
+        else:
+            raise CadQueryModuleManagerError('Output format "%s" is not supported.' % output)
+
+    def render_json(self, model):
         from jupyter_cadquery.utils import numpy_to_json
         from jupyter_cadquery.cad_objects import to_assembly
         from jupyter_cadquery.base import _tessellate_group
@@ -33,9 +43,6 @@ class CadQueryModuleManager:
         return numpy_to_json(_tessellate_group(to_assembly(model)))
 
     def load_module(self, module_name):
-        if not module_name:
-            module_name = self.main
-
         try:
             if self.module:
                 print('Reloading module %s...' % module_name)
