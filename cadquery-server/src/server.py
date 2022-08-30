@@ -26,7 +26,7 @@ class CadQueryModuleManagerError(Exception):
 
 
 class CadQueryModuleManager:
-    def __init__(self, dir=DEFAULT_DIR, main=DEFAULT_MAIN, model_var=DEFAULT_MODEL_VAR):
+    def __init__(self, dir, main, model_var):
         self.dir = dir
         self.main = main
         self.model_var = model_var
@@ -82,14 +82,14 @@ def parse_args():
     parser = argparse.ArgumentParser(
             description='A web server that renders a 3d model of a CadQuery script loaded dynamically.')
 
-    parser.add_argument('-p', '--port', type=int, default=5000,
-        help='Server port (default: 5000).')
-    parser.add_argument('-d', '--dir', default='.',
-        help='Path of the directory containing CadQuery scripts (default: current dir).')
-    parser.add_argument('-m', '--main', default='main',
-        help='Main module (default: main).')
-    parser.add_argument('-r', '--render', default='result',
-        help='Variable name of the model to render (default: result).')
+    parser.add_argument('-p', '--port', type=int, default=DEFAULT_PORT,
+        help='Server port (default: %d).' % DEFAULT_PORT)
+    parser.add_argument('-d', '--dir', default=DEFAULT_DIR,
+        help='Path of the directory containing CadQuery scripts (default: `%s`).' % DEFAULT_DIR)
+    parser.add_argument('-m', '--main', default=DEFAULT_MAIN,
+        help='Main module (default: %s).' % DEFAULT_MAIN)
+    parser.add_argument('-r', '--render', default=DEFAULT_MODEL_VAR,
+        help='Variable name of the model to render (default: %s).' % DEFAULT_MODEL_VAR)
 
     return parser.parse_args()
 
