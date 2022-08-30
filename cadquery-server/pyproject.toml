@@ -26,7 +26,7 @@ cadquery = {version = "2.2.0b0", optional = true}
 casadi = {version = "3.5.5", optional = true}
 
 [tool.poetry.scripts]
-cq-server = "src.server:main"
+cq-server = "src.cli:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
