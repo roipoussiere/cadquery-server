@@ -5,11 +5,11 @@ import importlib
 
 
 class CadQueryModuleManager:
-    def __init__(self, dir, main, model_var, output):
+    def __init__(self, dir, default_module_name, default_object_var, default_format):
         self.dir = dir
-        self.main = main
-        self.model_var = model_var
-        self.output = output
+        self.default_module_name = default_module_name
+        self.default_object_var = default_object_var
+        self.default_format = default_format
 
         self.module = None
 
@@ -21,19 +21,21 @@ class CadQueryModuleManager:
         modules_path = os.path.abspath(os.path.join(os.getcwd(), self.dir))
         sys.path.insert(1, modules_path)
 
-    def render(self, module_name, output):
+    def render(self, module_name, object_var, format):
         if not module_name:
-            module_name = self.main
-        if not output:
-            output = self.output
+            module_name = self.default_module_name
+        if not object_var:
+            object_var = self.default_object_var
+        if not format:
+            format = self.default_format
 
         self.load_module(module_name)
-        model = self.get_model()
+        model = self.get_model(object_var)
 
-        if output == 'json':
+        if format == 'json':
             return self.render_json(model)
         else:
-            raise CadQueryModuleManagerError('Output format "%s" is not supported.' % output)
+            raise CadQueryModuleManagerError('Output format "%s" is not supported.' % format)
 
     def render_json(self, model):
         from jupyter_cadquery.utils import numpy_to_json
@@ -57,11 +59,11 @@ class CadQueryModuleManager:
         except Exception as error:
             raise CadQueryModuleManagerError(type(error).__name__ + ': ' + str(error), traceback.format_exc())
 
-    def get_model(self):
+    def get_model(self, model_var):
         try:
-            return getattr(self.module, self.model_var)
+            return getattr(self.module, model_var)
         except AttributeError:
-            raise CadQueryModuleManagerError('Variable "%s" is required to render the model.' % self.model_var)
+            raise CadQueryModuleManagerError('3d object variable "%s" is not found in the module.' % self.default_object_var)
 
 
 class CadQueryModuleManagerError(Exception):

@@ -11,10 +11,11 @@ def run(port, module_manager):
     @app.route('/', methods = [ 'GET' ])
     def root():
         module_name = request.args.get('module')
-        output = request.args.get('output')
+        object_var_name = request.args.get('object')
+        format = request.args.get('format')
 
         try:
-            return module_manager.render(module_name, output)
+            return module_manager.render(module_name, object_var_name, format)
         except CadQueryModuleManagerError as err:
             response = '<p>%s</p>' % err.message
             if err.stacktrace:
