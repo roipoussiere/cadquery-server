@@ -6,6 +6,11 @@ let options = {};
 let viewer = build_viewer();
 let model = [ {}, {} ];
 
+const event_source = new EventSource('events');
+event_source.addEventListener('file_update', event => {
+	console.log('updated file:', event.data);
+})
+
 function update_options() {
 	options = {
 		cadWidth: window.innerWidth - 8,
@@ -18,7 +23,7 @@ function update_options() {
 function build_viewer() {
 	update_options();
 	const viewer = new Viewer(container, options, () => {});
-	viewer.trimUI(["axes", "axes0", "grid", "ortho", "more", "help"], false);
+	viewer.trimUI(['axes', 'axes0', 'grid', 'ortho', 'more', 'help'], false);
 	return viewer;
 }
 
