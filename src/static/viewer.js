@@ -8,7 +8,7 @@ let model = [ {}, {} ];
 
 const event_source = new EventSource('events');
 event_source.addEventListener('file_update', event => {
-	console.log('updated file:', event.data);
+	render(JSON.parse(event.data));
 })
 
 function update_options() {

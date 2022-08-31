@@ -48,7 +48,8 @@ def run(port, module_manager):
         SSE_MESSAGE_TEMPLATE = 'event: file_update\ndata: %s\n\n'
         while(True):
             if module_manager.is_file_updated():
-                events_queue.put(SSE_MESSAGE_TEMPLATE % 'plop')
+                model_json = module_manager.render_json()
+                events_queue.put(SSE_MESSAGE_TEMPLATE % model_json)
             sleep(WATCH_PERIOD)
 
     events_queue = Queue(maxsize = 3)
