@@ -14,7 +14,15 @@ Please note that the web server is intended for personal use and it's absolutely
 
 ## Installation
 
-    pip install cq-server
+If you already have CadQuery installed on your system:
+
+    pip install cadquery-server
+
+If you want to install both cq-server and CadQuery:
+
+    pip install 'cadquery-server[cadquery]'
+
+This may take a while.
 
 ## Usage
 
