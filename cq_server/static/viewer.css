@@ -6,3 +6,24 @@ body {
 .tcv_cad_viewer {
 	margin: 0;
 }
+
+#cad_error {
+	opacity: 0.8;
+	border-style: solid;
+	border-width: 2px;
+	border-radius: 5px;
+	position: absolute;
+	left: 10%;
+	top: 10%;
+	right: 10%;
+	bottom: 10%;
+	background-color: lightgray;
+	padding: 1em;
+	font-family: sans-serif;
+	z-index: 1000;
+	overflow: scroll;
+}
+
+#cad_error_stacktrace {
+	background-color: grey;
+}

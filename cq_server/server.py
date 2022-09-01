@@ -29,7 +29,7 @@ def run(port, module_manager):
             return module_manager.render_json()
         except CadQueryModuleManagerError as err:
             response = {
-                'msg': err.message,
+                'error': err.message,
                 'stacktrace': err.stacktrace
             }
             return response, 400
