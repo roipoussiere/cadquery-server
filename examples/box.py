@@ -1,7 +1,10 @@
 import cadquery as cq
+from cq_server.ui import UI, show_object
 
 height = 60
 width = 80
 thickness = 10
 
-result = cq.Workplane("XY").box(height, width, thickness)
+box = cq.Workplane("XY").box(height, width, thickness)
+
+show_object(box)
