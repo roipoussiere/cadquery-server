@@ -4,13 +4,28 @@ A web server used to render 3d models from CadQuery code loaded dynamically.
 
 It has been created for the [Cadquery VSCode extension](https://open-vsx.org/extension/roipoussiere/cadquery), but can be used as standalone.
 
-Because the CadQuery module is loaded when starting the web server and the scripts are loaded dynamically by request, it has a fast response time.
-
 Example usage with Kate on the left and Firefox on the right:
 
 ![](./images/screenshot.png)
 
+## Features
+
+- fast response time
+- built-in file-watcher
+- live-reload
+- use your favorite text editor or IDE
+- display model on an external monitor or other device
+- compatible with VSCode built-in browser
+
 Please note that the web server is intended for personal use and it's absolutely not safe to open it to a public network.
+
+## Functionning
+
+CadQuery Server dynamically loads your CadQuery code and renders the model on the browser using [three-cad-viewer](https://github.com/bernhard-42/three-cad-viewer) (the same used in [jupyter-cadquery](https://github.com/bernhard-42/jupyter-cadquery)). It includes a file watcher that reloads the Python code and updates the web page when the file is updated.
+
+This approach allows users to work on any IDE, and render the model on any web browser. It also allow them to display the model in an other monitor, or even in an other computer on the same local network (for instance a tablet on your desktop).
+
+The project was originally started for the VSCode extension, but since it doesn't depend on VSCode anymore, it's now a project as it own.
 
 ## Installation
 
@@ -92,3 +107,5 @@ Optional url parameters:
 example: `http://127.0.0.1?module=box`).
 
 Note that the `/json` endpoint is used internally and can be used for advanced use. It takes same parameters but returns the model as a threejs json object.
+
+In VSCode, the web page can be displayed within the IDE using LivePreview extension (ctrl+shift+P -> Simple Browser: Show). This way you can use VSCode debugging tools.
