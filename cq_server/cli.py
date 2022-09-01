@@ -20,10 +20,22 @@ def parse_args():
     parser.add_argument('-m', '--module', default=DEFAULT_MODULE, metavar='MOD',
         help='Default Python module to load (default: "%s").' % DEFAULT_MODULE)
 
-    parser.add_argument('--ui-glass', action='store_true',
-        help='ui: activate glass mode.')
     parser.add_argument('--ui-hide', metavar='LIST',
-        help='ui: disable a list of buttons, separated by commas.')
+        help='ui: a comma-separated list of buttons to disable, among: axes, axes0, grid, ortho, more, help.')
+    parser.add_argument('--ui-glass', action='store_true',
+        help='ui: activate tree view glass mode.')
+    parser.add_argument('--ui-theme', choices=['light', 'dark'], metavar='THEME',
+        help='ui: set ui theme, light or dark (default: browser config).')
+    parser.add_argument('--ui-trackball', action='store_true',
+        help='ui: set control mode to trackball instead orbit.')
+    parser.add_argument('--ui-perspective', action='store_true',
+        help='ui: set camera view to perspective instead orthogonal.')
+    parser.add_argument('--ui-grid', metavar='AXES',
+        help='ui: display a grid in specified axes (x, y, z, xy, etc.).')
+    parser.add_argument('--ui-transparent', action='store_true',
+        help='ui: make objects semi-transparent.')
+    parser.add_argument('--ui-black-edges', action='store_true',
+        help='ui: make edges black.')
 
     return parser.parse_args()
 
@@ -31,7 +43,13 @@ def parse_args():
 def get_ui_options(args):
     return {
         'hideButtons': args.ui_hide.split(',') if args.ui_hide else [],
-        'glass': args.ui_glass
+        'glass': args.ui_glass,
+        'theme': args.ui_theme,
+        'control': 'trackball' if args.ui_trackball else 'orbit',
+        'ortho': not args.ui_perspective,
+        'grid': [ 'x' in args.ui_grid, 'y' in args.ui_grid, 'z' in args.ui_grid ] if args.ui_grid else [ False, False, False ],
+        'transparent': args.ui_transparent,
+        'blackEdges': args.ui_black_edges
     }
 
 
