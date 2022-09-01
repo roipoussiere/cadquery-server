@@ -3,9 +3,9 @@ import { Viewer } from './vendor/three-cad-viewer.esm.js';
 const cad_view_dom = document.getElementById('cad_view');
 const event_source = new EventSource('events');
 
-let options = {};
-let viewer = build_viewer();
 let data = {};
+let options = {};
+let viewer = null;
 let timer = null;
 
 function update_size_options() {
@@ -17,7 +17,9 @@ function update_size_options() {
 function build_viewer() {
 	update_size_options();
 	const viewer = new Viewer(cad_view_dom, options, () => {});
-	viewer.trimUI(['axes', 'axes0', 'grid', 'ortho', 'more', 'help'], false);
+	if ('hideButtons' in options) {
+		viewer.trimUI(options.hideButtons, false);
+	}
 	return viewer;
 }
 
@@ -47,9 +49,10 @@ function render(_data) {
 	viewer.render(group, tree, states, options);
 }
 
-function update_model(module_name, _options) {
+function init_viewer(module_name, _options) {
 	options = _options;
 	update_size_options();
+	viewer = build_viewer();
 
 	fetch(`json?module=${ module_name }`)
 		.then(response => response.json())
@@ -95,4 +98,4 @@ event_source.addEventListener('file_update', event => {
 	render(JSON.parse(event.data));
 })
 
-export { update_model };
+export { init_viewer };

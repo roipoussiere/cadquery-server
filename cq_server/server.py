@@ -20,7 +20,10 @@ def run(port, module_manager):
         return render_template(
             'viewer.html',
             module=request.args.get('module', module_manager.default_module_name),
-            options={ 'glass': True }
+            options={
+                'hideButtons': ['axes', 'axes0', 'grid', 'ortho', 'more', 'help'],
+                'glass': True
+            }
         )
 
     @app.route('/json', methods = [ 'GET' ])

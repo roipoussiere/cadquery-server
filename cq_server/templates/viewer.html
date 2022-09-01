@@ -12,9 +12,9 @@
 <body>
 	<div id="cad_view"></div>
 	<script type="module">
-		import { update_model } from "{{ url_for('static', filename='viewer.js') }}";
+		import { init_viewer } from "{{ url_for('static', filename='viewer.js') }}";
 		window.addEventListener('DOMContentLoaded', () => {
-			update_model('{{ module }}', {{ options | tojson }});
+			init_viewer('{{ module }}', {{ options | tojson }});
 		});
 	</script>
 </body>
