@@ -6,12 +6,10 @@ import importlib
 
 
 class CadQueryModuleManager:
-    def __init__(self, modules_path, default_module_name, default_object_var):
+    def __init__(self, modules_path, default_module_name):
         self.default_module_name = default_module_name
-        self.default_object_var = default_object_var
 
         self.module_name = self.default_module_name
-        self.object_var = self.default_object_var
         self.modules_path = op.abspath(op.join(os.getcwd(), modules_path))
         self.module = None
         self.last_timestamp = 0

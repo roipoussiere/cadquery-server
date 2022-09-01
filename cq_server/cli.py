@@ -7,7 +7,6 @@ from .module_manager import CadQueryModuleManager
 DEFAULT_PORT = 5000
 DEFAULT_DIR = '.'
 DEFAULT_MODULE = 'main'
-DEFAULT_OBJECT_VAR = 'result'
 
 
 def parse_args():
@@ -20,15 +19,13 @@ def parse_args():
         help='Path of the directory containing CadQuery scripts (default: "%s").' % DEFAULT_DIR)
     parser.add_argument('-m', '--module', default=DEFAULT_MODULE, metavar='MOD',
         help='Default Python module to load (default: "%s").' % DEFAULT_MODULE)
-    parser.add_argument('-o', '--object', default=DEFAULT_OBJECT_VAR, metavar='OBJ',
-        help='Default rendered object variable name (default: "%s").' % DEFAULT_OBJECT_VAR)
 
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    module_manager = CadQueryModuleManager(args.dir, args.module, args.object)
+    module_manager = CadQueryModuleManager(args.dir, args.module)
     run(args.port, module_manager)
 
 

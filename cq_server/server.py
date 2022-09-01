@@ -18,14 +18,12 @@ def run(port, module_manager):
     def root():
         return render_template(
             'viewer.html',
-            module=request.args.get('module', module_manager.default_module_name),
-            object=request.args.get('object', module_manager.default_object_var)
+            module=request.args.get('module', module_manager.default_module_name)
         )
 
     @app.route('/json', methods = [ 'GET' ])
     def json():
         module_manager.module_name = request.args.get('module')
-        module_manager.object_var = request.args.get('object')
 
         try:
             return module_manager.render_json()

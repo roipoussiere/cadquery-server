@@ -36,8 +36,8 @@ function render(_model) {
 	viewer.render(group, tree, states, options);
 }
 
-function update_model(module_name, object_var) {
-	fetch(`json?module=${ module_name }&object=${ object_var }`)
+function update_model(module_name) {
+	fetch(`json?module=${ module_name }`)
 		.then(response => response.json())
 		.then(model => render(model))
 		.catch(error => console.log(error));
