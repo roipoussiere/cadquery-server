@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>CadQuery Viewer</title>
+	<title>{{ module }} | CadQuery Viewer</title>
 	<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/icon_cq.png') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='vendor/three-cad-viewer.esm.css') }}" />
 	<link rel="stylesheet" href="{{ url_for('static', filename='viewer.css') }}" />
@@ -13,12 +13,7 @@
 	<div id="cad_view"></div>
 	<script type="module">
 		import { update_model } from "{{ url_for('static', filename='viewer.js') }}";
-		const update = () => update_model('{{ module }}', '{{ object }}');
-		window.addEventListener('DOMContentLoaded', () => {
-			update();
-			const reload_button = document.getElementsByClassName('tcv_reset')[0];
-			reload_button.addEventListener('click', event => update());
-		});
+		window.addEventListener('DOMContentLoaded', () => update_model('{{ module }}'));
 	</script>
 </body>
 
