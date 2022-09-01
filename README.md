@@ -35,24 +35,28 @@ CLI options:
 - `-p`, `--port`: Server port (default: 5000);
 - `-d`, `--dir`: Path of the directory containing CadQuery scripts (default: ".");
 - `-m`, `--module`: Default module (default: "main");
-- `-o`, `--object`: Default rendered object variable name (default: "result");
 
 This list might not be up to date, please use `-h` to list all options.
 
 Example:
 
-    cq-server -p 5000 -d ./examples -m box -o result
+    cq-server -p 5000 -d ./examples -m box
 
-This command will run the server on the port `5000`, load the `box.py` python file in the `./examples` directory and render the CadQuery model named `result`. These two last options can be overridden by url parameters if necessary.
+This command will run the server on the port `5000` and load the `box.py` python file in the `./examples` directory. This last option can be overridden by url parameter if necessary.
 
 ### Writing a CadQuery code
 
-Example:
+CadQuery Server renders the model defined in the `show_object()` function (like in CadQuery Editor).
+
+You **must** import it before from the `cq_server.ui` module, among with the `UI` class, which is used by the server to load the model.
+
+Minimal working example:
 
 ```py
 import cadquery as cq
+from cq_server.ui import UI, show_object
 
-model = cq.Workplane("XY").box(1, 2, 3)
+show_object(cq.Workplane('XY').box(1, 2, 3))
 ```
 
 Please read the [CadQuery documentation](https://cadquery.readthedocs.io/en/latest/) for more details about the CadQuery library.
@@ -64,8 +68,7 @@ Once the server is started, go to its url (ie. `http://127.0.0.1`).
 Optional url parameters:
 
 - `module`: name of module to load (default: defined in the `--module` cli option);
-- `object`: variable name of object to render (default: defined in the `--object` cli option).
 
-example: `http://127.0.0.1?module=box&object=result`).
+example: `http://127.0.0.1?module=box`).
 
 Note that the `/json` endpoint is used internally and can be used for advanced use. It takes same parameters but returns the model as a threejs json object.
