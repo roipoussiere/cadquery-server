@@ -30,19 +30,22 @@ This may take a while.
 
 Once installed, the `cq-server` command should be available on your system:
 
-CLI options:
+Positional arguments:
+
+- `dir`: Path of the directory containing CadQuery scripts (default: ".").
+
+Options:
 
 - `-p`, `--port`: Server port (default: 5000);
-- `-d`, `--dir`: Path of the directory containing CadQuery scripts (default: ".");
-- `-m`, `--module`: Default module (default: "main");
+- `-m`, `--module`: Default module to load (default: "main").
 
 This list might not be up to date, please use `-h` to list all options.
 
 Example:
 
-    cq-server -p 5000 -d ./examples -m box
+    cq-server ./examples -p 5000 -m box
 
-This command will run the server on the port `5000` and load the `box.py` python file in the `./examples` directory. This last option can be overridden by url parameter if necessary.
+This command will run the server on the port `5000` and load the `box.py` python file in the `./examples` directory. Note that the `-m` option can be overridden by url parameter if necessary (see below).
 
 ### Writing a CadQuery code
 
