@@ -19,7 +19,8 @@ def run(port, module_manager):
     def _root():
         return render_template(
             'viewer.html',
-            module=request.args.get('module', module_manager.default_module_name)
+            module=request.args.get('module', module_manager.default_module_name),
+            options={ 'glass': True }
         )
 
     @app.route('/json', methods = [ 'GET' ])

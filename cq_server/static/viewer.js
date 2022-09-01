@@ -8,17 +8,14 @@ let viewer = build_viewer();
 let data = {};
 let timer = null;
 
-function update_options() {
-	options = {
-		cadWidth: window.innerWidth - 8,
-		treeWidth: window.innerWidth > 400 ? window.innerWidth / 3 : 200,
-		height: window.innerHeight - 44,
-		glass: true
-	}
+function update_size_options() {
+	options.cadWidth = window.innerWidth - 8;
+	options.treeWidth = window.innerWidth > 400 ? window.innerWidth / 3 : 200;
+	options.height = window.innerHeight - 44;
 }
 
 function build_viewer() {
-	update_options();
+	update_size_options();
 	const viewer = new Viewer(cad_view_dom, options, () => {});
 	viewer.trimUI(['axes', 'axes0', 'grid', 'ortho', 'more', 'help'], false);
 	return viewer;
@@ -50,7 +47,10 @@ function render(_data) {
 	viewer.render(group, tree, states, options);
 }
 
-function update_model(module_name) {
+function update_model(module_name, _options) {
+	options = _options;
+	update_size_options();
+
 	fetch(`json?module=${ module_name }`)
 		.then(response => response.json())
 		.then(model => render(model))

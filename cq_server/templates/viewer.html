@@ -13,7 +13,9 @@
 	<div id="cad_view"></div>
 	<script type="module">
 		import { update_model } from "{{ url_for('static', filename='viewer.js') }}";
-		window.addEventListener('DOMContentLoaded', () => update_model('{{ module }}'));
+		window.addEventListener('DOMContentLoaded', () => {
+			update_model('{{ module }}', {{ options | tojson }});
+		});
 	</script>
 </body>
 
