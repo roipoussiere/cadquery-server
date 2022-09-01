@@ -6,7 +6,7 @@ It has been created for the [Cadquery VSCode extension](https://open-vsx.org/ext
 
 Because the CadQuery module is loaded when starting the web server and the scripts are loaded dynamically by request, it has a fast response time.
 
-Example usage in the VSCode extension:
+Example usage with Kate on the left and Firefox on the right:
 
 ![](./images/screenshot.png)
 
