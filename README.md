@@ -28,24 +28,41 @@ This may take a while.
 
 ### Starting the server
 
-Once installed, the `cq-server` command should be available on your system:
+Once installed, the `cq-server` command should be available on your system.
+
+Use `cq-server -h` to list all available options.
 
 Positional arguments:
 
 - `dir`: Path of the directory containing CadQuery scripts (default: ".").
 
-Options:
+Main options:
 
 - `-p`, `--port`: Server port (default: 5000);
 - `-m`, `--module`: Default module to load (default: "main").
-
-This list might not be up to date, please use `-h` to list all options.
 
 Example:
 
     cq-server ./examples -p 5000 -m box
 
 This command will run the server on the port `5000` and load the `box.py` python file in the `./examples` directory. Note that the `-m` option can be overridden by url parameter if necessary (see below).
+
+### UI cli options
+
+Other cli options are available to change the UI appearence:
+
+- `--ui-hide`: a comma-separated list of buttons to disable, among: `axes`, `axes0`, `grid`, `ortho`, `more`, `help`;
+- `--ui-glass`: activate tree view glass mode;
+- `--ui-theme`: set ui theme, `light` or `dark` (default: browser config);
+- `--ui-trackball`: set control mode to trackball instead orbit;
+- `--ui-perspective`: set camera view to perspective instead orthogonal;
+- `--ui-grid`: display a grid in specified axes (`x`, `y`, `z`, `xy`, etc.);
+- `--ui-transparent`: make objects semi-transparent;
+- `--ui-black-edges`: make edges black.
+
+Example:
+
+    cq-server --ui-hide ortho,more,help --ui-glass --ui-theme light --ui-grid xyz
 
 ### Writing a CadQuery code
 
