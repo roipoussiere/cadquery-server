@@ -1,15 +1,12 @@
 import { Viewer } from './vendor/three-cad-viewer.esm.js';
 
 const cad_view_dom = document.getElementById('cad_view');
+const event_source = new EventSource('events');
 
 let options = {};
 let viewer = build_viewer();
 let data = {};
-
-const event_source = new EventSource('events');
-event_source.addEventListener('file_update', event => {
-	render(JSON.parse(event.data));
-})
+let timer = null;
 
 function update_options() {
 	options = {
@@ -36,7 +33,6 @@ function error(message, stacktrace) {
 	document.getElementById('cad_error_message').innerText = message;
 	document.getElementById('cad_error_stacktrace').innerText = stacktrace;
 	document.getElementById('cad_error_stacktrace').style.display = stacktrace ? 'block' : 'none';
-
 	document.getElementById('cad_error').style.display = 'block';
 }
 
@@ -61,11 +57,6 @@ function update_model(module_name) {
 		.catch(error => console.log(error));
 }
 
-window.addEventListener('resize', event => {
-	viewer = build_viewer();
-	render(data);
-});
-
 function build_error_dom() {
 	const dom_error = document.createElement('div');
 	dom_error.id = 'cad_error';
@@ -86,8 +77,22 @@ function build_error_dom() {
 	cad_view_dom.parentNode.insertBefore(dom_error, null);
 }
 
+window.addEventListener('resize', event => {
+	if (timer) {
+		clearTimeout(timer);
+	}
+	timer = setTimeout(() => {
+		viewer = build_viewer();
+		render(data);
+	}, 500);
+});
+
 window.addEventListener('DOMContentLoaded', () => {
 	build_error_dom();
 });
+
+event_source.addEventListener('file_update', event => {
+	render(JSON.parse(event.data));
+})
 
 export { update_model };
