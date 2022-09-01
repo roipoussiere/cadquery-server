@@ -1,3 +1,5 @@
+import json
+
 object_to_show = None
 
 
@@ -9,7 +11,7 @@ def show_object(object):
 class UI:
 
     @staticmethod
-    def get_json():
+    def get_model():
         from jupyter_cadquery.utils import numpy_to_json
         from jupyter_cadquery.cad_objects import to_assembly
         from jupyter_cadquery.base import _tessellate_group
@@ -19,6 +21,7 @@ class UI:
 
         assembly = to_assembly(object_to_show)
         tesselated = _tessellate_group(assembly)
-        json = numpy_to_json(tesselated)
+        model_json = numpy_to_json(tesselated)
+        model = json.loads(model_json)
 
-        return json
+        return model

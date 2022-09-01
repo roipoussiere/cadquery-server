@@ -1,3 +1,4 @@
+import json
 from threading import Thread
 from queue import Queue
 from time import sleep
@@ -15,27 +16,28 @@ app = Flask(__name__, static_url_path='/static')
 def run(port, module_manager):
 
     @app.route('/', methods = [ 'GET' ])
-    def root():
+    def _root():
         return render_template(
             'viewer.html',
             module=request.args.get('module', module_manager.default_module_name)
         )
 
     @app.route('/json', methods = [ 'GET' ])
-    def json():
+    def _json():
         module_manager.module_name = request.args.get('module')
 
         try:
-            return module_manager.render_json()
+            return {
+                'model': module_manager.get_model()
+            }
         except CadQueryModuleManagerError as err:
-            response = {
+            return {
                 'error': err.message,
                 'stacktrace': err.stacktrace
-            }
-            return response, 400
+            }, 400
 
     @app.route('/events', methods = [ 'GET' ])
-    def events():
+    def _events():
         def stream():
             while True:
                 yield events_queue.get()
@@ -46,8 +48,10 @@ def run(port, module_manager):
         SSE_MESSAGE_TEMPLATE = 'event: file_update\ndata: %s\n\n'
         while(True):
             if module_manager.is_file_updated():
-                model_json = module_manager.render_json()
-                events_queue.put(SSE_MESSAGE_TEMPLATE % model_json)
+                data = {
+                    'model': module_manager.get_model()
+                }
+                events_queue.put(SSE_MESSAGE_TEMPLATE % json.dumps(data))
             sleep(WATCH_PERIOD)
 
     events_queue = Queue(maxsize = 3)

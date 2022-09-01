@@ -14,8 +14,8 @@ event_source.addEventListener('file_update', event => {
 function update_options() {
 	options = {
 		cadWidth: window.innerWidth - 8,
-		height: window.innerHeight - 44,
 		treeWidth: window.innerWidth > 400 ? window.innerWidth / 3 : 200,
+		height: window.innerHeight - 44,
 		glass: true
 	}
 }
@@ -33,23 +33,21 @@ function error(message, stacktrace) {
 		stacktrace: stacktrace
 	}
 
-	console.log('error:', message);
 	document.getElementById('cad_error_message').innerText = message;
-
 	document.getElementById('cad_error_stacktrace').innerText = stacktrace;
 	document.getElementById('cad_error_stacktrace').style.display = stacktrace ? 'block' : 'none';
 
 	document.getElementById('cad_error').style.display = 'block';
 }
 
-function render(_model) {
-	if ('error' in _model) {
-		error(_model['error'], _model['stacktrace'])
+function render(_data) {
+	if ('error' in _data) {
+		error(_data.error, _data.stacktrace)
 		return
 	}
 	document.getElementById('cad_error').style.display = 'none';
 
-	data = { model: _model }
+	data = _data
 	viewer.clear();
 	const [ shapes, states ] = data.model;
 	const [ group, tree ] = viewer.renderTessellatedShapes(shapes, states, options);

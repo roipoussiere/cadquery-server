@@ -7,10 +7,10 @@ import importlib
 
 class CadQueryModuleManager:
     def __init__(self, modules_path, default_module_name):
+        self.modules_path = op.abspath(op.join(os.getcwd(), modules_path))
         self.default_module_name = default_module_name
 
         self.module_name = self.default_module_name
-        self.modules_path = op.abspath(op.join(os.getcwd(), modules_path))
         self.module = None
         self.last_timestamp = 0
 
@@ -36,16 +36,16 @@ class CadQueryModuleManager:
             self.last_timestamp = timestamp
             return True
 
-    def render_json(self):
+    def get_model(self):
         self.load_module()
 
         UI = self.get_ui_class()
-        json = UI.get_json()
+        model = UI.get_model()
 
-        if not json:
+        if not model:
             raise CadQueryModuleManagerError('There is no object to show. Missing show_object() ?')
 
-        return json
+        return model
 
     def load_module(self):
         try:
