@@ -13,17 +13,14 @@ WATCH_PERIOD = 0.1
 app = Flask(__name__, static_url_path='/static')
 
 
-def run(port, module_manager):
+def run(port, module_manager, ui_options):
 
     @app.route('/', methods = [ 'GET' ])
     def _root():
         return render_template(
             'viewer.html',
             module=request.args.get('module', module_manager.default_module_name),
-            options={
-                'hideButtons': ['axes', 'axes0', 'grid', 'ortho', 'more', 'help'],
-                'glass': True
-            }
+            options=ui_options
         )
 
     @app.route('/json', methods = [ 'GET' ])

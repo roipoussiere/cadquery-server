@@ -9,9 +9,9 @@ let viewer = null;
 let timer = null;
 
 function update_size_options() {
-	options.cadWidth = window.innerWidth - 8;
-	options.treeWidth = window.innerWidth > 400 ? window.innerWidth / 3 : 200;
 	options.height = window.innerHeight - 44;
+	options.treeWidth = window.innerWidth > 400 ? window.innerWidth / 3 : 200;
+	options.cadWidth = window.innerWidth - (options.glass ? 8 : options.treeWidth + 10);
 }
 
 function build_viewer() {

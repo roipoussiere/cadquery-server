@@ -20,13 +20,25 @@ def parse_args():
     parser.add_argument('-m', '--module', default=DEFAULT_MODULE, metavar='MOD',
         help='Default Python module to load (default: "%s").' % DEFAULT_MODULE)
 
+    parser.add_argument('--ui-glass', action='store_true',
+        help='ui: activate glass mode.')
+    parser.add_argument('--ui-hide', metavar='LIST',
+        help='ui: disable a list of buttons, separated by commas.')
+
     return parser.parse_args()
+
+
+def get_ui_options(args):
+    return {
+        'hideButtons': args.ui_hide.split(',') if args.ui_hide else [],
+        'glass': args.ui_glass
+    }
 
 
 def main():
     args = parse_args()
     module_manager = CadQueryModuleManager(args.dir, args.module)
-    run(args.port, module_manager)
+    run(args.port, module_manager, get_ui_options(args))
 
 
 if __name__ == '__main__':
