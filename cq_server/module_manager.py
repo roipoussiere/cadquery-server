@@ -40,16 +40,14 @@ class CadQueryModuleManager:
 
     def render_json(self):
         self.load_module()
-        model = self.get_model()
 
-        return self.model_to_json(model)
+        UI = self.get_ui_class()
+        json = UI.get_json()
 
-    def model_to_json(self, model):
-        from jupyter_cadquery.utils import numpy_to_json
-        from jupyter_cadquery.cad_objects import to_assembly
-        from jupyter_cadquery.base import _tessellate_group
+        if not json:
+            raise CadQueryModuleManagerError('There is no object to show. Missing show_object() ?')
 
-        return numpy_to_json(_tessellate_group(to_assembly(model)))
+        return json
 
     def load_module(self):
         try:
@@ -67,12 +65,13 @@ class CadQueryModuleManager:
         except Exception as error:
             raise CadQueryModuleManagerError(type(error).__name__ + ': ' + str(error), traceback.format_exc())
 
-    def get_model(self):
+    def get_ui_class(self):
         try:
-            return getattr(self.module, self.object_var)
+            return getattr(self.module, 'UI')
         except AttributeError:
-            raise CadQueryModuleManagerError('Variable "%s" not found in the module %s.'
-                % (self.object_var, self.module_name))
+            raise CadQueryModuleManagerError('UI class is not imported. '
+                + 'Please add `from cq_server.ui import UI, show_object` '
+                + 'at the begining of the script.')
 
 
 class CadQueryModuleManagerError(Exception):
