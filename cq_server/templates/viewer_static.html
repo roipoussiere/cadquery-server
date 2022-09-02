@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>{{ module }} | CadQuery Viewer</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/three-cad-viewer/dist/three-cad-viewer.css" />
+	<style>{{ viewer_css | safe }}</style>
+	<script src="https://cdn.jsdelivr.net/npm/three-cad-viewer@1.6.4/dist/three-cad-viewer.js"></script>
+</head>
+
+<body>
+	<div id="cad_view"></div>
+	<script>{{ viewer_js | safe }}</script>
+	<script>
+		window.addEventListener('DOMContentLoaded', () => {
+			init_viewer_from_data(
+                {{ data | tojson }},
+                {{ options | tojson }}
+            );
+		});
+	</script>
+</body>
+
+</html>
