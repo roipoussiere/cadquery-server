@@ -1,4 +1,4 @@
-import { Viewer } from './vendor/three-cad-viewer.esm.js';
+const tcv = window.CadViewer;
 
 const cad_view_dom = document.getElementById('cad_view');
 const event_source = new EventSource('events');
@@ -16,7 +16,7 @@ function update_size_options() {
 
 function build_viewer() {
 	update_size_options();
-	const viewer = new Viewer(cad_view_dom, options, () => {});
+	const viewer = new tcv.Viewer(cad_view_dom, options, () => {});
 	if ('hideButtons' in options) {
 		viewer.trimUI(options.hideButtons, false);
 	}
@@ -97,5 +97,3 @@ window.addEventListener('DOMContentLoaded', () => {
 event_source.addEventListener('file_update', event => {
 	render(JSON.parse(event.data));
 })
-
-export { init_viewer };
