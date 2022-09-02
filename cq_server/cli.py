@@ -1,6 +1,6 @@
 import argparse
 
-from .server import run
+from .server import run, get_static_html
 from .module_manager import CadQueryModuleManager
 
 
@@ -19,6 +19,8 @@ def parse_args():
         help='Server port (default: %d).' % DEFAULT_PORT)
     parser.add_argument('-m', '--module', default=DEFAULT_MODULE, metavar='MOD',
         help='Default Python module to load (default: "%s").' % DEFAULT_MODULE)
+    parser.add_argument('-e', '--export', action='store', default='', nargs='?', metavar='FILE',
+        help='Export a static html file that work without the server (default: "<module_name>.html").')
 
     parser.add_argument('--ui-hide', metavar='LIST',
         help='ui: a comma-separated list of buttons to disable, among: axes, axes0, grid, ortho, more, help.')
@@ -56,7 +58,17 @@ def get_ui_options(args):
 def main():
     args = parse_args()
     module_manager = CadQueryModuleManager(args.dir, args.module)
-    run(args.port, module_manager, get_ui_options(args))
+    ui_options = get_ui_options(args)
+
+    if args.export == '':
+        run(args.port, module_manager, ui_options)
+    else:
+        static_html = get_static_html(module_manager, ui_options)
+
+        file_name = args.export if args.export else ('%s.html' % args.module)
+        with open(file_name, 'w') as html_file:
+            html_file.write(static_html)
+        print('File exported in %s.' % file_name)
 
 
 if __name__ == '__main__':
