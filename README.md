@@ -29,6 +29,8 @@ The project was originally started for the VSCode extension, but since it doesn'
 
 ## Installation
 
+### From Pypi
+
 If you already have CadQuery installed on your system:
 
     pip install cadquery-server
@@ -38,6 +40,12 @@ If you want to install both cq-server and CadQuery:
     pip install 'cadquery-server[cadquery]'
 
 This may take a while.
+
+### From sources
+
+    git clone https://github.com/roipoussiere/cadquery-server.git
+    cd cadquery-server
+    pip install .
 
 ## Usage
 
@@ -61,6 +69,10 @@ Example:
     cq-server ./examples -p 5000 -m box
 
 This command will run the server on the port `5000` and load the `box.py` python file in the `./examples` directory. Note that the `-m` option can be overridden by url parameter if necessary (see below).
+
+### Exporting static html
+
+You can use `-e` / `--export` cli option to obtain an html file that work as a standalone and doesn't require a running server.
 
 ### UI cli options
 
