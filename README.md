@@ -29,7 +29,16 @@ The project was originally started for the VSCode extension, but since it doesn'
 
 ## Installation
 
-### From Pypi
+### Create a virtual environment (recommended)
+
+    python -m venv .venv
+    source .venv/bin/activate
+
+### Upgrade pip and setuptools
+
+    pip install --upgrade pip setuptools
+
+### Install with pip
 
 If you already have CadQuery installed on your system:
 
@@ -39,13 +48,18 @@ If you want to install both cq-server and CadQuery:
 
     pip install 'cadquery-server[cadquery]'
 
-This may take a while.
-
-### From sources
+### Install from sources
 
     git clone https://github.com/roipoussiere/cadquery-server.git
     cd cadquery-server
+
+If you already have CadQuery installed on your system:
+
     pip install .
+
+If you want to install both cq-server and CadQuery:
+
+    pip install '.[cadquery]'
 
 ## Usage
 
