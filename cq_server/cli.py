@@ -66,11 +66,10 @@ def main():
         run(args.port, module_manager, ui_options)
     else:
 
-        try:
-            static_html = get_static_html(module_manager, ui_options)
-        except NameError as error:
-            sys_exit(error)
+        if not module_manager.target_is_file:
+            sys_exit('Exporting a folder to html is not yet possible.')
 
+        static_html = get_static_html(module_manager, ui_options)
         file_name = args.export if args.export else \
             ('%s.html' % 'index' if args.target == '.' else args.target)
 

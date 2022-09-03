@@ -19,9 +19,6 @@ WATCH_PERIOD = 0.3
 app = Flask(__name__, static_url_path='/static')
 
 def get_static_html(module_manager, ui_options):
-    if not module_manager.target_is_file:
-        raise NameError('Target must be a file when exporting to html')
-
     viewer_css_path = op.join(STATIC_DIR, 'viewer.css')
     viewer_js_path = op.join(STATIC_DIR, 'viewer.js')
     template_path = op.join(TEMPLATES_DIR, 'viewer_static.html')
