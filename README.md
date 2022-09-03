@@ -67,22 +67,23 @@ If you want to install both cq-server and CadQuery:
 
 Once installed, the `cq-server` command should be available on your system.
 
-Use `cq-server -h` to list all available options.
+It takes only one optional argument: the target, which can be a folder or a file. Defaults to the current directory (`.`).
 
-Positional arguments:
+Then the root endpoint (ie. `http://127.0.0.1`) will display:
+- if `target` is a folder: an index page from which you can select a file to render;
+- if `target` is a file: the root endpoint will render the corresponding file.
 
-- `dir`: Path of the directory containing CadQuery scripts (default: ".").
-
-Main options:
+Server options:
 
 - `-p`, `--port`: Server port (default: 5000);
-- `-m`, `--module`: Default module to load (default: "main").
 
 Example:
 
-    cq-server ./examples -p 5000 -m box
+    cq-server -p 8080 ./examples/box.py
 
-This command will run the server on the port `5000` and load the `box.py` python file in the `./examples` directory. Note that the `-m` option can be overridden by url parameter if necessary (see below).
+This command will run the server on the port `8080`, then load and render `./examples/box.py`. The file to load can be overridden by url parameter if necessary (see below).
+
+Use `cq-server -h` to list all available options.
 
 ### Exporting static html
 
@@ -128,10 +129,13 @@ Once the server is started, go to its url (ie. `http://127.0.0.1`).
 
 Optional url parameters:
 
-- `module`: name of module to load (default: defined in the `--module` cli option);
+- `m`: name of an other module to load;
 
-example: `http://127.0.0.1?module=box`).
+example: `http://127.0.0.1?m=box`).
 
-Note that the `/json` endpoint is used internally and can be used for advanced use. It takes same parameters but returns the model as a threejs json object.
+Other endpoints:
 
-In VSCode, the web page can be displayed within the IDE using LivePreview extension (ctrl+shift+P -> Simple Browser: Show). This way you can use VSCode debugging tools.
+- `/json?m=box`: returns the model as a threejs json object. Used internally to retrieve the model.
+- `/html?m=box`: returns a static html page that doesn't require the CadQuery Server running.
+
+Note: In VSCode, the web page can be displayed within the IDE using LivePreview extension (ctrl+shift+P -> Simple Browser: Show). This way you can use VSCode debugging tools.
