@@ -19,7 +19,7 @@ WATCH_PERIOD = 0.3
 app = Flask(__name__, static_url_path='/static')
 
 def get_static_html(module_manager, ui_options):
-    if module_manager.main_module_name == '__index__':
+    if not module_manager.target_is_file:
         raise NameError('Target must be a file when exporting to html')
 
     viewer_css_path = op.join(STATIC_DIR, 'viewer.css')
@@ -51,24 +51,24 @@ def run(port, module_manager, ui_options):
 
     @app.route('/', methods = [ 'GET' ])
     def _root():
-        module_manager.set_module_name(request.args.get('m'))
-
-        if module_manager.module_name == '__index__':
-            modules_name = [ op.basename(path)[:-3] for path in module_manager.get_modules_path() ]
-            return render_template(
-                'index.html',
-                modules_name=modules_name
-            )
-        else:
+        if module_manager.target_is_file:
             return render_template(
                 'viewer.html',
                 module_name=module_manager.module_name,
                 options=ui_options
             )
+        else:
+            module_manager.set_module_name(request.args.get('m'))
+            modules_name = [ op.basename(path)[:-3] for path in module_manager.get_modules_path() ]
+            return render_template(
+                'index.html',
+                modules_name=modules_name
+            )
 
     @app.route('/html', methods = [ 'GET' ])
     def _html():
-        module_manager.set_module_name(request.args.get('m'))
+        if not module_manager.target_is_file:
+            module_manager.set_module_name(request.args.get('m'))
 
         try:
             return get_static_html(module_manager, ui_options)
@@ -77,7 +77,8 @@ def run(port, module_manager, ui_options):
 
     @app.route('/json', methods = [ 'GET' ])
     def _json():
-        module_manager.set_module_name(request.args.get('m'))
+        if not module_manager.target_is_file:
+            module_manager.set_module_name(request.args.get('m'))
 
         try:
             model = module_manager.get_model()

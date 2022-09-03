@@ -8,15 +8,17 @@ import importlib
 class ModuleManager:
     def __init__(self, target):
         if op.isfile(target):
+            self.target_is_file = True
             self.modules_dir = op.abspath(op.dirname(target))
             self.main_module_name = op.basename(target[:-3])
         elif op.isdir(target):
+            self.target_is_file = False
             self.modules_dir = op.abspath(target)
-            self.main_module_name = '__index__'
+            self.main_module_name = None
         else:
             raise ModuleManagerError('No file or folder found at "%s".' % target)
 
-        self.module_name = self.main_module_name
+        self.module_name = None
         self.module = None
         self.last_timestamp = 0
 
@@ -42,15 +44,15 @@ class ModuleManager:
         most_recent_module_path = ''
         most_recent_timestamp = 0
 
-        if self.main_module_name == '__index__':
+        if self.target_is_file:
+            most_recent_module_path = self.module.__file__
+            most_recent_timestamp = op.getmtime(most_recent_module_path)
+        else:
             for module_path in self.get_modules_path():
                 timestamp = op.getmtime(module_path)
                 if timestamp > most_recent_timestamp:
                     most_recent_module_path = module_path
                     most_recent_timestamp = timestamp
-        else:
-            most_recent_module_path = self.module.__file__
-            most_recent_timestamp = op.getmtime(most_recent_module_path)
 
         return most_recent_module_path, most_recent_timestamp
 
