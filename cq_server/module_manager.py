@@ -18,7 +18,7 @@ class ModuleManager:
         else:
             raise ModuleManagerError('No file or folder found at "%s".' % target)
 
-        self.module_name = None
+        self.module_name = self.main_module_name
         self.module = None
         self.last_timestamp = 0
 
