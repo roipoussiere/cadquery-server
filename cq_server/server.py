@@ -14,7 +14,7 @@ APP_DIR = op.dirname(__file__)
 STATIC_DIR = op.join(APP_DIR, 'static')
 TEMPLATES_DIR = op.join(APP_DIR, 'templates')
 
-WATCH_PERIOD = 0.1
+WATCH_PERIOD = 0.3
 
 app = Flask(__name__, static_url_path='/static')
 
@@ -54,9 +54,10 @@ def run(port, module_manager, ui_options):
         module_manager.set_module_name(request.args.get('m'))
 
         if module_manager.module_name == '__index__':
+            modules_name = [ op.basename(path)[:-3] for path in module_manager.get_modules_path() ]
             return render_template(
                 'index.html',
-                modules_name=module_manager.get_available_modules()
+                modules_name=modules_name
             )
         else:
             return render_template(
@@ -98,10 +99,14 @@ def run(port, module_manager, ui_options):
 
         return Response(stream(), mimetype='text/event-stream')
 
-    def watch_file():
+    def watchdog():
         SSE_MESSAGE_TEMPLATE = 'event: file_update\ndata: %s\n\n'
+
         while(True):
-            if module_manager.is_file_updated():
+            last_updated_file = module_manager.get_last_updated_file()
+    
+            if last_updated_file:
+                module_manager.set_module_name(op.basename(last_updated_file)[:-3])
                 data = {
                     'model': module_manager.get_model()
                 }
@@ -110,6 +115,6 @@ def run(port, module_manager, ui_options):
 
     events_queue = Queue(maxsize = 3)
     module_manager.init()
-    watchdog = Thread(target=watch_file, daemon=True)
-    watchdog.start()
+    watchdog_thread = Thread(target=watchdog, daemon=True)
+    watchdog_thread.start()
     app.run(host='0.0.0.0', port=port, debug=False)

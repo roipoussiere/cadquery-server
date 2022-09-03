@@ -27,31 +27,48 @@ class ModuleManager:
 
         sys.path.insert(1, self.modules_dir)
 
-    def get_available_modules(self):
-        modules_name = []
+    def get_modules_path(self):
+        modules_path = []
         for file_name in os.listdir(self.modules_dir):
             file_path = op.join(self.modules_dir, file_name)
             if op.isfile(file_path) and op.splitext(file_path)[1] == '.py':
-                modules_name.append(op.basename(file_name[:-3]))
-        return modules_name
+                modules_path.append(file_path)
+        return modules_path
 
     def set_module_name(self, module_name):
         self.module_name = self.main_module_name if not module_name else module_name
 
-    def is_file_updated(self):
-        if not self.module:
-            return False
+    def get_most_recent_module_info(self):
+        most_recent_module_path = ''
+        most_recent_timestamp = 0
 
-        timestamp = op.getmtime(self.module.__file__)
+        if self.main_module_name == '__index__':
+            for module_path in self.get_modules_path():
+                timestamp = op.getmtime(module_path)
+                if timestamp > most_recent_timestamp:
+                    most_recent_module_path = module_path
+                    most_recent_timestamp = timestamp
+        else:
+            most_recent_module_path = self.module.__file__
+            most_recent_timestamp = op.getmtime(most_recent_module_path)
+
+        return most_recent_module_path, most_recent_timestamp
+
+    def get_last_updated_file(self):
+        if not self.module:
+            return ''
+
+        module_path, timestamp = self.get_most_recent_module_info()
 
         if self.last_timestamp == 0:
+            print('last timestamp is 0')
             self.last_timestamp = timestamp
-            return False
+            return ''
 
-        if timestamp != self.last_timestamp:
+        if self.last_timestamp != timestamp:
             print('File %s updated.' % self.module.__file__)
             self.last_timestamp = timestamp
-            return True
+            return module_path
 
     def get_model(self):
         self.load_module()
@@ -60,7 +77,7 @@ class ModuleManager:
         model = UI.get_model()
 
         if not model:
-            raise ModuleManagerError('There is no object to show. Missing show_object() ?')
+            raise ModuleManagerError('There is no object to show. Missing show_object()?')
 
         return model
 
