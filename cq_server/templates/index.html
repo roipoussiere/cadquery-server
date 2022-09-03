@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>CadQuery Server</title>
+	<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/icon_cq.png') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}" />
+</head>
+
+<body>
+    <h1>CadQuery Server</h1>
+    <h2>Available modules</h2>
+    <ul class="modules_list">
+    {% if modules_name %}
+    {% for module_name in modules_name %}
+        <li><a href="/?m={{ module_name }}">{{ module_name }}</a></li>
+    {% endfor %}
+    {% else %}
+    <p>There is no module available in the target directory.</p>
+    {% endif %}
+    </ul>
+</body>
+
+</html>

@@ -1,0 +1,29 @@
+body {
+    font-family: sans-serif;
+    padding: 1em;
+    background-color: lightgray;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 1em;
+}
+
+li {
+    margin: 3px;
+    padding-left: 5px;
+    width: 10em;
+    display: block;
+    background-color: gray;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 2px;
+}
+
+li a {
+    text-decoration: none;
+}
+
+li a:visited {
+    color: inherit;
+}
