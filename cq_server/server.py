@@ -7,7 +7,7 @@ import os.path as op
 from flask import Flask, request, render_template, Response
 from jinja2 import Template
 
-from .module_manager import CadQueryModuleManagerError
+from .module_manager import ModuleManagerError
 
 
 APP_DIR = op.dirname(__file__)
@@ -19,6 +19,9 @@ WATCH_PERIOD = 0.1
 app = Flask(__name__, static_url_path='/static')
 
 def get_static_html(module_manager, ui_options):
+    if module_manager.main_module_name == '__index__':
+        raise NameError('Target must be a file when exporting to html')
+
     viewer_css_path = op.join(STATIC_DIR, 'viewer.css')
     viewer_js_path = op.join(STATIC_DIR, 'viewer.js')
     template_path = op.join(TEMPLATES_DIR, 'viewer_static.html')
@@ -46,37 +49,46 @@ def get_static_html(module_manager, ui_options):
 
 def run(port, module_manager, ui_options):
 
-    def update_module_name():
-        module_manager.module_name = request.args.get('module', module_manager.default_module_name)
-
     @app.route('/', methods = [ 'GET' ])
     def _root():
-        update_module_name()
+        module_manager.set_module_name(request.args.get('m'))
 
-        return render_template(
-            'viewer.html',
-            module=module_manager.module_name,
-            options=ui_options
-        )
+        if module_manager.module_name == '__index__':
+            return render_template(
+                'index.html',
+                modules_name=module_manager.get_available_modules()
+            )
+        else:
+            return render_template(
+                'viewer.html',
+                module_name=module_manager.module_name,
+                options=ui_options
+            )
 
     @app.route('/html', methods = [ 'GET' ])
     def _html():
-        update_module_name()
-        return get_static_html(module_manager, ui_options)
+        module_manager.set_module_name(request.args.get('m'))
+
+        try:
+            return get_static_html(module_manager, ui_options)
+        except NameError as error:
+            return error, 400
 
     @app.route('/json', methods = [ 'GET' ])
     def _json():
-        update_module_name()
+        module_manager.set_module_name(request.args.get('m'))
 
         try:
+            model = module_manager.get_model()
+        except ModuleManagerError as error:
             return {
-                'model': module_manager.get_model()
-            }
-        except CadQueryModuleManagerError as err:
-            return {
-                'error': err.message,
-                'stacktrace': err.stacktrace
+                'error': error.message,
+                'stacktrace': error.stacktrace
             }, 400
+
+        return {
+            'model': model
+        }
 
     @app.route('/events', methods = [ 'GET' ])
     def _events():

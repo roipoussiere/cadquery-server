@@ -50,7 +50,7 @@ function render(_data) {
 }
 
 function init_viewer(module_name, _options) {
-	fetch(`json?module=${ module_name }`)
+	fetch(`json?m=${ module_name }`)
 		.then(response => response.json())
 		.then(data => init_viewer_from_data(data, _options))
 		.catch(error => console.log(error));
@@ -58,7 +58,6 @@ function init_viewer(module_name, _options) {
 
 function init_viewer_from_data(_data, _options) {
 	options = _options;
-	update_size_options();
 	viewer = build_viewer();
 	render(_data);
 }

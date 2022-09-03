@@ -5,12 +5,18 @@ import traceback
 import importlib
 
 
-class CadQueryModuleManager:
-    def __init__(self, modules_path, default_module_name):
-        self.modules_path = op.abspath(op.join(os.getcwd(), modules_path))
-        self.default_module_name = default_module_name
+class ModuleManager:
+    def __init__(self, target):
+        if op.isfile(target):
+            self.modules_dir = op.abspath(op.dirname(target))
+            self.main_module_name = op.basename(target[:-3])
+        elif op.isdir(target):
+            self.modules_dir = op.abspath(target)
+            self.main_module_name = '__index__'
+        else:
+            raise ModuleManagerError('No file or folder found at "%s".' % target)
 
-        self.module_name = self.default_module_name
+        self.module_name = self.main_module_name
         self.module = None
         self.last_timestamp = 0
 
@@ -19,7 +25,18 @@ class CadQueryModuleManager:
         import cadquery
         print('done.')
 
-        sys.path.insert(1, self.modules_path)
+        sys.path.insert(1, self.modules_dir)
+
+    def get_available_modules(self):
+        modules_name = []
+        for file_name in os.listdir(self.modules_dir):
+            file_path = op.join(self.modules_dir, file_name)
+            if op.isfile(file_path) and op.splitext(file_path)[1] == '.py':
+                modules_name.append(op.basename(file_name[:-3]))
+        return modules_name
+
+    def set_module_name(self, module_name):
+        self.module_name = self.main_module_name if not module_name else module_name
 
     def is_file_updated(self):
         if not self.module:
@@ -43,7 +60,7 @@ class CadQueryModuleManager:
         model = UI.get_model()
 
         if not model:
-            raise CadQueryModuleManagerError('There is no object to show. Missing show_object() ?')
+            raise ModuleManagerError('There is no object to show. Missing show_object() ?')
 
         return model
 
@@ -57,27 +74,27 @@ class CadQueryModuleManager:
                 self.module = importlib.import_module(self.module_name)
 
         except ModuleNotFoundError:
-            raise CadQueryModuleManagerError('Can not import module "%s" from %s.'
-                % (self.module_name, self.modules_path))
+            raise ModuleManagerError('Can not import module "%s" from %s.'
+                % (self.module_name, self.modules_dir))
 
         except Exception as error:
-            raise CadQueryModuleManagerError(type(error).__name__ + ': ' + str(error), traceback.format_exc())
+            raise ModuleManagerError(type(error).__name__ + ': ' + str(error), traceback.format_exc())
 
     def get_ui_class(self):
         try:
             return getattr(self.module, 'UI')
         except AttributeError:
-            raise CadQueryModuleManagerError('UI class is not imported. '
+            raise ModuleManagerError('UI class is not imported. '
                 + 'Please add `from cq_server.ui import UI, show_object` '
                 + 'at the begining of the script.')
 
 
-class CadQueryModuleManagerError(Exception):
+class ModuleManagerError(Exception):
     def __init__(self, message, stacktrace=''):
         self.message = message
         self.stacktrace = stacktrace
 
-        print(message, file=sys.stderr)
+        print('Module manager error: ' + message, file=sys.stderr)
         if stacktrace:
             print(stacktrace, file=sys.stderr)
 

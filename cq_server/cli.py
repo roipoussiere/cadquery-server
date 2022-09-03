@@ -1,24 +1,21 @@
+from sys import exit as sys_exit
 import argparse
 
 from .server import run, get_static_html
-from .module_manager import CadQueryModuleManager
+from .module_manager import ModuleManager, ModuleManagerError
 
 
 DEFAULT_PORT = 5000
-DEFAULT_DIR = '.'
-DEFAULT_MODULE = 'main'
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
             description='A web server that renders a 3d model of a CadQuery script loaded dynamically.')
 
-    parser.add_argument('dir', nargs='?', default=DEFAULT_DIR,
-        help='Path of the directory containing CadQuery scripts (default: "%s").' % DEFAULT_DIR)
+    parser.add_argument('target', nargs='?', default='.',
+        help='Python file or folder containing CadQuery script to load (default: ".").')
     parser.add_argument('-p', '--port', type=int, default=DEFAULT_PORT,
         help='Server port (default: %d).' % DEFAULT_PORT)
-    parser.add_argument('-m', '--module', default=DEFAULT_MODULE, metavar='MOD',
-        help='Default Python module to load (default: "%s").' % DEFAULT_MODULE)
     parser.add_argument('-e', '--export', action='store', default='', nargs='?', metavar='FILE',
         help='Export a static html file that work without the server (default: "<module_name>.html").')
 
@@ -57,15 +54,26 @@ def get_ui_options(args):
 
 def main():
     args = parse_args()
-    module_manager = CadQueryModuleManager(args.dir, args.module)
+
+    try:
+        module_manager = ModuleManager(args.target)
+    except ModuleManagerError as err:
+        sys_exit(err)
+
     ui_options = get_ui_options(args)
 
     if args.export == '':
         run(args.port, module_manager, ui_options)
     else:
-        static_html = get_static_html(module_manager, ui_options)
 
-        file_name = args.export if args.export else ('%s.html' % args.module)
+        try:
+            static_html = get_static_html(module_manager, ui_options)
+        except NameError as error:
+            sys_exit(error)
+
+        file_name = args.export if args.export else \
+            ('%s.html' % 'index' if args.target == '.' else args.target)
+
         with open(file_name, 'w') as html_file:
             html_file.write(static_html)
         print('File exported in %s.' % file_name)
