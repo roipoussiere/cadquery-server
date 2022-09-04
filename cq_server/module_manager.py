@@ -8,11 +8,11 @@ import importlib
 class ModuleManager:
     def __init__(self, target):
         if op.isfile(target):
-            self.target_is_file = True
+            self.target_is_dir = False
             self.modules_dir = op.abspath(op.dirname(target))
             self.main_module_name = op.basename(target[:-3])
         elif op.isdir(target):
-            self.target_is_file = False
+            self.target_is_dir = True
             self.modules_dir = op.abspath(target)
             self.main_module_name = None
         else:
@@ -44,15 +44,15 @@ class ModuleManager:
         most_recent_module_path = ''
         most_recent_timestamp = 0
 
-        if self.target_is_file:
-            most_recent_module_path = self.module.__file__
-            most_recent_timestamp = op.getmtime(most_recent_module_path)
-        else:
+        if self.target_is_dir:
             for module_path in self.get_modules_path():
                 timestamp = op.getmtime(module_path)
                 if timestamp > most_recent_timestamp:
                     most_recent_module_path = module_path
                     most_recent_timestamp = timestamp
+        else:
+            most_recent_module_path = self.module.__file__
+            most_recent_timestamp = op.getmtime(most_recent_module_path)
 
         return most_recent_module_path, most_recent_timestamp
 

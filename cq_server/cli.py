@@ -66,7 +66,7 @@ def main():
         run(args.port, module_manager, ui_options)
     else:
 
-        if not module_manager.target_is_file:
+        if module_manager.target_is_dir:
             sys_exit('Exporting a folder to html is not yet possible.')
 
         static_html = get_static_html(module_manager, ui_options)

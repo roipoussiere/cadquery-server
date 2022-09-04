@@ -48,13 +48,7 @@ def run(port, module_manager, ui_options):
 
     @app.route('/', methods = [ 'GET' ])
     def _root():
-        if module_manager.target_is_file:
-            return render_template(
-                'viewer.html',
-                module_name=module_manager.module_name,
-                options=ui_options
-            )
-        else:
+        if module_manager.target_is_dir and not request.args.get('m'):
             module_manager.set_module_name(request.args.get('m'))
             modules_name = [ op.basename(path)[:-3] for path in module_manager.get_modules_path() ]
             return render_template(
@@ -62,9 +56,18 @@ def run(port, module_manager, ui_options):
                 modules_name=modules_name
             )
 
+        if request.args.get('m'):
+            module_manager.set_module_name(request.args.get('m'))
+
+        return render_template(
+            'viewer.html',
+            module_name=module_manager.module_name,
+            options=ui_options
+        )
+
     @app.route('/html', methods = [ 'GET' ])
     def _html():
-        if not module_manager.target_is_file:
+        if module_manager.target_is_dir:
             module_manager.set_module_name(request.args.get('m'))
 
         try:
@@ -74,7 +77,7 @@ def run(port, module_manager, ui_options):
 
     @app.route('/json', methods = [ 'GET' ])
     def _json():
-        if not module_manager.target_is_file:
+        if module_manager.target_is_dir:
             module_manager.set_module_name(request.args.get('m'))
 
         try:
