@@ -7,7 +7,7 @@ body {
 	margin: 0;
 }
 
-#cqe_error {
+#cqs_error {
 	opacity: 0.8;
 	border-style: solid;
 	border-width: 2px;
@@ -24,6 +24,6 @@ body {
 	overflow: scroll;
 }
 
-#cqe_stacktrace {
+#cqs_stacktrace {
 	background-color: grey;
 }

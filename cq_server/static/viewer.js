@@ -29,10 +29,10 @@ function error(message, stacktrace) {
 		stacktrace: stacktrace
 	}
 
-	document.getElementById('cqe_error_message').innerText = message;
-	document.getElementById('cqe_stacktrace').innerText = stacktrace;
-	document.getElementById('cqe_stacktrace').style.display = stacktrace ? 'block' : 'none';
-	document.getElementById('cqe_error').style.display = 'block';
+	document.getElementById('cqs_error_message').innerText = message;
+	document.getElementById('cqs_stacktrace').innerText = stacktrace;
+	document.getElementById('cqs_stacktrace').style.display = stacktrace ? 'block' : 'none';
+	document.getElementById('cqs_error').style.display = 'block';
 }
 
 function render(_data) {
@@ -40,7 +40,7 @@ function render(_data) {
 		error(_data.error, _data.stacktrace)
 		return
 	}
-	document.getElementById('cqe_error').style.display = 'none';
+	document.getElementById('cqs_error').style.display = 'none';
 
 	data = _data
 	viewer.clear();
