@@ -47,6 +47,8 @@ function render(_data) {
 	document.getElementById('cqs_error').style.display = 'none';
 
 	data = _data;
+	document.title = data.module_name + ' | CadQuery Server';
+
 	viewer.clear();
 	const [ shapes, states ] = data.model;
 	const [ group, tree ] = viewer.renderTessellatedShapes(shapes, states, options);
