@@ -42,6 +42,7 @@ def get_static_html(module_manager, ui_options):
         module_name=module_manager.module_name,
         options=ui_options,
         data={
+            'module_name': module_manager.module_name,
             'model': module_manager.get_model()
         }
     )
@@ -98,6 +99,7 @@ def run(port, module_manager, ui_options):
             }, 400
 
         return {
+            'module_name': module_manager.module_name,
             'model': model
         }
 
