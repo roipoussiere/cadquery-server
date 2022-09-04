@@ -3,6 +3,7 @@ import argparse
 
 from .server import run, get_static_html
 from .module_manager import ModuleManager, ModuleManagerError
+from . import __version__ as cqs_version
 
 
 DEFAULT_PORT = 5000
@@ -12,15 +13,19 @@ def parse_args():
     parser = argparse.ArgumentParser(
             description='A web server that renders a 3d model of a CadQuery script loaded dynamically.')
 
+    parser.add_argument('-V', '--version', action='store_true',
+        help='Print CadQuery Server version and exit.')
+
     parser.add_argument('target', nargs='?', default='.',
         help='Python file or folder containing CadQuery script to load (default: ".").')
+
     parser.add_argument('-p', '--port', type=int, default=DEFAULT_PORT,
         help='Server port (default: %d).' % DEFAULT_PORT)
     parser.add_argument('-e', '--export', action='store', default='', nargs='?', metavar='FILE',
         help='Export a static html file that work without the server (default: "<module_name>.html").')
 
     parser.add_argument('--ui-hide', metavar='LIST',
-        help='ui: a comma-separated list of buttons to disable, among: axes, axes0, grid, ortho, more, help.')
+        help='ui: a comma-separated list of buttons to hide, among: axes, axes0, grid, ortho, more, help.')
     parser.add_argument('--ui-glass', action='store_true',
         help='ui: activate tree view glass mode.')
     parser.add_argument('--ui-theme', choices=['light', 'dark'], metavar='THEME',
@@ -61,6 +66,10 @@ def main():
         sys_exit(err)
 
     ui_options = get_ui_options(args)
+
+    if args.version:
+        print('CadQuery Server version: %s' % cqs_version)
+        sys_exit()
 
     if args.export == '':
         run(args.port, module_manager, ui_options)
