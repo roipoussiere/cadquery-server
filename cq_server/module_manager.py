@@ -22,7 +22,7 @@ class ModuleManager:
             raise ModuleManagerError('No file or folder found at "%s".' % target)
 
         self.module_name = self.main_module_name
-        self.module = None
+        self.modules = {}
         self.last_timestamp = 0
         self.ignored_files = []
 
@@ -69,13 +69,13 @@ class ModuleManager:
                     most_recent_module_path = module_path
                     most_recent_timestamp = timestamp
         else:
-            most_recent_module_path = self.module.__file__
+            most_recent_module_path = self.modules[self.module_name].__file__
             most_recent_timestamp = op.getmtime(most_recent_module_path)
 
         return most_recent_module_path, most_recent_timestamp
 
     def get_last_updated_file(self):
-        if not self.module:
+        if not self.main_module_name or not self.modules[self.module_name]:
             return ''
 
         module_path, timestamp = self.get_most_recent_module_info()
@@ -85,7 +85,7 @@ class ModuleManager:
             return ''
 
         if self.last_timestamp != timestamp:
-            print('File %s updated.' % self.module.__file__)
+            print('File %s updated.' % self.modules[self.module_name].__file__)
             self.last_timestamp = timestamp
             return module_path
 
@@ -105,12 +105,12 @@ class ModuleManager:
             raise ModuleManagerError('Module %s has been ignored by your .cqsignore.' % self.module_name)
 
         try:
-            if self.module and self.module_name == self.module.__name__:
+            if self.module_name in sys.modules:
                 print('Reloading module %s...' % self.module_name)
-                importlib.reload(self.module)
+                importlib.reload(self.modules[self.module_name])
             else:
                 print('Importing module %s...' % self.module_name)
-                self.module = importlib.import_module(self.module_name)
+                self.modules[self.module_name] = importlib.import_module(self.module_name)
 
         except ModuleNotFoundError:
             raise ModuleManagerError('Can not import module "%s" from %s.'
@@ -121,7 +121,7 @@ class ModuleManager:
 
     def get_ui_class(self):
         try:
-            return getattr(self.module, 'UI')
+            return getattr(self.modules[self.module_name], 'UI')
         except AttributeError:
             raise ModuleManagerError('UI class is not imported. '
                 + 'Please add `from cq_server.ui import UI, show_object` '
