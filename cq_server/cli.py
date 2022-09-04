@@ -1,5 +1,6 @@
 from sys import exit as sys_exit
 import argparse
+import os.path as op
 
 from .server import run, get_static_html
 from .module_manager import ModuleManager, ModuleManagerError
@@ -79,8 +80,7 @@ def main():
             sys_exit('Exporting a folder to html is not yet possible.')
 
         static_html = get_static_html(module_manager, ui_options)
-        file_name = args.export if args.export else \
-            ('%s.html' % 'index' if args.target == '.' else args.target)
+        file_name = args.export if args.export else '%s.html' % op.splitext(args.target)[0]
 
         with open(file_name, 'w') as html_file:
             html_file.write(static_html)
