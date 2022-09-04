@@ -71,14 +71,18 @@ window.addEventListener('resize', () => {
 });
 
 function add_modules_list() {
+	const current_module_name = new URLSearchParams(window.location.search).get('m')
+
+	if (current_module_name == undefined) {
+		return;
+	}
+
 	select_dom = document.createElement('select');
 	select_dom.name = 'modules_list';
 
 	option_dom = document.createElement('option');
 	option_dom.innerText = 'Index page';
 	select_dom.append(option_dom);
-
-	const current_module_name = new URLSearchParams(window.location.search).get('m')
 
 	for(module_name of modules_name) {
 		option_dom = document.createElement('option');
