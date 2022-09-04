@@ -5,6 +5,9 @@ import traceback
 import importlib
 
 
+IGNORE_FILE_NAME = '.cqsignore'
+
+
 class ModuleManager:
     def __init__(self, target):
         if op.isfile(target):
@@ -21,6 +24,7 @@ class ModuleManager:
         self.module_name = self.main_module_name
         self.module = None
         self.last_timestamp = 0
+        self.ignored_files = []
 
     def init(self):
         print('Importing CadQuery...', end=' ', flush=True)
@@ -28,12 +32,26 @@ class ModuleManager:
         print('done.')
 
         sys.path.insert(1, self.modules_dir)
+        self.update_ignore_list()
+
+    def update_ignore_list(self):
+        ignore_file_path = op.join(self.modules_dir, IGNORE_FILE_NAME)
+
+        if op.isfile(ignore_file_path):
+            import glob
+
+            with open(ignore_file_path) as ignore_file:
+                for line in ignore_file.readlines():
+                    ignore = op.join(self.modules_dir, line)
+                    self.ignored_files += glob.glob(ignore)
 
     def get_modules_path(self):
         modules_path = []
         for file_name in os.listdir(self.modules_dir):
             file_path = op.join(self.modules_dir, file_name)
-            if op.isfile(file_path) and op.splitext(file_path)[1] == '.py':
+            if op.isfile(file_path) \
+                    and op.splitext(file_path)[1] == '.py' \
+                    and file_path not in self.ignored_files:
                 modules_path.append(file_path)
         return modules_path
 
@@ -84,6 +102,9 @@ class ModuleManager:
         return model
 
     def load_module(self):
+        if self.module_name in [ op.basename(path)[:-3] for path in self.ignored_files ]:
+            raise ModuleManagerError('Module %s has been ignored by your .cqsignore.' % self.module_name)
+
         try:
             if self.module and self.module_name == self.module.__name__:
                 print('Reloading module %s...' % self.module_name)
