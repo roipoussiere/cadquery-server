@@ -56,7 +56,7 @@ def run(port, module_manager, ui_options):
                 modules_name=modules_name
             )
 
-        if request.args.get('m'):
+        if module_manager.target_is_dir and request.args.get('m'):
             module_manager.set_module_name(request.args.get('m'))
 
         return render_template(
