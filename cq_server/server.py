@@ -69,10 +69,21 @@ def run(port, module_manager, ui_options):
         if module_manager.target_is_dir and request.args.get('m'):
             module_manager.set_module_name(request.args.get('m'))
 
+        try:
+            data = {
+                'module_name': module_manager.module_name,
+                'model': module_manager.get_model()
+            }
+        except ModuleManagerError as error:
+            data={
+                'error': error.message,
+                'stacktrace': error.stacktrace
+            }
+
         return render_template(
             'viewer.html',
-            module_name=module_manager.module_name,
-            options=ui_options
+            options=ui_options,
+            data=data
         )
 
     @app.route('/html', methods = [ 'GET' ])

@@ -19,10 +19,8 @@
 	<script>{{ viewer_js | safe }}</script>
 	<script>
 		window.addEventListener('DOMContentLoaded', () => {
-			init_viewer_from_data(
-                {{ data | tojson }},
-                {{ options | tojson }}
-            );
+			init_viewer({{ options | tojson }});
+			render({{ data | tojson }});
 		});
 	</script>
 </body>

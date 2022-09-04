@@ -14,14 +14,15 @@ function update_size_options() {
 	options.cadWidth = window.innerWidth - (options.glass ? 8 : options.treeWidth + 10);
 }
 
-function build_viewer() {
+function init_viewer(_options) {
+	options = _options;
 	update_size_options();
-	const viewer = new tcv.Viewer(cad_view_dom, options, () => {});
+	viewer = new tcv.Viewer(cad_view_dom, options, () => {});
 	add_modules_list();
+	console.log('options:', options);
 	if ('hideButtons' in options) {
 		viewer.trimUI(options.hideButtons, false);
 	}
-	return viewer;
 }
 
 function error(message, stacktrace) {
@@ -50,26 +51,19 @@ function render(_data) {
 	viewer.render(group, tree, states, options);
 }
 
-function init_viewer(module_name, _options) {
+function render_from_name(module_name) {
 	fetch(`json?m=${ module_name }`)
 		.then(response => response.json())
-		.then(_data => init_viewer_from_data(_data, _options))
+		.then(_data => render(_data))
 		.catch(error => console.error(error));
 }
 
-function init_viewer_from_data(_data, _options) {
-	data = _data;
-	options = _options;
-	viewer = build_viewer();
-	render(_data);
-}
-
-window.addEventListener('resize', event => {
+window.addEventListener('resize', () => {
 	if (timer) {
 		clearTimeout(timer);
 	}
 	timer = setTimeout(() => {
-		viewer = build_viewer();
+		viewer = init_viewer(options);
 		render(data);
 	}, 500);
 });
@@ -93,7 +87,8 @@ function add_modules_list() {
 		if (event.target.value == 'Index page') {
 			window.location.href = '/';
 		} else {
-			init_viewer(event.target.value, options);
+			init_viewer(options);
+			render_from_name(event.target.value);
 		}		
 	});
 

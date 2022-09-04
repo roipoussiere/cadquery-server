@@ -81,7 +81,6 @@ class ModuleManager:
         module_path, timestamp = self.get_most_recent_module_info()
 
         if self.last_timestamp == 0:
-            print('last timestamp is 0')
             self.last_timestamp = timestamp
             return ''
 
