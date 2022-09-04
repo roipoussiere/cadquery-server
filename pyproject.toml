@@ -24,6 +24,7 @@ matplotlib = "^3.5.3"
 Flask = "^2.2.2"
 cadquery = {version = "2.2.0b0", optional = true}
 casadi = {version = "3.5.5", optional = true}
+minify-html = "^0.10.0"
 
 [tool.poetry.scripts]
 cq-server = "cq_server.cli:main"
