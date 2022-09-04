@@ -7,7 +7,7 @@ body {
 	margin: 0;
 }
 
-#cad_error {
+#cqe_error {
 	opacity: 0.8;
 	border-style: solid;
 	border-width: 2px;
@@ -24,6 +24,6 @@ body {
 	overflow: scroll;
 }
 
-#cad_error_stacktrace {
+#cqe_stacktrace {
 	background-color: grey;
 }

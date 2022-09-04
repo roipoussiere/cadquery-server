@@ -29,10 +29,10 @@ function error(message, stacktrace) {
 		stacktrace: stacktrace
 	}
 
-	document.getElementById('cad_error_message').innerText = message;
-	document.getElementById('cad_error_stacktrace').innerText = stacktrace;
-	document.getElementById('cad_error_stacktrace').style.display = stacktrace ? 'block' : 'none';
-	document.getElementById('cad_error').style.display = 'block';
+	document.getElementById('cqe_error_message').innerText = message;
+	document.getElementById('cqe_stacktrace').innerText = stacktrace;
+	document.getElementById('cqe_stacktrace').style.display = stacktrace ? 'block' : 'none';
+	document.getElementById('cqe_error').style.display = 'block';
 }
 
 function render(_data) {
@@ -40,7 +40,7 @@ function render(_data) {
 		error(_data.error, _data.stacktrace)
 		return
 	}
-	document.getElementById('cad_error').style.display = 'none';
+	document.getElementById('cqe_error').style.display = 'none';
 
 	data = _data
 	viewer.clear();
@@ -60,26 +60,6 @@ function init_viewer_from_data(_data, _options) {
 	options = _options;
 	viewer = build_viewer();
 	render(_data);
-}
-
-function build_error_dom() {
-	const dom_error = document.createElement('div');
-	dom_error.id = 'cad_error';
-	dom_error.style.display = 'none';
-
-	const dom_error_title = document.createElement('h2');
-	dom_error_title.innerText = 'Oops! An error occured.'
-	dom_error.appendChild(dom_error_title);
-
-	const dom_error_message = document.createElement('p');
-	dom_error_message.id = 'cad_error_message';
-	dom_error.appendChild(dom_error_message);
-
-	const dom_error_stacktrace = document.createElement('pre');
-	dom_error_stacktrace.id = 'cad_error_stacktrace';
-	dom_error.appendChild(dom_error_stacktrace);
-
-	cad_view_dom.parentNode.insertBefore(dom_error, null);
 }
 
 window.addEventListener('resize', event => {

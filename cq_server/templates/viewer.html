@@ -12,6 +12,11 @@
 
 <body>
 	<div id="cad_view"></div>
+	<div id="cqe_error" style="display: none">
+		<h2>Oops! An error occured.</h2>
+		<p id="cqe_error_message"></p>
+		<pre id="cqe_stacktrace"></pre>
+	</div>
 	<script src="{{ url_for('static', filename='viewer.js') }}"></script>
 	<script>
 		window.addEventListener('DOMContentLoaded', () => {
