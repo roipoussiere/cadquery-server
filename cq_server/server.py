@@ -58,9 +58,10 @@ def run(port, module_manager, ui_options):
 
     @app.route('/', methods = [ 'GET' ])
     def _root():
+        modules_name = [ op.basename(path)[:-3] for path in module_manager.get_modules_path() ]
+
         if module_manager.target_is_dir and not request.args.get('m'):
             module_manager.set_module_name(request.args.get('m'))
-            modules_name = [ op.basename(path)[:-3] for path in module_manager.get_modules_path() ]
             return render_template(
                 'index.html',
                 modules_name=modules_name
@@ -83,6 +84,7 @@ def run(port, module_manager, ui_options):
         return render_template(
             'viewer.html',
             options=ui_options,
+            modules_name=modules_name,
             data=data
         )
 
@@ -131,6 +133,7 @@ def run(port, module_manager, ui_options):
             if last_updated_file:
                 module_manager.set_module_name(op.basename(last_updated_file)[:-3])
                 data = {
+                    'module_name': module_manager.module_name,
                     'model': module_manager.get_model()
                 }
                 events_queue.put(SSE_MESSAGE_TEMPLATE % json.dumps(data))

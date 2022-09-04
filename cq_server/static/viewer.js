@@ -5,6 +5,7 @@ const event_source = new EventSource('events');
 
 let data = {};
 let options = {};
+let modules_name = [];
 let viewer = null;
 let timer = null;
 
@@ -14,12 +15,13 @@ function update_size_options() {
 	options.cadWidth = window.innerWidth - (options.glass ? 8 : options.treeWidth + 10);
 }
 
-function init_viewer(_options) {
+function init_viewer(_options, _modules_name) {
 	options = _options;
+	modules_name = _modules_name;
+
 	update_size_options();
 	viewer = new tcv.Viewer(cad_view_dom, options, () => {});
 	add_modules_list();
-	console.log('options:', options);
 	if ('hideButtons' in options) {
 		viewer.trimUI(options.hideButtons, false);
 	}
@@ -63,20 +65,24 @@ window.addEventListener('resize', () => {
 		clearTimeout(timer);
 	}
 	timer = setTimeout(() => {
-		viewer = init_viewer(options);
+		viewer = init_viewer(options, modules_name);
 		render(data);
 	}, 500);
 });
 
 function add_modules_list() {
-	modules_name = [ 'Index page', 'box', 'cq_tutorial'];
-
 	select_dom = document.createElement('select');
 	select_dom.name = 'modules_list';
 
+	option_dom = document.createElement('option');
+	option_dom.innerText = 'Index page';
+	select_dom.append(option_dom);
+
+	const current_module_name = new URLSearchParams(window.location.search).get('m')
+
 	for(module_name of modules_name) {
 		option_dom = document.createElement('option');
-		if (module_name == data['module_name']) {
+		if (module_name == current_module_name) {
 			option_dom.setAttribute('selected', 'selected');
 		}
 		option_dom.innerText = module_name;
@@ -87,7 +93,6 @@ function add_modules_list() {
 		if (event.target.value == 'Index page') {
 			window.location.href = '/';
 		} else {
-			init_viewer(options);
 			render_from_name(event.target.value);
 		}		
 	});
