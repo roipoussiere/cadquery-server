@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>{{ module }} | CadQuery Server</title>
+	<title>{{ module_name }} | CadQuery Server</title>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/three-cad-viewer/dist/three-cad-viewer.css" />
 	<style>{{ viewer_css | safe }}</style>
 	<script src="https://cdn.jsdelivr.net/npm/three-cad-viewer@1.6.4/dist/three-cad-viewer.js"></script>
@@ -11,6 +11,11 @@
 
 <body>
 	<div id="cad_view"></div>
+	<div id="cqs_error" style="display: none">
+		<h2>Oops! An error occured.</h2>
+		<p id="cqs_error_message"></p>
+		<pre id="cqs_stacktrace"></pre>
+	</div>
 	<script>{{ viewer_js | safe }}</script>
 	<script>
 		window.addEventListener('DOMContentLoaded', () => {

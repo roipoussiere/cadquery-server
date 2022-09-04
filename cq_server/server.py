@@ -37,7 +37,7 @@ def get_static_html(module_manager, ui_options):
     return template.render(
         viewer_css=viewer_css,
         viewer_js=viewer_js,
-        module=module_manager.module_name,
+        module_name=module_manager.module_name,
         options=ui_options,
         data={
             'model': module_manager.get_model()
