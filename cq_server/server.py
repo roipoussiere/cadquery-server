@@ -23,7 +23,7 @@ def get_static_html(module_manager, ui_options):
 
     viewer_css_path = op.join(STATIC_DIR, 'viewer.css')
     viewer_js_path = op.join(STATIC_DIR, 'viewer.js')
-    template_path = op.join(TEMPLATES_DIR, 'viewer_static.html')
+    template_path = op.join(TEMPLATES_DIR, 'viewer.html')
 
     with open(viewer_css_path) as css_file:
         viewer_css = '\n' + css_file.read() + '\n'
@@ -37,10 +37,11 @@ def get_static_html(module_manager, ui_options):
     module_manager.init()
 
     html = template.render(
+        static=True,
         viewer_css=viewer_css,
         viewer_js=viewer_js,
-        module_name=module_manager.module_name,
         options=ui_options,
+        modules_name=[],
         data={
             'module_name': module_manager.module_name,
             'model': module_manager.get_model()

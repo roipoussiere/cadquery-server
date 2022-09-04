@@ -3,11 +3,17 @@
 
 <head>
 	<meta charset="utf-8" />
-	<title>{{ module_name }} | CadQuery Server</title>
+	<title>CadQuery Server</title>
+	{% if static %}
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/three-cad-viewer/dist/three-cad-viewer.css" />
+	<style>{{ viewer_css | safe }}</style>
+	<script src="https://cdn.jsdelivr.net/npm/three-cad-viewer@1.6.4/dist/three-cad-viewer.js"></script>
+	{% else %}
 	<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/icon_cq.png') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='vendor/three-cad-viewer.css') }}" />
 	<link rel="stylesheet" href="{{ url_for('static', filename='viewer.css') }}" />
 	<script src="{{ url_for('static', filename='vendor/three-cad-viewer.js') }}"></script>
+	{% endif %}
 </head>
 
 <body>
@@ -17,7 +23,11 @@
 		<p id="cqs_error_message"></p>
 		<pre id="cqs_stacktrace"></pre>
 	</div>
+	{% if static %}
+	<script>{{ viewer_js | safe }}</script>
+	{% else %}
 	<script src="{{ url_for('static', filename='viewer.js') }}"></script>
+	{% endif %}
 	<script>
 		window.addEventListener('DOMContentLoaded', () => {
 			init_viewer({{ options | tojson }}, {{ modules_name | tojson }});
