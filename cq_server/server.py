@@ -60,26 +60,22 @@ def run(port, module_manager, ui_options):
     @app.route('/', methods = [ 'GET' ])
     def _root():
         modules_name = [ op.basename(path)[:-3] for path in module_manager.get_modules_path() ]
+        data = {}
 
         if module_manager.target_is_dir:
             module_manager.module_name = request.args.get('m')
 
-        if not module_manager.module_name:
-            return render_template(
-                'index.html',
-                modules_name=modules_name
-            )
-
-        try:
-            data = {
-                'module_name': module_manager.module_name,
-                'model': module_manager.get_model()
-            }
-        except ModuleManagerError as error:
-            data={
-                'error': error.message,
-                'stacktrace': error.stacktrace
-            }
+        if module_manager.module_name:
+            try:
+                data = {
+                    'module_name': module_manager.module_name,
+                    'model': module_manager.get_model()
+                }
+            except ModuleManagerError as error:
+                data={
+                    'error': error.message,
+                    'stacktrace': error.stacktrace
+                }
 
         return render_template(
             'viewer.html',
@@ -131,7 +127,7 @@ def run(port, module_manager, ui_options):
             last_updated_file = module_manager.get_last_updated_file()
     
             if last_updated_file:
-                module_manager.set_module_name(op.basename(last_updated_file)[:-3])
+                module_manager.module_name = op.basename(last_updated_file)[:-3]
                 data = {
                     'module_name': module_manager.module_name,
                     'model': module_manager.get_model()

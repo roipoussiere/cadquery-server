@@ -27,32 +27,58 @@ function init_viewer(_options, _modules_name) {
 	}
 }
 
-function error(message, stacktrace) {
-	data = {
-		error: message,
-		stacktrace: stacktrace
-	}
+function show_error() {
+	document.title = 'error | CadQuery Server';
+	document.getElementById('cqs_index').style.display = 'none';
 
-	document.getElementById('cqs_error_message').innerText = message;
-	document.getElementById('cqs_stacktrace').innerText = stacktrace;
-	document.getElementById('cqs_stacktrace').style.display = stacktrace ? 'block' : 'none';
+	document.getElementById('cqs_error_message').innerText = data.error;
+	document.getElementById('cqs_stacktrace').innerText = data.stacktrace;
+	document.getElementById('cqs_stacktrace').style.display = data.stacktrace ? 'block' : 'none';
+
 	document.getElementById('cqs_error').style.display = 'block';
 }
 
-function render(_data) {
-	if ('error' in _data) {
-		error(_data.error, _data.stacktrace)
-		return
-	}
+function show_index() {
+	document.title = 'index | CadQuery Server';
 	document.getElementById('cqs_error').style.display = 'none';
+	document.getElementById('cqs_no_modules').style.display = modules_name ? 'block' : 'none';
+	const modules_dom = document.getElementById('cqs_modules_list');
 
-	data = _data;
+	for(let module_name of modules_name) {
+		const list_item_dom = document.createElement('li');
+		const link_dom = document.createElement('a');
+		list_item_dom.append(link_dom);
+
+		link_dom.innerText = module_name;
+		link_dom.setAttribute('href', '/?m=' + module_name);
+
+		modules_dom.append(list_item_dom);
+	}
+
+	document.getElementById('cqs_index').style.display = 'block';
+}
+
+function show_model() {
 	document.title = data.module_name + ' | CadQuery Server';
+	document.getElementById('cqs_error').style.display = 'none';
+	document.getElementById('cqs_index').style.display = 'none';
 
-	viewer.clear();
 	const [ shapes, states ] = data.model;
 	const [ group, tree ] = viewer.renderTessellatedShapes(shapes, states, options);
 	viewer.render(group, tree, states, options);
+}
+
+function render(_data) {
+	data = _data;
+	viewer.clear();
+
+	if ('error' in data) {
+		show_error();
+	} else if (data.module_name) {
+		show_model();
+	} else {
+		show_index();
+	}
 }
 
 function render_from_name(module_name) {
@@ -86,7 +112,7 @@ function add_modules_list() {
 	option_dom.innerText = 'Index page';
 	select_dom.append(option_dom);
 
-	for(module_name of modules_name) {
+	for(let module_name of modules_name) {
 		option_dom = document.createElement('option');
 		if (module_name == current_module_name) {
 			option_dom.setAttribute('selected', 'selected');

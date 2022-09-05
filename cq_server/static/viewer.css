@@ -27,6 +27,31 @@ body {
 	background-color: #fdd;
 }
 
+.modal.info {
+	background-color: #ddf;
+}
+
 .modal pre {
 	background-color: grey;
+}
+
+.modal ul {
+    list-style-type: none;
+    padding-left: 1em;
+}
+
+.modal li a {
+    margin: 3px;
+    padding-left: 5px;
+    width: 10em;
+    display: block;
+    background-color: gray;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 2px;
+    text-decoration: none;
+}
+
+.modal li a:visited {
+    color: inherit;
 }
