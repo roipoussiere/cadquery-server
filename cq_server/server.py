@@ -19,23 +19,6 @@ WATCH_PERIOD = 0.3
 app = Flask(__name__, static_url_path='/static')
 
 
-def get_data(module_manager):
-    data = {}
-
-    if module_manager.module_name:
-        try:
-            data = {
-                'module_name': module_manager.module_name,
-                'model': module_manager.get_model()
-            }
-        except ModuleManagerError as error:
-            data={
-                'error': error.message,
-                'stacktrace': error.stacktrace
-            }
-
-    return data
-
 def get_static_html(module_manager, ui_options, minify=True):
     viewer_css_path = op.join(STATIC_DIR, 'viewer.css')
     viewer_js_path = op.join(STATIC_DIR, 'viewer.js')
@@ -58,7 +41,7 @@ def get_static_html(module_manager, ui_options, minify=True):
         viewer_js=viewer_js,
         options=ui_options,
         modules_name=[],
-        data=get_data(module_manager)
+        data=module_manager.get_data()
     )
 
     if minify:
@@ -85,7 +68,7 @@ def run(port, module_manager, ui_options, is_blind=False):
             'viewer.html',
             options=ui_options,
             modules_name=modules_name,
-            data=get_data(module_manager)
+            data=module_manager.get_data()
         )
 
     @app.route('/html', methods = [ 'GET' ])

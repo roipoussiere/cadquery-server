@@ -112,6 +112,23 @@ class ModuleManager:
         except Exception as error:
             raise ModuleManagerError(type(error).__name__ + ': ' + str(error), traceback.format_exc())
 
+    def get_data(self):
+        data = {}
+
+        if self.module_name:
+            try:
+                data = {
+                    'module_name': self.module_name,
+                    'model': self.get_model()
+                }
+            except ModuleManagerError as error:
+                data={
+                    'error': error.message,
+                    'stacktrace': error.stacktrace
+                }
+
+        return data
+
     def get_ui_class(self):
         try:
             return getattr(self.modules[self.module_name], 'UI')
