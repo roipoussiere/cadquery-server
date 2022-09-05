@@ -48,6 +48,16 @@ If you want to install both cq-server and CadQuery:
 
     pip install 'cadquery-server[cadquery]'
 
+### Install with Docker
+
+    docker pull cadquery/cadquery-server
+
+Then add a volume and port when running the container. Typically:
+
+    docker run -p 5000:5000 -v $(pwd)/examples:/data cadquery/cadquery-server
+
+Where `examples` is in your current directory and contains CadQuery scripts.
+
 ### Install from sources
 
     git clone https://github.com/roipoussiere/cadquery-server.git
