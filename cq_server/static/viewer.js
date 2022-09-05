@@ -10,7 +10,6 @@ let viewer = null;
 let timer = null;
 let sse = null;
 
-init_sse();
 
 function init_sse() {
 	sse = new EventSource('events');
@@ -55,11 +54,13 @@ function show_error() {
 }
 
 function show_index() {
-	window.history.pushState('/', '', window.location.origin);
 	document.title = 'index | CadQuery Server';
-
 	document.getElementById('cqs_error').style.display = 'none';
-	document.getElementById('cqs_no_modules').style.display = modules_name ? 'block' : 'none';
+
+	if (sse) {
+		window.history.pushState('/', '', window.location.origin);
+	}
+
 	const modules_list_dom = document.getElementById('cqs_modules_list');
 
 	while (modules_list_dom.firstChild) {
@@ -79,17 +80,20 @@ function show_index() {
 		modules_list_dom.append(list_item_dom);
 	}
 
+	document.getElementById('cqs_no_modules').style.display = modules_name.length == 0 ? 'block' : 'none';
 	document.getElementById('cqs_index').style.display = 'block';
 }
 
 function show_model() {
-	const url = new URL(window.location.href);
-	url.searchParams.set('m', data.module_name);
-	window.history.pushState(url.pathname, '', url.href);
 	document.title = data.module_name + ' | CadQuery Server';
-
 	document.getElementById('cqs_error').style.display = 'none';
 	document.getElementById('cqs_index').style.display = 'none';
+
+	if (sse) {
+		const url = new URL(window.location.href);
+		url.searchParams.set('m', data.module_name);
+		window.history.pushState(url.pathname, '', url.href);
+	}
 
 	const [ shapes, states ] = data.model;
 	const [ group, tree ] = viewer.renderTessellatedShapes(shapes, states, options);
@@ -117,10 +121,12 @@ function render(_data) {
 }
 
 function render_from_name(module_name) {
-	fetch(`json?m=${ module_name }`)
-		.then(response => response.json())
-		.then(_data => render(_data))
-		.catch(error => console.error(error));
+	if (sse) {
+		fetch(`json?m=${ module_name }`)
+			.then(response => response.json())
+			.then(_data => render(_data))
+			.catch(error => console.error(error));
+	}
 }
 
 window.addEventListener('resize', () => {
