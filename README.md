@@ -143,7 +143,7 @@ show_object(cq.Workplane('XY').box(1, 2, 3))
 
 Please read the [CadQuery documentation](https://cadquery.readthedocs.io/en/latest/) for more details about the CadQuery library.
 
-### Using the web server
+### Using with the web server
 
 Once the server is started, go to its url (ie. `http://127.0.0.1`).
 
@@ -158,7 +158,13 @@ Other endpoints:
 - `/json?m=box`: returns the model as a threejs json object. Used internally to retrieve the model.
 - `/html?m=box`: returns a static html page that doesn't require the CadQuery Server running.
 
-Note: In VSCode, the web page can be displayed within the IDE using LivePreview extension (ctrl+shift+P -> Simple Browser: Show). This way you can use VSCode debugging tools.
+### Using with VSCode
+
+The web page can be displayed within VSCode IDE using [LivePreview extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server):
+
+1. install the LivePreview VSCode extension;
+2. `ctrl+shift+P` -> *Simple Browser: Show*;
+3. update the url according to your running CadQuery server instance (ie. `127.0.0.1:5000`).
 
 ## About
 
