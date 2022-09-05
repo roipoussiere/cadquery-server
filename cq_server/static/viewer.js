@@ -59,7 +59,11 @@ function show_index() {
 }
 
 function show_model() {
+	const url = new URL(window.location.href);
+	url.searchParams.set('m', data.module_name);
+	window.history.pushState(url.pathname, data.module_name + ' | CadQuery Server', url.href);
 	document.title = data.module_name + ' | CadQuery Server';
+
 	document.getElementById('cqs_error').style.display = 'none';
 	document.getElementById('cqs_index').style.display = 'none';
 
