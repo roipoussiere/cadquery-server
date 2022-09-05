@@ -65,7 +65,7 @@ class ModuleManager:
                     most_recent_module_path = module_path
                     most_recent_timestamp = timestamp
         else:
-            most_recent_module_path = self.modules[self.module_name].__file__
+            most_recent_module_path = op.join(self.modules_dir, self.module_name + '.py')
             most_recent_timestamp = op.getmtime(most_recent_module_path)
 
         return most_recent_module_path, most_recent_timestamp
