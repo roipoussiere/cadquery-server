@@ -36,9 +36,7 @@ def get_data(module_manager):
 
     return data
 
-def get_static_html(module_manager, ui_options):
-    import minify_html
-
+def get_static_html(module_manager, ui_options, minify=True):
     viewer_css_path = op.join(STATIC_DIR, 'viewer.css')
     viewer_js_path = op.join(STATIC_DIR, 'viewer.js')
     template_path = op.join(TEMPLATES_DIR, 'viewer.html')
@@ -63,12 +61,17 @@ def get_static_html(module_manager, ui_options):
         data=get_data(module_manager)
     )
 
-    return minify_html.minify(
-        html,
-        minify_js=True,
-        minify_css=True,
-        remove_processing_instructions=True
-    )
+    if minify:
+        import minify_html
+
+        html = minify_html.minify(
+            html,
+            minify_js=True,
+            minify_css=True,
+            remove_processing_instructions=True
+        )
+
+    return html
 
 def run(port, module_manager, ui_options, is_blind=False):
 
