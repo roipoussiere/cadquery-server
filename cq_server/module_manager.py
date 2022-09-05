@@ -75,9 +75,6 @@ class ModuleManager:
         return most_recent_module_path, most_recent_timestamp
 
     def get_last_updated_file(self):
-        if not self.main_module_name or not self.modules[self.module_name]:
-            return ''
-
         module_path, timestamp = self.get_most_recent_module_info()
 
         if self.last_timestamp == 0:
@@ -85,7 +82,7 @@ class ModuleManager:
             return ''
 
         if self.last_timestamp != timestamp:
-            print('File %s updated.' % self.modules[self.module_name].__file__)
+            print('File %s updated.' % module_path)
             self.last_timestamp = timestamp
             return module_path
 
