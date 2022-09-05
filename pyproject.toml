@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cadquery-server"
-version = "0.2.2"
+version = "0.3"
 description = "A web server used to render 3d models from CadQuery code loaded dynamically."
 license = "MIT"
 authors = ["Roipoussiere"]
