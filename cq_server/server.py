@@ -40,7 +40,7 @@ def get_static_html(module_manager, ui_options, minify=True):
         viewer_css=viewer_css,
         viewer_js=viewer_js,
         options=ui_options,
-        modules_name=[],
+        modules_name=module_manager.get_modules_name(),
         data=module_manager.get_data()
     )
 
@@ -60,14 +60,13 @@ def run(port, module_manager, ui_options, is_blind=False):
 
     @app.route('/', methods = [ 'GET' ])
     def _root():
-        modules_name = [ op.basename(path)[:-3] for path in module_manager.get_modules_path() ]
         if module_manager.target_is_dir:
             module_manager.module_name = request.args.get('m')
 
         return render_template(
             'viewer.html',
             options=ui_options,
-            modules_name=modules_name,
+            modules_name=module_manager.get_modules_name(),
             data=module_manager.get_data()
         )
 

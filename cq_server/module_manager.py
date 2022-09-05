@@ -129,6 +129,9 @@ class ModuleManager:
 
         return data
 
+    def get_modules_name(self):
+        return [ op.basename(path)[:-3] for path in self.get_modules_path() ]
+
     def get_ui_class(self):
         try:
             return getattr(self.modules[self.module_name], 'UI')
