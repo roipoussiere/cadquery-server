@@ -4,6 +4,7 @@
 <head>
 	<meta charset="utf-8" />
 	<title>CadQuery Server</title>
+
 	{% if static %}
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/three-cad-viewer/dist/three-cad-viewer.css" />
 	<style>{{ viewer_css | safe }}</style>
@@ -14,20 +15,24 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='viewer.css') }}" />
 	<script src="{{ url_for('static', filename='vendor/three-cad-viewer.js') }}"></script>
 	{% endif %}
+
 </head>
 
 <body>
 	<div id="cad_view"></div>
-	<div id="cqs_error" style="display: none">
+
+	<div class="modal error" id="cqs_error" style="display: none">
 		<h2>Oops! An error occured.</h2>
 		<p id="cqs_error_message"></p>
 		<pre id="cqs_stacktrace"></pre>
 	</div>
+
 	{% if static %}
 	<script>{{ viewer_js | safe }}</script>
 	{% else %}
 	<script src="{{ url_for('static', filename='viewer.js') }}"></script>
 	{% endif %}
+
 	<script>
 		window.addEventListener('DOMContentLoaded', () => {
 			init_viewer({{ options | tojson }}, {{ modules_name | tojson }});

@@ -7,7 +7,7 @@ body {
 	margin: 0;
 }
 
-#cqs_error {
+.modal {
 	opacity: 0.8;
 	border-style: solid;
 	border-width: 2px;
@@ -17,13 +17,16 @@ body {
 	top: 10%;
 	right: 10%;
 	bottom: 10%;
-	background-color: lightgray;
 	padding: 1em;
 	font-family: sans-serif;
 	z-index: 1000;
 	overflow: scroll;
 }
 
-#cqs_stacktrace {
+.modal.error {
+	background-color: #fdd;
+}
+
+.modal pre {
 	background-color: grey;
 }
