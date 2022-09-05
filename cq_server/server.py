@@ -18,6 +18,24 @@ WATCH_PERIOD = 0.3
 
 app = Flask(__name__, static_url_path='/static')
 
+
+def get_data(module_manager):
+    data = {}
+
+    if module_manager.module_name:
+        try:
+            data = {
+                'module_name': module_manager.module_name,
+                'model': module_manager.get_model()
+            }
+        except ModuleManagerError as error:
+            data={
+                'error': error.message,
+                'stacktrace': error.stacktrace
+            }
+
+    return data
+
 def get_static_html(module_manager, ui_options):
     import minify_html
 
@@ -42,10 +60,7 @@ def get_static_html(module_manager, ui_options):
         viewer_js=viewer_js,
         options=ui_options,
         modules_name=[],
-        data={
-            'module_name': module_manager.module_name,
-            'model': module_manager.get_model()
-        }
+        data=get_data(module_manager)
     )
 
     return minify_html.minify(
@@ -60,35 +75,22 @@ def run(port, module_manager, ui_options):
     @app.route('/', methods = [ 'GET' ])
     def _root():
         modules_name = [ op.basename(path)[:-3] for path in module_manager.get_modules_path() ]
-        data = {}
-
         if module_manager.target_is_dir:
             module_manager.module_name = request.args.get('m')
-
-        if module_manager.module_name:
-            try:
-                data = {
-                    'module_name': module_manager.module_name,
-                    'model': module_manager.get_model()
-                }
-            except ModuleManagerError as error:
-                data={
-                    'error': error.message,
-                    'stacktrace': error.stacktrace
-                }
 
         return render_template(
             'viewer.html',
             options=ui_options,
             modules_name=modules_name,
-            data=data
+            data=get_data(module_manager)
         )
 
     @app.route('/html', methods = [ 'GET' ])
     def _html():
         if module_manager.target_is_dir:
             module_manager.module_name = request.args.get('m')
-            return get_static_html(module_manager, ui_options)
+
+        return get_static_html(module_manager, ui_options)
 
     @app.route('/json', methods = [ 'GET' ])
     def _json():
