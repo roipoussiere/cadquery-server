@@ -41,8 +41,10 @@ class ModuleManager:
 
             with open(ignore_file_path) as ignore_file:
                 for line in ignore_file.readlines():
-                    ignore = op.join(self.modules_dir, line)
-                    self.ignored_files += glob.glob(ignore)
+                    line = line.strip()
+                    if line and not line.startswith('#'):
+                        ignore = op.join(self.modules_dir, line)
+                        self.ignored_files += glob.glob(ignore)
 
     def get_modules_path(self):
         modules_path = []
