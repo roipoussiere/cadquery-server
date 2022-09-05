@@ -1,5 +1,6 @@
-const tcv = window.CadViewer;
+'use strict';
 
+const tcv = window.CadViewer;
 const cad_view_dom = document.getElementById('cad_view');
 
 let data = {};
@@ -54,7 +55,9 @@ function show_error() {
 }
 
 function show_index() {
+	window.history.pushState('/', '', window.location.origin);
 	document.title = 'index | CadQuery Server';
+
 	document.getElementById('cqs_error').style.display = 'none';
 	document.getElementById('cqs_no_modules').style.display = modules_name ? 'block' : 'none';
 	const modules_list_dom = document.getElementById('cqs_modules_list');
@@ -82,7 +85,7 @@ function show_index() {
 function show_model() {
 	const url = new URL(window.location.href);
 	url.searchParams.set('m', data.module_name);
-	window.history.pushState(url.pathname, data.module_name + ' | CadQuery Server', url.href);
+	window.history.pushState(url.pathname, '', url.href);
 	document.title = data.module_name + ' | CadQuery Server';
 
 	document.getElementById('cqs_error').style.display = 'none';
@@ -94,7 +97,6 @@ function show_model() {
 }
 
 function render(_data) {
-	console.log('render');
 	data = _data;
 
 	if ( ! viewer) {
