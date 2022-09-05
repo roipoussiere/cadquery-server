@@ -1,4 +1,4 @@
-# CadQuery server
+# CadQuery Server
 
 A web server used to render 3d models from CadQuery code loaded dynamically.
 
@@ -8,7 +8,9 @@ Example usage with Kate on the left and Firefox on the right:
 
 ![](./images/screenshot.png)
 
-## Features
+## About CadQuery Server
+
+### Features
 
 - fast response time
 - built-in file-watcher
@@ -19,13 +21,21 @@ Example usage with Kate on the left and Firefox on the right:
 
 Please note that the web server is intended for personal use and it's absolutely not safe to open it to a public network.
 
-## Functionning
+### Functionning
 
 CadQuery Server dynamically loads your CadQuery code and renders the model on the browser using [three-cad-viewer](https://github.com/bernhard-42/three-cad-viewer) (the same used in [jupyter-cadquery](https://github.com/bernhard-42/jupyter-cadquery)). It includes a file watcher that reloads the Python code and updates the web page when the file is updated.
 
 This approach allows users to work on any IDE, and render the model on any web browser. It also allow them to display the model in an other monitor, or even in an other computer on the same local network (for instance a tablet on your desktop).
 
 The project was originally started for the VSCode extension, but since it doesn't depend on VSCode anymore, it's now a project as it own.
+
+### About CadQuery
+
+From the [CadQuery readme](https://github.com/CadQuery/cadquery/blob/master/README.md):
+
+> CadQuery is an intuitive, easy-to-use Python module for building parametric 3D CAD models. Using CadQuery, you can write short, simple scripts that produce high quality CAD models. It is easy to make many different objects using a single script that can be customized.
+
+Read [CadQuery documentation](https://cadquery.readthedocs.io/en/latest/) for more information about CadQuery and its usage.
 
 ## Installation
 
@@ -149,3 +159,12 @@ Other endpoints:
 - `/html?m=box`: returns a static html page that doesn't require the CadQuery Server running.
 
 Note: In VSCode, the web page can be displayed within the IDE using LivePreview extension (ctrl+shift+P -> Simple Browser: Show). This way you can use VSCode debugging tools.
+
+## About
+
+- contact:
+    - ping user `@roipoussiere` on channel `other-gui` in the CadQuery Discord;
+    - [Mastodon](https://mastodon.tetaneutral.net/@roipoussiere);
+- license: [MIT](./LICENSE);
+- source: both on [Framagit](https://framagit.org/roipoussiere/cadquery-server) (Gitlab instance) and [Github](https://github.com/roipoussiere/cadquery-server);
+- issue tracker: both on [Framagit](https://framagit.org/roipoussiere/cadquery-server/-/issues) and [Github](https://github.com/roipoussiere/cadquery-server/issues)
