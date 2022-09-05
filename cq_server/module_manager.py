@@ -13,15 +13,14 @@ class ModuleManager:
         if op.isfile(target):
             self.target_is_dir = False
             self.modules_dir = op.abspath(op.dirname(target))
-            self.main_module_name = op.basename(target[:-3])
+            self.module_name = op.basename(target[:-3])
         elif op.isdir(target):
             self.target_is_dir = True
             self.modules_dir = op.abspath(target)
-            self.main_module_name = None
+            self.module_name = None
         else:
             raise ModuleManagerError('No file or folder found at "%s".' % target)
 
-        self.module_name = self.main_module_name
         self.modules = {}
         self.last_timestamp = 0
         self.ignored_files = []
@@ -54,9 +53,6 @@ class ModuleManager:
                     and file_path not in self.ignored_files:
                 modules_path.append(file_path)
         return modules_path
-
-    def set_module_name(self, module_name):
-        self.module_name = self.main_module_name if not module_name else module_name
 
     def get_most_recent_module_info(self):
         most_recent_module_path = ''

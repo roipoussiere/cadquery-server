@@ -61,15 +61,14 @@ def run(port, module_manager, ui_options):
     def _root():
         modules_name = [ op.basename(path)[:-3] for path in module_manager.get_modules_path() ]
 
-        if module_manager.target_is_dir and not request.args.get('m'):
-            module_manager.set_module_name(request.args.get('m'))
+        if module_manager.target_is_dir:
+            module_manager.module_name = request.args.get('m')
+
+        if not module_manager.module_name:
             return render_template(
                 'index.html',
                 modules_name=modules_name
             )
-
-        if module_manager.target_is_dir and request.args.get('m'):
-            module_manager.set_module_name(request.args.get('m'))
 
         try:
             data = {
@@ -92,7 +91,7 @@ def run(port, module_manager, ui_options):
     @app.route('/html', methods = [ 'GET' ])
     def _html():
         if module_manager.target_is_dir:
-            module_manager.set_module_name(request.args.get('m'))
+            module_manager.module_name = request.args.get('m')
 
         try:
             return get_static_html(module_manager, ui_options)
@@ -102,7 +101,7 @@ def run(port, module_manager, ui_options):
     @app.route('/json', methods = [ 'GET' ])
     def _json():
         if module_manager.target_is_dir:
-            module_manager.set_module_name(request.args.get('m'))
+            module_manager.module_name = request.args.get('m')
 
         try:
             model = module_manager.get_model()
