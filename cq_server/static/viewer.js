@@ -1,13 +1,27 @@
 const tcv = window.CadViewer;
 
 const cad_view_dom = document.getElementById('cad_view');
-const event_source = new EventSource('events');
 
 let data = {};
 let options = {};
 let modules_name = [];
 let viewer = null;
 let timer = null;
+let sse = null;
+
+init_sse();
+
+function init_sse() {
+	sse = new EventSource('events');
+	sse.addEventListener('file_update', event => {
+		render(JSON.parse(event.data));
+	})
+	sse.onerror = error => {
+		if (sse.readyState == 2) {
+			setTimeout(init_sse, 1000);
+		}
+	};	
+}
 
 function update_size_options() {
 	options.height = window.innerHeight - 44;
@@ -80,6 +94,7 @@ function show_model() {
 }
 
 function render(_data) {
+	console.log('render');
 	data = _data;
 
 	if ( ! viewer) {
@@ -155,6 +170,3 @@ function add_modules_dropdown() {
 	document.getElementsByClassName('tcv_cad_toolbar')[0].prepend(modules_dropdown_dom);
 }
 
-event_source.addEventListener('file_update', event => {
-	render(JSON.parse(event.data));
-})
