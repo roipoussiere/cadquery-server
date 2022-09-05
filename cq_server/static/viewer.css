@@ -40,7 +40,7 @@ body {
     padding-left: 1em;
 }
 
-.modal li a {
+.modal li button {
     margin: 3px;
     padding-left: 5px;
     width: 10em;
@@ -48,10 +48,8 @@ body {
     background-color: gray;
     border-style: solid;
     border-width: 1px;
-    border-radius: 2px;
+    border-radius: 3px;
+	border-color: black;
     text-decoration: none;
-}
-
-.modal li a:visited {
-    color: inherit;
+	cursor: pointer;
 }

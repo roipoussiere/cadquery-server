@@ -18,10 +18,11 @@ function update_size_options() {
 function init_viewer(_options, _modules_name) {
 	options = _options;
 	modules_name = _modules_name;
-
 	update_size_options();
+
 	viewer = new tcv.Viewer(cad_view_dom, options, () => {});
-	add_modules_list();
+	add_modules_dropdown();
+
 	if ('hideButtons' in options) {
 		viewer.trimUI(options.hideButtons, false);
 	}
@@ -42,17 +43,23 @@ function show_index() {
 	document.title = 'index | CadQuery Server';
 	document.getElementById('cqs_error').style.display = 'none';
 	document.getElementById('cqs_no_modules').style.display = modules_name ? 'block' : 'none';
-	const modules_dom = document.getElementById('cqs_modules_list');
+	const modules_list_dom = document.getElementById('cqs_modules_list');
+
+	while (modules_list_dom.firstChild) {
+        modules_list_dom.removeChild(modules_list_dom.firstChild);
+    }
 
 	for(let module_name of modules_name) {
 		const list_item_dom = document.createElement('li');
-		const link_dom = document.createElement('a');
-		list_item_dom.append(link_dom);
 
-		link_dom.innerText = module_name;
-		link_dom.setAttribute('href', '/?m=' + module_name);
+		const button_dom = document.createElement('button');
+		button_dom.innerText = module_name;
+		button_dom.addEventListener('click', event => {
+			render_from_name(event.target.innerText);
+		});
 
-		modules_dom.append(list_item_dom);
+		list_item_dom.append(button_dom);
+		modules_list_dom.append(list_item_dom);
 	}
 
 	document.getElementById('cqs_index').style.display = 'block';
@@ -74,7 +81,14 @@ function show_model() {
 
 function render(_data) {
 	data = _data;
-	viewer.clear();
+
+	if ( ! viewer) {
+		init_viewer(options, modules_name);
+	} else {
+		viewer.clear();
+	}
+
+	update_modules_dropdown();
 
 	if ('error' in data) {
 		show_error();
@@ -102,38 +116,43 @@ window.addEventListener('resize', () => {
 	}, 500);
 });
 
-function add_modules_list() {
-	const current_module_name = new URLSearchParams(window.location.search).get('m')
+function update_modules_dropdown() {
+	const modules_dropdown_dom = document.getElementById('modules_dropdown');
 
-	if (current_module_name == undefined) {
-		return;
-	}
+	while (modules_dropdown_dom.firstChild) {
+        modules_dropdown_dom.removeChild(modules_dropdown_dom.firstChild);
+    }
 
-	select_dom = document.createElement('select');
-	select_dom.name = 'modules_list';
-
-	option_dom = document.createElement('option');
+	const option_dom = document.createElement('option');
+	option_dom.setAttribute('selected', 'selected');
 	option_dom.innerText = 'Index page';
-	select_dom.append(option_dom);
+	modules_dropdown_dom.appendChild(option_dom);
 
 	for(let module_name of modules_name) {
-		option_dom = document.createElement('option');
-		if (module_name == current_module_name) {
+		const option_dom = document.createElement('option');
+		if (module_name == data.module_name) {
 			option_dom.setAttribute('selected', 'selected');
 		}
 		option_dom.innerText = module_name;
-		select_dom.append(option_dom);
+		modules_dropdown_dom.appendChild(option_dom);
 	}
 
-	select_dom.addEventListener('change', event => {
+	modules_dropdown_dom.style.display = data.module_name == undefined ? 'none' : 'inline';
+}
+
+function add_modules_dropdown() {
+	const modules_dropdown_dom = document.createElement('select');
+	modules_dropdown_dom.id = 'modules_dropdown';
+
+	modules_dropdown_dom.addEventListener('change', event => {
 		if (event.target.value == 'Index page') {
-			window.location.href = '/';
+			render({});
 		} else {
 			render_from_name(event.target.value);
 		}		
 	});
 
-	document.getElementsByClassName('tcv_cad_toolbar')[0].prepend(select_dom);
+	document.getElementsByClassName('tcv_cad_toolbar')[0].prepend(modules_dropdown_dom);
 }
 
 event_source.addEventListener('file_update', event => {
