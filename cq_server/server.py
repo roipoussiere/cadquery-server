@@ -88,11 +88,7 @@ def run(port, module_manager, ui_options):
     def _html():
         if module_manager.target_is_dir:
             module_manager.module_name = request.args.get('m')
-
-        try:
             return get_static_html(module_manager, ui_options)
-        except NameError as error:
-            return error, 400
 
     @app.route('/json', methods = [ 'GET' ])
     def _json():
