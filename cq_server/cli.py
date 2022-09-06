@@ -12,7 +12,7 @@ DEFAULT_PORT = 5000
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-            description='A web server that renders a 3d model of a CadQuery script loaded dynamically.')
+        description='A web server that renders a 3d model of a CadQuery script loaded dynamically.')
 
     parser.add_argument('-V', '--version', action='store_true',
         help='Print CadQuery Server version and exit.')
@@ -23,17 +23,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('-l', '--list', action='store_true',
         help='List available modules for the current context and exit.')
     parser.add_argument('-e', '--export', action='store', default='', nargs='?', metavar='FILE',
-        help='Export a static html file that work without the server (default: "<module_name>.html").')
+        help='Export a static html file that work without server (default: "<module_name>.html").')
     parser.add_argument('-m', '--minify', action='store_true',
         help='Minify output when exporting to html.')
 
     parser.add_argument('-p', '--port', type=int, default=DEFAULT_PORT,
-        help='Server port (default: %d).' % DEFAULT_PORT)
+        help=f'Server port (default: { DEFAULT_PORT }).')
     parser.add_argument('-d', '--dead', action='store_true',
         help='Disable live reloading.')
 
     parser.add_argument('--ui-hide', metavar='LIST',
-        help='ui: a comma-separated list of buttons to hide, among: axes, axes0, grid, ortho, more, help.')
+        help='ui: a comma-separated list of buttons to hide'
+            + ', among: axes, axes0, grid, ortho, more, help.')
     parser.add_argument('--ui-glass', action='store_true',
         help='ui: activate tree view glass mode.')
     parser.add_argument('--ui-theme', choices=['light', 'dark'], metavar='THEME',
@@ -59,7 +60,8 @@ def get_ui_options(args: argparse.Namespace) -> dict:
         'theme': args.ui_theme,
         'control': 'trackball' if args.ui_trackball else 'orbit',
         'ortho': not args.ui_perspective,
-        'grid': [ 'x' in args.ui_grid, 'y' in args.ui_grid, 'z' in args.ui_grid ] if args.ui_grid else [ False, False, False ],
+        'grid': [ 'x' in args.ui_grid, 'y' in args.ui_grid, 'z' in args.ui_grid ] \
+            if args.ui_grid else [ False, False, False ],
         'transparent': args.ui_transparent,
         'blackEdges': args.ui_black_edges
     }
@@ -76,7 +78,7 @@ def main() -> None:
     ui_options = get_ui_options(args)
 
     if args.version:
-        print('CadQuery Server version: %s' % cqs_version)
+        print(f'CadQuery Server version: { cqs_version }')
         sys_exit()
 
     if args.list:
@@ -92,11 +94,11 @@ def main() -> None:
             sys_exit('Exporting a folder to html is not yet possible.')
 
         static_html = get_static_html(module_manager, ui_options, args.minify)
-        file_name = args.export if args.export else '%s.html' % op.splitext(args.target)[0]
+        file_name = args.export if args.export else f'{ op.splitext(args.target)[0] }.html'
 
-        with open(file_name, 'w') as html_file:
+        with open(file_name, 'w', encoding='utf-8') as html_file:
             html_file.write(static_html)
-        print('File exported in %s.' % file_name)
+        print(f'File exported in { file_name }.')
 
 
 if __name__ == '__main__':

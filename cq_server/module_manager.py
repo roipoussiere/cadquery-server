@@ -4,6 +4,7 @@ import sys
 import traceback
 import importlib
 from typing import List, Tuple
+import glob
 
 
 IGNORE_FILE_NAME = '.cqsignore'
@@ -20,7 +21,7 @@ class ModuleManager:
             self.modules_dir = op.abspath(target)
             self.module_name = None
         else:
-            raise ModuleManagerError('No file or folder found at "%s".' % target)
+            raise ModuleManagerError(f'No file or folder found at "{ target }".')
 
         self.modules = {}
         self.last_timestamp = 0
@@ -28,7 +29,7 @@ class ModuleManager:
 
     def init(self) -> None:
         print('Importing CadQuery...', end=' ', flush=True)
-        import cadquery
+        import cadquery # pylint: disable=import-outside-toplevel, unused-import
         print('done.')
 
         sys.path.insert(1, self.modules_dir)
@@ -38,9 +39,7 @@ class ModuleManager:
         ignore_file_path = op.join(self.modules_dir, IGNORE_FILE_NAME)
 
         if op.isfile(ignore_file_path):
-            import glob
-
-            with open(ignore_file_path) as ignore_file:
+            with open(ignore_file_path, encoding='utf-8') as ignore_file:
                 for line in ignore_file.readlines():
                     line = line.strip()
                     if line and not line.startswith('#'):
@@ -75,21 +74,23 @@ class ModuleManager:
 
     def get_last_updated_file(self) -> str:
         module_path, timestamp = self.get_most_recent_module_info()
+        last_updated = ''
 
         if self.last_timestamp == 0:
             self.last_timestamp = timestamp
-            return ''
 
         if self.last_timestamp != timestamp:
-            print('File %s updated.' % module_path)
+            print(f'File { module_path } updated.')
             self.last_timestamp = timestamp
-            return module_path
+            last_updated = module_path
+
+        return last_updated
 
     def get_model(self) -> list:
         self.load_module()
 
-        UI = self.get_ui_class()
-        model = UI.get_model()
+        ui_class = self.get_ui_class()
+        model = ui_class.get_model()
 
         if not model:
             raise ModuleManagerError('There is no object to show. Missing show_object()?')
@@ -98,18 +99,20 @@ class ModuleManager:
 
     def load_module(self) -> None:
         if self.module_name not in self.get_modules_name():
-            raise ModuleManagerError('Module "%s" is not available in the current context.' % self.module_name)
+            raise ModuleManagerError(f'Module "{ self.module_name }" is not available '
+                + 'in the current context.')
 
         try:
             if self.module_name in sys.modules:
-                print('Reloading module %s...' % self.module_name)
+                print(f'Reloading module { self.module_name }...')
                 importlib.reload(self.modules[self.module_name])
             else:
-                print('Importing module %s...' % self.module_name)
+                print(f'Importing module { self.module_name }...')
                 self.modules[self.module_name] = importlib.import_module(self.module_name)
 
         except Exception as error:
-            raise ModuleManagerError(type(error).__name__ + ': ' + str(error), traceback.format_exc())
+            error_message = type(error).__name__ + ': ' + str(error)
+            raise ModuleManagerError(error_message, traceback.format_exc()) from error
 
     def get_data(self) -> dict:
         data = {}
@@ -134,10 +137,10 @@ class ModuleManager:
     def get_ui_class(self) -> type:
         try:
             return getattr(self.modules[self.module_name], 'UI')
-        except AttributeError:
+        except AttributeError as error:
             raise ModuleManagerError('UI class is not imported. '
                 + 'Please add `from cq_server.ui import UI, show_object` '
-                + 'at the begining of the script.')
+                + 'at the begining of the script.') from error
 
 
 class ModuleManagerError(Exception):

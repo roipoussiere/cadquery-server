@@ -7,6 +7,7 @@ from typing import Tuple
 
 from flask import Flask, request, render_template, Response
 from jinja2 import Template
+import minify_html
 
 from .module_manager import ModuleManager, ModuleManagerError
 
@@ -16,6 +17,7 @@ STATIC_DIR = op.join(APP_DIR, 'static')
 TEMPLATES_DIR = op.join(APP_DIR, 'templates')
 
 WATCH_PERIOD = 0.3
+SSE_MESSAGE_TEMPLATE = 'event: file_update\ndata: %s\n\n'
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -26,13 +28,13 @@ def get_static_html(module_manager: ModuleManager, ui_options: dict, minify: boo
     viewer_js_path = op.join(STATIC_DIR, 'viewer.js')
     template_path = op.join(TEMPLATES_DIR, 'viewer.html')
 
-    with open(viewer_css_path) as css_file:
+    with open(viewer_css_path, encoding='utf-8') as css_file:
         viewer_css = '\n' + css_file.read() + '\n'
 
-    with open(viewer_js_path) as js_file:
+    with open(viewer_js_path, encoding='utf-8') as js_file:
         viewer_js = '\n' + js_file.read() + '\n'
 
-    with open(template_path) as template_file:
+    with open(template_path, encoding='utf-8') as template_file:
         template = Template(template_file.read())
 
     module_manager.init()
@@ -47,9 +49,7 @@ def get_static_html(module_manager: ModuleManager, ui_options: dict, minify: boo
     )
 
     if minify:
-        import minify_html
-
-        html = minify_html.minify(
+        html = minify_html.minify( # pylint: disable=no-member
             html,
             minify_js=True,
             minify_css=True,
@@ -57,6 +57,7 @@ def get_static_html(module_manager: ModuleManager, ui_options: dict, minify: boo
         )
 
     return html
+
 
 def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: bool=False) -> None:
 
@@ -106,11 +107,9 @@ def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: boo
         return Response(stream(), mimetype='text/event-stream')
 
     def watchdog() -> None:
-        SSE_MESSAGE_TEMPLATE = 'event: file_update\ndata: %s\n\n'
-
-        while(True):
+        while True:
             last_updated_file = module_manager.get_last_updated_file()
-    
+
             if last_updated_file:
                 module_manager.module_name = op.basename(last_updated_file)[:-3]
                 data = {
