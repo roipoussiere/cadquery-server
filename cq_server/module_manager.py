@@ -3,13 +3,14 @@ import os.path as op
 import sys
 import traceback
 import importlib
+from typing import List, Tuple
 
 
 IGNORE_FILE_NAME = '.cqsignore'
 
 
 class ModuleManager:
-    def __init__(self, target):
+    def __init__(self, target: str):
         if op.isfile(target):
             self.target_is_dir = False
             self.modules_dir = op.abspath(op.dirname(target))
@@ -25,7 +26,7 @@ class ModuleManager:
         self.last_timestamp = 0
         self.ignored_files = []
 
-    def init(self):
+    def init(self) -> None:
         print('Importing CadQuery...', end=' ', flush=True)
         import cadquery
         print('done.')
@@ -33,7 +34,7 @@ class ModuleManager:
         sys.path.insert(1, self.modules_dir)
         self.update_ignore_list()
 
-    def update_ignore_list(self):
+    def update_ignore_list(self) -> None:
         ignore_file_path = op.join(self.modules_dir, IGNORE_FILE_NAME)
 
         if op.isfile(ignore_file_path):
@@ -46,7 +47,7 @@ class ModuleManager:
                         ignore = op.join(self.modules_dir, line)
                         self.ignored_files += glob.glob(ignore)
 
-    def get_modules_path(self):
+    def get_modules_path(self) -> List[str]:
         modules_path = []
         for file_name in os.listdir(self.modules_dir):
             file_path = op.join(self.modules_dir, file_name)
@@ -56,7 +57,7 @@ class ModuleManager:
                 modules_path.append(file_path)
         return modules_path
 
-    def get_most_recent_module_info(self):
+    def get_most_recent_module_info(self) -> Tuple[str, str]:
         most_recent_module_path = ''
         most_recent_timestamp = 0
 
@@ -72,7 +73,7 @@ class ModuleManager:
 
         return most_recent_module_path, most_recent_timestamp
 
-    def get_last_updated_file(self):
+    def get_last_updated_file(self) -> str:
         module_path, timestamp = self.get_most_recent_module_info()
 
         if self.last_timestamp == 0:
@@ -84,7 +85,7 @@ class ModuleManager:
             self.last_timestamp = timestamp
             return module_path
 
-    def get_model(self):
+    def get_model(self) -> list:
         self.load_module()
 
         UI = self.get_ui_class()
@@ -95,7 +96,7 @@ class ModuleManager:
 
         return model
 
-    def load_module(self):
+    def load_module(self) -> None:
         if self.module_name not in self.get_modules_name():
             raise ModuleManagerError('Module "%s" is not available in the current context.' % self.module_name)
 
@@ -110,7 +111,7 @@ class ModuleManager:
         except Exception as error:
             raise ModuleManagerError(type(error).__name__ + ': ' + str(error), traceback.format_exc())
 
-    def get_data(self):
+    def get_data(self) -> dict:
         data = {}
 
         if self.module_name:
@@ -127,10 +128,10 @@ class ModuleManager:
 
         return data
 
-    def get_modules_name(self):
+    def get_modules_name(self) -> List[str]:
         return [ op.basename(path)[:-3] for path in self.get_modules_path() ]
 
-    def get_ui_class(self):
+    def get_ui_class(self) -> type:
         try:
             return getattr(self.modules[self.module_name], 'UI')
         except AttributeError:
@@ -140,7 +141,7 @@ class ModuleManager:
 
 
 class ModuleManagerError(Exception):
-    def __init__(self, message, stacktrace=''):
+    def __init__(self, message: str, stacktrace: str=''):
         self.message = message
         self.stacktrace = stacktrace
 

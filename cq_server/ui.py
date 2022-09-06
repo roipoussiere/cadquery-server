@@ -1,9 +1,10 @@
 import json
 
+
 object_to_show = None
 
 
-def show_object(object):
+def show_object(object) -> None:
     global object_to_show
     object_to_show = object
 
@@ -11,7 +12,7 @@ def show_object(object):
 class UI:
 
     @staticmethod
-    def get_model():
+    def get_model() -> list:
         from jupyter_cadquery.utils import numpy_to_json
         from jupyter_cadquery.cad_objects import to_assembly
         from jupyter_cadquery.base import _tessellate_group

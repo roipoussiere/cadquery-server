@@ -3,11 +3,12 @@ from threading import Thread
 from queue import Queue
 from time import sleep
 import os.path as op
+from typing import Tuple
 
 from flask import Flask, request, render_template, Response
 from jinja2 import Template
 
-from .module_manager import ModuleManagerError
+from .module_manager import ModuleManager, ModuleManagerError
 
 
 APP_DIR = op.dirname(__file__)
@@ -16,10 +17,11 @@ TEMPLATES_DIR = op.join(APP_DIR, 'templates')
 
 WATCH_PERIOD = 0.3
 
+
 app = Flask(__name__, static_url_path='/static')
 
 
-def get_static_html(module_manager, ui_options, minify=True):
+def get_static_html(module_manager: ModuleManager, ui_options: dict, minify: bool=True) -> str:
     viewer_css_path = op.join(STATIC_DIR, 'viewer.css')
     viewer_js_path = op.join(STATIC_DIR, 'viewer.js')
     template_path = op.join(TEMPLATES_DIR, 'viewer.html')
@@ -56,10 +58,10 @@ def get_static_html(module_manager, ui_options, minify=True):
 
     return html
 
-def run(port, module_manager, ui_options, is_dead=False):
+def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: bool=False) -> None:
 
     @app.route('/', methods = [ 'GET' ])
-    def _root():
+    def _root() -> str:
         if module_manager.target_is_dir:
             module_manager.module_name = request.args.get('m')
 
@@ -71,14 +73,14 @@ def run(port, module_manager, ui_options, is_dead=False):
         )
 
     @app.route('/html', methods = [ 'GET' ])
-    def _html():
+    def _html() -> str:
         if module_manager.target_is_dir:
             module_manager.module_name = request.args.get('m')
 
         return get_static_html(module_manager, ui_options)
 
     @app.route('/json', methods = [ 'GET' ])
-    def _json():
+    def _json() -> Tuple[str, int]:
         if module_manager.target_is_dir:
             module_manager.module_name = request.args.get('m')
 
@@ -93,17 +95,17 @@ def run(port, module_manager, ui_options, is_dead=False):
         return {
             'module_name': module_manager.module_name,
             'model': model
-        }
+        }, 200
 
     @app.route('/events', methods = [ 'GET' ])
-    def _events():
+    def _events() -> Response:
         def stream():
             while True:
                 yield events_queue.get()
 
         return Response(stream(), mimetype='text/event-stream')
 
-    def watchdog():
+    def watchdog() -> None:
         SSE_MESSAGE_TEMPLATE = 'event: file_update\ndata: %s\n\n'
 
         while(True):
@@ -120,7 +122,9 @@ def run(port, module_manager, ui_options, is_dead=False):
 
     events_queue = Queue(maxsize = 3)
     module_manager.init()
+
     if not is_dead:
         watchdog_thread = Thread(target=watchdog, daemon=True)
         watchdog_thread.start()
+
     app.run(host='0.0.0.0', port=port, debug=False)

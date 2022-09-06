@@ -10,7 +10,7 @@ from . import __version__ as cqs_version
 DEFAULT_PORT = 5000
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
             description='A web server that renders a 3d model of a CadQuery script loaded dynamically.')
 
@@ -52,7 +52,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_ui_options(args):
+def get_ui_options(args: argparse.Namespace) -> dict:
     return {
         'hideButtons': args.ui_hide.split(',') if args.ui_hide else [],
         'glass': args.ui_glass,
@@ -65,7 +65,7 @@ def get_ui_options(args):
     }
 
 
-def main():
+def main() -> None:
     args = parse_args()
 
     try:
