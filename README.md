@@ -2,8 +2,6 @@
 
 A web server used to render 3d models from CadQuery code loaded dynamically.
 
-It has been created for the [Cadquery VSCode extension](https://open-vsx.org/extension/roipoussiere/cadquery), but can be used as standalone.
-
 Example usage with Kate on the left and Firefox on the right:
 
 ![](./images/screenshot.png)
@@ -13,13 +11,14 @@ Example usage with Kate on the left and Firefox on the right:
 ### Features
 
 - fast response time
+- multi-file support
 - built-in file-watcher
 - live-reload
 - use your favorite text editor or IDE
 - display model on an external monitor or other device
 - compatible with VSCode built-in browser
-
-Please note that the web server is intended for personal use and it's absolutely not safe to open it to a public network.
+- option to customize ui
+- option to export to static html file
 
 ### Functionning
 
@@ -85,7 +84,7 @@ If you want to install both cq-server and CadQuery:
 
 ### Starting the server
 
-Once installed, the `cq-server` command should be available on your system.
+Once installed, the `cq-server` command should be available on your system (or on your virtual env).
 
 It takes only one optional argument: the target, which can be a folder or a file. Defaults to the current directory (`.`).
 
@@ -93,27 +92,37 @@ Then the root endpoint (ie. `http://127.0.0.1`) will display:
 - if `target` is a folder: an index page from which you can select a file to render;
 - if `target` is a file: the root endpoint will render the corresponding file.
 
-Server options:
-
-- `-p`, `--port`: Server port (default: 5000);
-
-Example:
-
-    cq-server -p 8080 ./examples/box.py
-
-This command will run the server on the port `8080`, then load and render `./examples/box.py`. The file to load can be overridden by url parameter if necessary (see below).
+### CLI options
 
 Use `cq-server -h` to list all available options.
 
-### Exporting static html
+#### General
 
-You can use `-e` / `--export` cli option to obtain an html file that work as a standalone and doesn't require a running server.
+- `-V`, `--version`: Print CadQuery Server version and exit.
+- `-l`, `--list`: List available modules for the current target and exit.
 
-### UI cli options
+#### Server
+
+- `-p`, `--port`: Server port (default: `5000`).
+- `-d`, `--dead`: Disable live reloading.
+
+#### Export
+
+- `-e [FILE]`, `--export [FILE]`: Export a static html file that work without server (default: "<module_name>.html").
+- `-m`, `--minify`: Minify output when exporting to html.
+
+> **Note 1**: The `html` endpoint could eventually be used to export a model to html from a running CadQueryServer instance (see below).
+
+> **Note 2**. Order of parameters might be important when using `-e`:
+- `cq-server ./examples --list` is similar to `cq-server ./examples --list`;
+- but `cq-server ./examples --export` is **not** similar to `cq-server --export ./examples`.
+> In this last case, the target will be the current folder and the file will be stored as `examples`.
+
+#### User interface
 
 Other cli options are available to change the UI appearence:
 
-- `--ui-hide`: a comma-separated list of buttons to disable, among: `axes`, `axes0`, `grid`, `ortho`, `more`, `help`;
+- `--ui-hide`: a comma-separated list of buttons to disable, among: `axes`, `axes0`, `grid`, `ortho`, `more`, `help` and `all`;
 - `--ui-glass`: activate tree view glass mode;
 - `--ui-theme`: set ui theme, `light` or `dark` (default: browser config);
 - `--ui-trackball`: set control mode to trackball instead orbit;
@@ -121,10 +130,6 @@ Other cli options are available to change the UI appearence:
 - `--ui-grid`: display a grid in specified axes (`x`, `y`, `z`, `xy`, etc.);
 - `--ui-transparent`: make objects semi-transparent;
 - `--ui-black-edges`: make edges black.
-
-Example:
-
-    cq-server --ui-hide ortho,more,help --ui-glass --ui-theme light --ui-grid xyz
 
 ### Writing a CadQuery code
 
@@ -147,23 +152,23 @@ Please read the [CadQuery documentation](https://cadquery.readthedocs.io/en/late
 
 Once the server is started, go to its url (ie. `http://127.0.0.1`).
 
-Optional url parameters:
-
-- `m`: name of an other module to load;
-
-example: `http://127.0.0.1?m=box`).
-
 Other endpoints:
 
-- `/json?m=box`: returns the model as a threejs json object. Used internally to retrieve the model.
-- `/html?m=box`: returns a static html page that doesn't require the CadQuery Server running.
+- `/json`: returns the model as a threejs json object. Used internally to retrieve the model;
+- `/html`: returns a static html page that doesn't require the CadQuery Server running.
+
+Optional url parameters, available for all listed endpoints:
+
+- `m`: name of module to load (if target is a folder)
+
+Examples: `/?m=box`, `/json?m=box`, `/html?m=box`.
 
 ### Using with VSCode
 
 The web page can be displayed within VSCode IDE using [LivePreview extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server):
 
 1. install the LivePreview VSCode extension;
-2. `ctrl+shift+P` -> *Simple Browser: Show*;
+2. hit `ctrl+shift+P` -> *Simple Browser: Show*;
 3. update the url according to your running CadQuery server instance (ie. `127.0.0.1:5000`).
 
 ## About

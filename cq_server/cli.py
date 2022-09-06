@@ -26,7 +26,7 @@ def parse_args() -> argparse.Namespace:
         help='Python file or folder containing CadQuery script to load (default: ".").')
 
     parser.add_argument('-l', '--list', action='store_true',
-        help='List available modules for the current context and exit.')
+        help='List available modules for the current target and exit.')
     parser.add_argument('-e', '--export', action='store', default='', nargs='?', metavar='FILE',
         help='Export a static html file that work without server (default: "<module_name>.html").')
     parser.add_argument('-m', '--minify', action='store_true',
