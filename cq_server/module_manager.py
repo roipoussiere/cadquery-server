@@ -1,3 +1,5 @@
+'''Module module_manager: define the ModuleManager and ModuleManagerError classes.'''
+
 import os
 import os.path as op
 import sys
@@ -11,6 +13,8 @@ IGNORE_FILE_NAME = '.cqsignore'
 
 
 class ModuleManager:
+    '''Manage CadQuery scripts (ie. Python modules)'''
+
     def __init__(self, target: str):
         if op.isfile(target):
             self.target_is_dir = False
@@ -28,6 +32,8 @@ class ModuleManager:
         self.ignored_files = []
 
     def init(self) -> None:
+        '''Initialize the module manager, in particular import the CadQuery Python module.'''
+
         print('Importing CadQuery...', end=' ', flush=True)
         import cadquery # pylint: disable=import-outside-toplevel, unused-import
         print('done.')
@@ -36,6 +42,8 @@ class ModuleManager:
         self.update_ignore_list()
 
     def update_ignore_list(self) -> None:
+        '''Update the list of files ignored, based on the .cqsignore file.'''
+
         ignore_file_path = op.join(self.modules_dir, IGNORE_FILE_NAME)
 
         if op.isfile(ignore_file_path):
@@ -47,6 +55,8 @@ class ModuleManager:
                         self.ignored_files += glob.glob(ignore)
 
     def get_modules_path(self) -> List[str]:
+        '''Returns the list of available modules'''
+
         modules_path = []
         for file_name in os.listdir(self.modules_dir):
             file_path = op.join(self.modules_dir, file_name)
@@ -57,6 +67,8 @@ class ModuleManager:
         return modules_path
 
     def get_most_recent_module_info(self) -> Tuple[str, str]:
+        '''Return the last updated module info as a tuple containing its path and timestamp.'''
+
         most_recent_module_path = ''
         most_recent_timestamp = 0
 
@@ -73,6 +85,9 @@ class ModuleManager:
         return most_recent_module_path, most_recent_timestamp
 
     def get_last_updated_file(self) -> str:
+        '''If a file has been updated since the last call of this function call,
+        return its path, otherwise return an empty string.'''
+
         module_path, timestamp = self.get_most_recent_module_info()
         last_updated = ''
 
@@ -87,6 +102,9 @@ class ModuleManager:
         return last_updated
 
     def get_model(self) -> list:
+        '''Return the tesselated model of the object passed in the show_object() function in the
+        user script, as a dictionnary usable by three-cad-viewer.'''
+
         self.load_module()
 
         ui_class = self.get_ui_class()
@@ -98,6 +116,8 @@ class ModuleManager:
         return model
 
     def load_module(self) -> None:
+        '''Load or reload the `self.module_name` module.'''
+
         if self.module_name not in self.get_modules_name():
             raise ModuleManagerError(f'Module "{ self.module_name }" is not available '
                 + 'in the current context.')
@@ -115,6 +135,8 @@ class ModuleManager:
             raise ModuleManagerError(error_message, traceback.format_exc()) from error
 
     def get_data(self) -> dict:
+        '''Return the data to send to the client, that includes the tesselated model.'''
+
         data = {}
 
         if self.module_name:
@@ -132,9 +154,13 @@ class ModuleManager:
         return data
 
     def get_modules_name(self) -> List[str]:
+        '''Return the list of available modules name.'''
+
         return [ op.basename(path)[:-3] for path in self.get_modules_path() ]
 
     def get_ui_class(self) -> type:
+        '''Retrieve the UI class imported in the user CadQuery script, used to get the model.'''
+
         try:
             return getattr(self.modules[self.module_name], 'UI')
         except AttributeError as error:
@@ -144,6 +170,8 @@ class ModuleManager:
 
 
 class ModuleManagerError(Exception):
+    '''Error class used to define ModuleManager errors.'''
+
     def __init__(self, message: str, stacktrace: str=''):
         self.message = message
         self.stacktrace = stacktrace

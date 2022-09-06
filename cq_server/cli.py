@@ -1,3 +1,5 @@
+'''Module cli: handles command line interface.'''
+
 from sys import exit as sys_exit
 import argparse
 import os.path as op
@@ -11,6 +13,8 @@ DEFAULT_PORT = 5000
 
 
 def parse_args() -> argparse.Namespace:
+    '''Parse cli arguments with argparse.'''
+
     parser = argparse.ArgumentParser(
         description='A web server that renders a 3d model of a CadQuery script loaded dynamically.')
 
@@ -54,6 +58,8 @@ def parse_args() -> argparse.Namespace:
 
 
 def get_ui_options(args: argparse.Namespace) -> dict:
+    '''Generate the options dictionnary used in three-cad-viewer, based on cli options.'''
+
     return {
         'hideButtons': args.ui_hide.split(',') if args.ui_hide else [],
         'glass': args.ui_glass,
@@ -68,6 +74,8 @@ def get_ui_options(args: argparse.Namespace) -> dict:
 
 
 def main() -> None:
+    '''Main function, called when using the `cq-server` command.'''
+
     args = parse_args()
 
     try:

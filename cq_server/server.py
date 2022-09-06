@@ -1,3 +1,5 @@
+'''Module server: used to run the Flask web server and render Jinja templates.'''
+
 import json
 from threading import Thread
 from queue import Queue
@@ -24,6 +26,8 @@ app = Flask(__name__, static_url_path='/static')
 
 
 def get_static_html(module_manager: ModuleManager, ui_options: dict, minify: bool=True) -> str:
+    '''Return the html string of a page that renders the target defined in the module manager.'''
+
     viewer_css_path = op.join(STATIC_DIR, 'viewer.css')
     viewer_js_path = op.join(STATIC_DIR, 'viewer.js')
     template_path = op.join(TEMPLATES_DIR, 'viewer.html')
@@ -60,6 +64,7 @@ def get_static_html(module_manager: ModuleManager, ui_options: dict, minify: boo
 
 
 def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: bool=False) -> None:
+    '''Run the Flask web server.'''
 
     @app.route('/', methods = [ 'GET' ])
     def _root() -> str:
