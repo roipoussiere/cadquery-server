@@ -4,8 +4,9 @@ from sys import exit as sys_exit
 import argparse
 import os.path as op
 
-from .server import run, get_static_html
+from .server import run
 from .module_manager import ModuleManager, ModuleManagerError
+from .renderers import get_static_html
 from . import __version__ as cqs_version
 
 
