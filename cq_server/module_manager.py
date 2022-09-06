@@ -96,8 +96,8 @@ class ModuleManager:
         return model
 
     def load_module(self):
-        if self.module_name in [ op.basename(path)[:-3] for path in self.ignored_files ]:
-            raise ModuleManagerError('Module %s has been ignored by your .cqsignore.' % self.module_name)
+        if self.module_name not in self.get_modules_name():
+            raise ModuleManagerError('Module "%s" is not available in the current context.' % self.module_name)
 
         try:
             if self.module_name in sys.modules:
@@ -106,10 +106,6 @@ class ModuleManager:
             else:
                 print('Importing module %s...' % self.module_name)
                 self.modules[self.module_name] = importlib.import_module(self.module_name)
-
-        except ModuleNotFoundError:
-            raise ModuleManagerError('Can not import module "%s" from %s.'
-                % (self.module_name, self.modules_dir))
 
         except Exception as error:
             raise ModuleManagerError(type(error).__name__ + ': ' + str(error), traceback.format_exc())
