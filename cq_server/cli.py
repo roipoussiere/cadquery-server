@@ -20,10 +20,13 @@ def parse_args():
     parser.add_argument('target', nargs='?', default='.',
         help='Python file or folder containing CadQuery script to load (default: ".").')
 
-    parser.add_argument('-p', '--port', type=int, default=DEFAULT_PORT,
-        help='Server port (default: %d).' % DEFAULT_PORT)
     parser.add_argument('-e', '--export', action='store', default='', nargs='?', metavar='FILE',
         help='Export a static html file that work without the server (default: "<module_name>.html").')
+    parser.add_argument('-l', '--list', action='store_true',
+        help='List available modules for the current context and exit.')
+
+    parser.add_argument('-p', '--port', type=int, default=DEFAULT_PORT,
+        help='Server port (default: %d).' % DEFAULT_PORT)
     parser.add_argument('-d', '--dead', action='store_true',
         help='Disable live reloading.')
 
@@ -72,6 +75,11 @@ def main():
 
     if args.version:
         print('CadQuery Server version: %s' % cqs_version)
+        sys_exit()
+
+    if args.list:
+        module_manager.update_ignore_list()
+        print('\n'.join(module_manager.get_modules_name()))
         sys_exit()
 
     if args.export == '':
