@@ -20,10 +20,12 @@ def parse_args():
     parser.add_argument('target', nargs='?', default='.',
         help='Python file or folder containing CadQuery script to load (default: ".").')
 
-    parser.add_argument('-e', '--export', action='store', default='', nargs='?', metavar='FILE',
-        help='Export a static html file that work without the server (default: "<module_name>.html").')
     parser.add_argument('-l', '--list', action='store_true',
         help='List available modules for the current context and exit.')
+    parser.add_argument('-e', '--export', action='store', default='', nargs='?', metavar='FILE',
+        help='Export a static html file that work without the server (default: "<module_name>.html").')
+    parser.add_argument('-m', '--minify', action='store_true',
+        help='Minify output when exporting to html.')
 
     parser.add_argument('-p', '--port', type=int, default=DEFAULT_PORT,
         help='Server port (default: %d).' % DEFAULT_PORT)
@@ -89,7 +91,7 @@ def main():
         if module_manager.target_is_dir:
             sys_exit('Exporting a folder to html is not yet possible.')
 
-        static_html = get_static_html(module_manager, ui_options)
+        static_html = get_static_html(module_manager, ui_options, args.minify)
         file_name = args.export if args.export else '%s.html' % op.splitext(args.target)[0]
 
         with open(file_name, 'w') as html_file:
