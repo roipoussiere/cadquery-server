@@ -39,7 +39,7 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument('--ui-hide', metavar='LIST',
         help='ui: a comma-separated list of buttons to hide'
-            + ', among: axes, axes0, grid, ortho, more, help.')
+            + ', among: axes, axes0, grid, ortho, more, help, all.')
     parser.add_argument('--ui-glass', action='store_true',
         help='ui: activate tree view glass mode.')
     parser.add_argument('--ui-theme', choices=['light', 'dark'], metavar='THEME',
@@ -61,8 +61,14 @@ def parse_args() -> argparse.Namespace:
 def get_ui_options(args: argparse.Namespace) -> dict:
     '''Generate the options dictionnary used in three-cad-viewer, based on cli options.'''
 
+    hidden_buttons = []
+    if args.ui_hide:
+        hidden_buttons = args.ui_hide.split(',')
+        if 'all' in hidden_buttons:
+            hidden_buttons = [ 'axes', 'axes0', 'grid', 'ortho', 'more', 'help' ]
+
     return {
-        'hideButtons': args.ui_hide.split(',') if args.ui_hide else [],
+        'hideButtons': hidden_buttons,
         'glass': args.ui_glass,
         'theme': args.ui_theme,
         'control': 'trackball' if args.ui_trackball else 'orbit',
