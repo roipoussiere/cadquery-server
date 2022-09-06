@@ -24,8 +24,8 @@ def parse_args():
         help='Server port (default: %d).' % DEFAULT_PORT)
     parser.add_argument('-e', '--export', action='store', default='', nargs='?', metavar='FILE',
         help='Export a static html file that work without the server (default: "<module_name>.html").')
-    parser.add_argument('-b', '--blind', action='store_true',
-        help='Disable file watcher.')
+    parser.add_argument('-d', '--dead', action='store_true',
+        help='Disable live reloading.')
 
     parser.add_argument('--ui-hide', metavar='LIST',
         help='ui: a comma-separated list of buttons to hide, among: axes, axes0, grid, ortho, more, help.')
@@ -75,7 +75,7 @@ def main():
         sys_exit()
 
     if args.export == '':
-        run(args.port, module_manager, ui_options, args.blind)
+        run(args.port, module_manager, ui_options, args.dead)
     else:
 
         if module_manager.target_is_dir:

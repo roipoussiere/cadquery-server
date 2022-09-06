@@ -56,7 +56,7 @@ def get_static_html(module_manager, ui_options, minify=True):
 
     return html
 
-def run(port, module_manager, ui_options, is_blind=False):
+def run(port, module_manager, ui_options, is_dead=False):
 
     @app.route('/', methods = [ 'GET' ])
     def _root():
@@ -120,7 +120,7 @@ def run(port, module_manager, ui_options, is_blind=False):
 
     events_queue = Queue(maxsize = 3)
     module_manager.init()
-    if not is_blind:
+    if not is_dead:
         watchdog_thread = Thread(target=watchdog, daemon=True)
         watchdog_thread.start()
     app.run(host='0.0.0.0', port=port, debug=False)
