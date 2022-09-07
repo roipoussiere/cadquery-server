@@ -8,6 +8,8 @@ import importlib
 from typing import List, Tuple
 import glob
 
+from .ui import UI
+
 
 IGNORE_FILE_NAME = '.cqsignore'
 
@@ -107,8 +109,8 @@ class ModuleManager:
 
         self.load_module()
 
-        ui_class = self.get_ui_class()
-        model = ui_class.get_model()
+        ui_instance = self.get_ui_instance()
+        model = ui_instance.get_model()
 
         if not model:
             raise ModuleManagerError('There is no object to show. Missing show_object()?')
@@ -158,14 +160,14 @@ class ModuleManager:
 
         return [ op.basename(path)[:-3] for path in self.get_modules_path() ]
 
-    def get_ui_class(self) -> type:
-        '''Retrieve the UI class imported in the user CadQuery script, used to get the model.'''
+    def get_ui_instance(self) -> UI:
+        '''Retrieve the ui object imported in the CadQuery script, used to retrieve the model.'''
 
         try:
-            return getattr(self.modules[self.module_name], 'UI')
+            return getattr(self.modules[self.module_name], 'ui')
         except AttributeError as error:
             raise ModuleManagerError('UI class is not imported. '
-                + 'Please add `from cq_server.ui import UI, show_object` '
+                + 'Please add `from cq_server.ui import ui, show_object` '
                 + 'at the begining of the script.') from error
 
 

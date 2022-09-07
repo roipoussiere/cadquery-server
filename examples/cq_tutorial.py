@@ -1,5 +1,5 @@
 import cadquery as cq
-from cq_server.ui import UI, show_object
+from cq_server.ui import ui, show_object
 
 height = 60.0
 width = 80.0
