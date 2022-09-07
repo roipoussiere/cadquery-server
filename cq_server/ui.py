@@ -1,6 +1,11 @@
 '''Module ui: define UI class and render functions (show_object, …). Used by the CadQuery script.'''
 
 import json
+from typing import Tuple, Optional
+
+
+MODEL_OPTIONS_DEFAULT   = { 'color': (232, 176, 36), 'alpha': 1   }
+MODEL_OPTIONS_DEBUG = { 'color': (255,   0,  0), 'alpha': 0.2 }
 
 
 class UI: # pylint: disable=too-few-public-methods
@@ -8,7 +13,9 @@ class UI: # pylint: disable=too-few-public-methods
     Must be imported by the CadQuery script.'''
 
     def __init__(self) -> None:
-        self.model_to_show = None
+        self.model_to_show: str = None
+        self.color: Optional[Tuple[str, str, str]] = None
+        self.alpha: int = 1
 
     # pylint: disable=import-outside-toplevel
     def get_model(self) -> list:
@@ -22,7 +29,10 @@ class UI: # pylint: disable=too-few-public-methods
         if not self.model_to_show:
             return ''
 
-        assembly = to_assembly(self.model_to_show)
+        color = '#{:02x}{:02x}{:02x}{:02x}'.format(*self.color, int(self.alpha*255)) \
+            if self.color else None
+
+        assembly = to_assembly(self.model_to_show, default_color=color)
         tesselated = _tessellate_group(assembly)
         model_json = numpy_to_json(tesselated)
         model = json.loads(model_json)
@@ -33,7 +43,13 @@ class UI: # pylint: disable=too-few-public-methods
 ui = UI()
 
 
-def show_object(model) -> None:
+def show_object(model, options: dict={}) -> None:
     '''Store the given model to ui object in order to allow CadQuery Server to render it.'''
 
+    ui.color = options.get('color', MODEL_OPTIONS_DEFAULT['color'])
+    ui.alpha = options.get('alpha', MODEL_OPTIONS_DEFAULT['alpha'])
     ui.model_to_show = model
+
+
+def debug(model) -> None:
+    show_object(model, options = MODEL_OPTIONS_DEBUG)
