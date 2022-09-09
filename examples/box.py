@@ -2,15 +2,12 @@ import cadquery as cq
 from cq_server.ui import ui, show_object #, debug
 
 
-height = 60
-width = 80
-thickness = 10
+box_1 = cq.Workplane('XY').box(1, 2, 3)
+box_2 = cq.Workplane('XY').box(3, 2, 1)
 
-box = cq.Workplane('XY').box(height, width, thickness)
-
-show_object(box, options={
-    'color': (50, 100, 150),
+show_object(box_1, box_2, options={
+    'color': (0, 150, 150),
     'alpha': 0.5
 })
 
-# debug(box)
+# debug(box_1)
