@@ -14,6 +14,7 @@ class UI: # pylint: disable=too-few-public-methods
     Must be imported by the CadQuery script.'''
 
     def __init__(self) -> None:
+        self.names: List[str] = []
         self.models: list = []
         self.colors: List[Color] = []
 
@@ -28,7 +29,7 @@ class UI: # pylint: disable=too-few-public-methods
         if not self.models:
             return ''
 
-        assembly = to_assembly(*self.models)
+        assembly = to_assembly(*self.models, names=self.names)
         for idx, obj in enumerate(assembly.objects):
             obj.color = self.colors[idx]
 
@@ -45,7 +46,7 @@ class UI: # pylint: disable=too-few-public-methods
 ui = UI()
 
 
-def show_object(*models, options: dict={}) -> None:
+def show_object(*models, name: str=None, options: dict={}) -> None:
     '''Store the given model to ui object in order to allow CadQuery Server to render it.'''
 
     rgb = options.get('color', MODEL_OPTIONS_DEFAULT['color'])
@@ -53,9 +54,12 @@ def show_object(*models, options: dict={}) -> None:
     color = Color('#{:02x}{:02x}{:02x}{:02x}'.format(*rgb, int(alpha*255)))
 
     for model in models:
+        ui.names.append(name)
         ui.models.append(model)
         ui.colors.append(color)
 
 
-def debug(model) -> None:
-    show_object(model, options = MODEL_OPTIONS_DEBUG)
+def debug(model, name: str = None) -> None:
+    '''Same as show_object() but with predefined debug color and alpha used for debugging.'''
+
+    show_object(model, name=name, options = MODEL_OPTIONS_DEBUG)
