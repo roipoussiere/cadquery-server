@@ -1,7 +1,8 @@
 '''Module ui: define UI class and render functions (show_object, …). Used by the CadQuery script.'''
 
 import json
-from typing import Tuple
+from typing import List
+from jupyter_cadquery.utils import numpy_to_json, Color
 
 
 MODEL_OPTIONS_DEFAULT   = { 'color': (232, 176, 36), 'alpha': 1   }
@@ -13,31 +14,32 @@ class UI: # pylint: disable=too-few-public-methods
     Must be imported by the CadQuery script.'''
 
     def __init__(self) -> None:
-        self.models_to_show: list = []
-        self.color: Tuple[str, str, str] = MODEL_OPTIONS_DEFAULT['color']
-        self.alpha: int = MODEL_OPTIONS_DEFAULT['alpha']
+        self.models: list = []
+        self.colors: List[Color] = []
 
     # pylint: disable=import-outside-toplevel
     def get_model(self) -> list:
         '''Return the tesselated model of the object passed in the show_object() function,
         as a dictionnary usable by three-cad-viewer.'''
 
-        from jupyter_cadquery.utils import numpy_to_json
         from jupyter_cadquery.cad_objects import to_assembly
         from jupyter_cadquery.base import _tessellate_group
 
-        if not self.models_to_show:
+        if not self.models:
             return ''
 
-        color = '#{:02x}{:02x}{:02x}{:02x}'.format(*self.color, int(self.alpha*255)) \
-            if self.color else None
+        assembly = to_assembly(*self.models)
+        for idx, obj in enumerate(assembly.objects):
+            obj.color = self.colors[idx]
 
-        assembly = to_assembly(*self.models_to_show, default_color=color)
-        tesselated = _tessellate_group(assembly)
-        model_json = numpy_to_json(tesselated)
-        model = json.loads(model_json)
+        assembly_tesselated = _tessellate_group(assembly)
+        assembly_json = numpy_to_json(assembly_tesselated)
+        assembly_dict = json.loads(assembly_json)
 
-        return model
+        self.models = []
+        self.colors = []
+
+        return assembly_dict
 
 
 ui = UI()
@@ -46,10 +48,13 @@ ui = UI()
 def show_object(*models, options: dict={}) -> None:
     '''Store the given model to ui object in order to allow CadQuery Server to render it.'''
 
-    ui.color = options.get('color', MODEL_OPTIONS_DEFAULT['color'])
-    # model.color = color
-    ui.alpha = options.get('alpha', MODEL_OPTIONS_DEFAULT['alpha'])
-    ui.models_to_show += models
+    rgb = options.get('color', MODEL_OPTIONS_DEFAULT['color'])
+    alpha = options.get('alpha', MODEL_OPTIONS_DEFAULT['alpha'])
+    color = Color('#{:02x}{:02x}{:02x}{:02x}'.format(*rgb, int(alpha*255)))
+
+    for model in models:
+        ui.models.append(model)
+        ui.colors.append(color)
 
 
 def debug(model) -> None:
