@@ -23,11 +23,11 @@ class UI: # pylint: disable=too-few-public-methods
         '''Return the tesselated model of the object passed in the show_object() function,
         as a dictionnary usable by three-cad-viewer.'''
 
-        from jupyter_cadquery.cad_objects import to_assembly
-        from jupyter_cadquery.base import _tessellate_group
-
         if not self.models:
             return ''
+
+        from jupyter_cadquery.cad_objects import to_assembly
+        from jupyter_cadquery.base import _tessellate_group
 
         assembly = to_assembly(*self.models, names=self.names)
         for idx, obj in enumerate(assembly.objects):
