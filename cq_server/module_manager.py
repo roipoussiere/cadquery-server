@@ -125,7 +125,7 @@ class ModuleManager:
                 + 'in the current context.')
 
         try:
-            if self.module_name in sys.modules:
+            if self.module_name in self.modules:
                 print(f'Reloading module { self.module_name }...')
                 importlib.reload(self.modules[self.module_name])
             else:
@@ -148,7 +148,7 @@ class ModuleManager:
                     'model': self.get_model()
                 }
             except ModuleManagerError as error:
-                data={
+                data = {
                     'error': error.message,
                     'stacktrace': error.stacktrace
                 }
@@ -166,7 +166,7 @@ class ModuleManager:
         try:
             return getattr(self.modules[self.module_name], 'ui')
         except AttributeError as error:
-            raise ModuleManagerError('UI class is not imported. '
+            raise ModuleManagerError('ui is not imported. '
                 + 'Please add `from cq_server.ui import ui, show_object` '
                 + 'at the begining of the script.') from error
 
