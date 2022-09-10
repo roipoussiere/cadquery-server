@@ -7,9 +7,9 @@ from time import sleep
 import os.path as op
 from typing import Tuple
 
-from flask import Flask, request, render_template, Response
+from flask import Flask, request, render_template, make_response, Response
 
-from .module_manager import ModuleManager, ModuleManagerError
+from .module_manager import ModuleManager
 from .renderers import get_static_html
 
 
@@ -54,9 +54,15 @@ def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: boo
     def _events() -> Response:
         def stream():
             while True:
-                yield events_queue.get()
+                data = events_queue.get()
+                print(f'Sending Server Sent Event: { data[:100] }...')
+                yield data
 
-        return Response(stream(), mimetype='text/event-stream')
+        response = make_response(stream())
+        response.mimetype = 'text/event-stream'
+        response.headers['Cache-Control'] = 'no-store, must-revalidate'
+        response.headers['Expires'] = 0
+        return response
 
     def watchdog() -> None:
         while True:
