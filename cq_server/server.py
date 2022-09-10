@@ -47,18 +47,8 @@ def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: boo
         if module_manager.target_is_dir:
             module_manager.module_name = request.args.get('m')
 
-        try:
-            model = module_manager.get_model()
-        except ModuleManagerError as error:
-            return {
-                'error': error.message,
-                'stacktrace': error.stacktrace
-            }, 400
-
-        return {
-            'module_name': module_manager.module_name,
-            'model': model
-        }, 200
+        data = module_manager.get_data()
+        return data, (400 if 'error' in data else 200)
 
     @app.route('/events', methods = [ 'GET' ])
     def _events() -> Response:
@@ -74,10 +64,7 @@ def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: boo
 
             if last_updated_file:
                 module_manager.module_name = op.basename(last_updated_file)[:-3]
-                data = {
-                    'module_name': module_manager.module_name,
-                    'model': module_manager.get_model()
-                }
+                data = module_manager.get_data()
                 events_queue.put(SSE_MESSAGE_TEMPLATE % json.dumps(data))
             sleep(WATCH_PERIOD)
 
