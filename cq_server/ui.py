@@ -31,7 +31,8 @@ class UI: # pylint: disable=too-few-public-methods
 
         assembly = to_assembly(*self.models, names=self.names)
         for idx, obj in enumerate(assembly.objects):
-            obj.color = self.colors[idx]
+            if hasattr(obj, 'color'):
+                obj.color = self.colors[idx]
 
         assembly_tesselated = _tessellate_group(assembly)
         assembly_json = numpy_to_json(assembly_tesselated)
