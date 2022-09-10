@@ -38,10 +38,15 @@ class UI: # pylint: disable=too-few-public-methods
         assembly_json = numpy_to_json(assembly_tesselated)
         assembly_dict = json.loads(assembly_json)
 
+        self.clear()
+        return assembly_dict
+
+    def clear(self):
+        '''Clear all data stored in the UI instance.'''
+
+        self.names  = []
         self.models = []
         self.colors = []
-
-        return assembly_dict
 
 
 ui = UI()

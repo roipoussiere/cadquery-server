@@ -110,7 +110,17 @@ class ModuleManager:
         self.load_module()
 
         ui_instance = self.get_ui_instance()
-        model = ui_instance.get_model()
+
+        try:
+            model = ui_instance.get_model()
+        except AttributeError as error:
+            model_types = [ type(m).__name__ for m in ui_instance.models ]
+            error_message = f'The type { model_types[0] }' if len(model_types) == 1 \
+                else f"At least one of the types { ', '.join(model_types) }"
+            error_message += ' is not supported by the show function.'
+
+            ui_instance.clear()
+            raise ModuleManagerError(error_message) from error
 
         if not model:
             raise ModuleManagerError('There is no object to show. Missing show_object()?')
@@ -133,7 +143,7 @@ class ModuleManager:
                 self.modules[self.module_name] = importlib.import_module(self.module_name)
 
         except Exception as error:
-            error_message = type(error).__name__ + ': ' + str(error)
+            error_message = 'Can not load module. ' + type(error).__name__ + ': ' + str(error)
             raise ModuleManagerError(error_message, traceback.format_exc()) from error
 
     def get_data(self) -> dict:
@@ -148,6 +158,7 @@ class ModuleManager:
                     'model': self.get_model()
                 }
             except ModuleManagerError as error:
+                # self.modules.pop(self.module_name)
                 data = {
                     'error': error.message,
                     'stacktrace': error.stacktrace
