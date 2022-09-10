@@ -129,22 +129,40 @@ class ModuleManager:
 
     def load_module(self) -> None:
         '''Load or reload the `self.module_name` module.'''
+        # pylint: disable=broad-except
 
         if self.module_name not in self.get_modules_name():
             raise ModuleManagerError(f'Module "{ self.module_name }" is not available '
                 + 'in the current context.')
 
-        try:
-            if self.module_name in self.modules:
-                print(f'Reloading module { self.module_name }...')
-                importlib.reload(self.modules[self.module_name])
-            else:
-                print(f'Importing module { self.module_name }...')
-                self.modules[self.module_name] = importlib.import_module(self.module_name)
+        error = None
+        if self.module_name in self.modules:
+            print(f'Reloading module { self.module_name }...')
 
-        except Exception as error:
+            try:
+                importlib.reload(self.modules[self.module_name])
+            except Exception:
+                print('Error when reloading module, trying to re-import it...')
+
+                try:
+                    self.modules[self.module_name] = importlib.import_module(self.module_name)
+                    importlib.reload(self.modules[self.module_name])
+                except Exception as err:
+                    error = err
+
+        else:
+            print(f'Importing module { self.module_name }...')
+
+            try:
+                self.modules[self.module_name] = importlib.import_module(self.module_name)
+            except Exception as err:
+                error = err
+
+        if error:
             error_message = 'Can not load module. ' + type(error).__name__ + ': ' + str(error)
             raise ModuleManagerError(error_message, traceback.format_exc()) from error
+
+        print('Done.')
 
     def get_data(self) -> dict:
         '''Return the data to send to the client, that includes the tesselated model.'''
