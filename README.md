@@ -6,6 +6,10 @@ Example usage with Kate on the left and Firefox on the right:
 
 ![](./images/screenshot.png)
 
+Demonstration video:
+
+[![cq-server_v-0-3-1](https://peertube.ethibox.fr/static/thumbnails/a6f01cba-7f53-4ac9-9d2f-c74d0f58abe2.jpg)](https://peertube.ethibox.fr/w/vwBfEkaEdzKiN98mm2jyDz)
+
 ## About CadQuery Server
 
 ### Features
