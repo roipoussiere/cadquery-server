@@ -18,13 +18,13 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
+Flask = "^2.2.2"
 jupyter-cadquery = "^3.2.2"
 cadquery-massembly = "^0.9.0"
 matplotlib = "^3.5.3"
-Flask = "^2.2.2"
-cadquery = {version = "2.2.0b0", optional = true}
-casadi = {version = "3.5.5", optional = true}
 minify-html = "^0.10.0"
+cadquery = {version = ">=2", optional = true, allow-prereleases = true}
+casadi = {version = "^3.5.6rc2", optional = true, allow-prereleases = true}
 
 [tool.poetry.scripts]
 cq-server = "cq_server.cli:main"
