@@ -17,7 +17,7 @@ IGNORE_FILE_NAME = '.cqsignore'
 class ModuleManager:
     '''Manage CadQuery scripts (ie. Python modules)'''
 
-    def __init__(self, target: str):
+    def __init__(self, target: str, should_raise=False):
         if op.isfile(target):
             self.target_is_dir = False
             self.modules_dir = op.abspath(op.dirname(target))
@@ -29,6 +29,7 @@ class ModuleManager:
         else:
             raise ModuleManagerError(f'No file or folder found at "{ target }".')
 
+        self.should_raise = should_raise
         self.modules = {}
         self.last_timestamp = 0
         self.ignored_files = []
@@ -176,11 +177,13 @@ class ModuleManager:
                     'model': self.get_model()
                 }
             except ModuleManagerError as error:
-                # self.modules.pop(self.module_name)
-                data = {
-                    'error': error.message,
-                    'stacktrace': error.stacktrace
-                }
+                if self.should_raise:
+                    raise(error)
+                else:
+                    data = {
+                        'error': error.message,
+                        'stacktrace': error.stacktrace
+                    }
 
         return data
 

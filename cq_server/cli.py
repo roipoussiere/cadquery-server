@@ -28,6 +28,8 @@ def parse_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         help='python file or folder containing CadQuery script to load (default: ".")')
     parser_run.add_argument('-p', '--port', type=int, default=DEFAULT_PORT,
         help=f'server port (default: { DEFAULT_PORT })')
+    parser_run.add_argument('-r', '--raise', dest='should_raise', action='store_true',
+        help=f'when an error happen, raise it instead showing its title')
     parser_run.add_argument('-d', '--dead', action='store_true',
         help='disable live reloading')
     add_ui_options(parser_run)
@@ -53,21 +55,21 @@ def add_ui_options(parser: argparse.ArgumentParser):
     parse_ui = parser.add_argument_group('user interface options')
     parse_ui.add_argument('--ui-hide', metavar='LIST',
         help='a comma-separated list of buttons to hide'
-            + ', among: axes, axes0, grid, ortho, more, help, all.')
+            + ', among: axes, axes0, grid, ortho, more, help, all')
     parse_ui.add_argument('--ui-glass', action='store_true',
-        help='activate tree view glass mode.')
+        help='activate tree view glass mode')
     parse_ui.add_argument('--ui-theme', choices=['light', 'dark'], metavar='THEME',
-        help='set ui theme, light or dark (default: browser config).')
+        help='set ui theme, light or dark (default: browser config)')
     parse_ui.add_argument('--ui-trackball', action='store_true',
-        help='set control mode to trackball instead orbit.')
+        help='set control mode to trackball instead orbit')
     parse_ui.add_argument('--ui-perspective', action='store_true',
-        help='set camera view to perspective instead orthogonal.')
+        help='set camera view to perspective instead orthogonal')
     parse_ui.add_argument('--ui-grid', metavar='AXES',
-        help='display a grid in specified axes (x, y, z, xy, etc.).')
+        help='display a grid in specified axes (x, y, z, xy, etc.)')
     parse_ui.add_argument('--ui-transparent', action='store_true',
-        help='make objects semi-transparent.')
+        help='make objects semi-transparent')
     parse_ui.add_argument('--ui-black-edges', action='store_true',
-        help='make edges black.')
+        help='make edges black')
 
 def get_ui_options(args: argparse.Namespace) -> dict:
     '''Generate the options dictionnary used in three-cad-viewer, based on cli options.'''
@@ -105,8 +107,9 @@ def main() -> None:
         parser.print_help()
         sys_exit()
 
+    should_raise = (args.cmd == 'run' and args.should_raise)
     try:
-        module_manager = ModuleManager(args.target)
+        module_manager = ModuleManager(args.target, should_raise)
     except ModuleManagerError as err:
         sys_exit(err)
 
