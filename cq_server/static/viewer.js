@@ -29,10 +29,20 @@ function update_size_options() {
 	options.cadWidth = window.innerWidth - (options.glass ? 8 : options.treeWidth + 10);
 }
 
+function load_camera_position() {
+	if (viewer != null) {
+		options.position = viewer.getCameraPosition();
+		options.quaternion = viewer.getCameraQuaternion();
+		options.target = viewer.getCameraTarget();
+		options.zoom = viewer.getCameraZoom();
+	}
+}
+
 function init_viewer(_options, _modules_name) {
 	options = _options;
 	modules_name = _modules_name;
 	update_size_options();
+	load_camera_position();
 
 	viewer = new tcv.Viewer(cad_view_dom, options, () => {});
 	add_modules_dropdown();
