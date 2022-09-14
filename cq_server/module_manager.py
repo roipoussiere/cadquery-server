@@ -7,6 +7,7 @@ import traceback
 import importlib
 from typing import List, Tuple
 import glob
+import inspect
 
 from .ui import UI
 
@@ -108,8 +109,6 @@ class ModuleManager:
         '''Return the tesselated model of the object passed in the show_object() function in the
         user script, as a dictionnary usable by three-cad-viewer.'''
 
-        self.load_module()
-
         ui_instance = self.get_ui_instance()
 
         try:
@@ -169,12 +168,14 @@ class ModuleManager:
         '''Return the data to send to the client, that includes the tesselated model.'''
 
         data = {}
+        self.load_module()
 
         if self.module_name:
             try:
                 data = {
                     'module_name': self.module_name,
-                    'model': self.get_model()
+                    'model': self.get_model(),
+                    'source': inspect.getsource(self.modules[self.module_name])
                 }
             except ModuleManagerError as error:
                 if self.should_raise:
