@@ -1,6 +1,7 @@
 '''Module renderers: define functions that return things, given a module manager.'''
 
 import os.path as op
+import json
 
 from jinja2 import Template
 import minify_html
@@ -13,7 +14,14 @@ STATIC_DIR = op.join(APP_DIR, 'static')
 TEMPLATES_DIR = op.join(APP_DIR, 'templates')
 
 
-def get_static_html(module_manager: ModuleManager, ui_options: dict, minify: bool=True) -> str:
+def to_json(module_manager: ModuleManager) -> str:
+    '''Return model data as json string'''
+    
+    module_manager.init()
+    data = module_manager.get_data()
+    return json.dumps(data)
+
+def to_html(module_manager: ModuleManager, ui_options: dict, minify: bool=True) -> str:
     '''Return the html string of a page that renders the target defined in the module manager.'''
 
     viewer_css_path = op.join(STATIC_DIR, 'viewer.css')

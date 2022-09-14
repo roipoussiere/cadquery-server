@@ -6,7 +6,7 @@ import os.path as op
 
 from .server import run
 from .module_manager import ModuleManager, ModuleManagerError
-from .renderers import to_html
+from .renderers import to_html, to_json
 from . import __version__ as cqs_version
 
 
@@ -138,7 +138,7 @@ def main() -> None:
         if args.format == 'html':
             output_content = to_html(module_manager, ui_options, args.minify)
         elif args.format == 'json':
-            raise NotImplementedError()
+            output_content = to_json(module_manager)
         else:
             sys_exit('Output format not recognized.')
 
