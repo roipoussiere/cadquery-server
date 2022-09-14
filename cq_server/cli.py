@@ -13,50 +13,61 @@ from . import __version__ as cqs_version
 DEFAULT_PORT = 5000
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     '''Parse cli arguments with argparse.'''
 
-    parser = argparse.ArgumentParser(
-        description='A web server that renders a 3d model of a CadQuery script loaded dynamically.')
-
+    parser.description = 'A web server that renders a 3d model of a CadQuery script loaded dynamically.'
     parser.add_argument('-V', '--version', action='store_true',
-        help='Print CadQuery Server version and exit.')
+        help='print CadQuery Server version and exit')
 
-    parser.add_argument('target', nargs='?', default='.',
-        help='Python file or folder containing CadQuery script to load (default: ".").')
+    subparsers = parser.add_subparsers(title='subcommands', dest='cmd',
+        description='type <command> -h for subcommand usage')
 
-    parser.add_argument('-l', '--list', action='store_true',
-        help='List available modules for the current target and exit.')
-    parser.add_argument('-e', '--export', action='store', default='', nargs='?', metavar='FILE',
-        help='Export a static html file that work without server (default: "<module_name>.html").')
-    parser.add_argument('-m', '--minify', action='store_true',
-        help='Minify output when exporting to html.')
+    parser_run = subparsers.add_parser('run', help='run the server')
+    parser_run.add_argument('target', nargs='?', default='.',
+        help='python file or folder containing CadQuery script to load (default: ".")')
+    parser_run.add_argument('-p', '--port', type=int, default=DEFAULT_PORT,
+        help=f'server port (default: { DEFAULT_PORT })')
+    parser_run.add_argument('-d', '--dead', action='store_true',
+        help='disable live reloading')
+    add_ui_options(parser_run)
 
-    parser.add_argument('-p', '--port', type=int, default=DEFAULT_PORT,
-        help=f'Server port (default: { DEFAULT_PORT }).')
-    parser.add_argument('-d', '--dead', action='store_true',
-        help='Disable live reloading.')
+    parser_build = subparsers.add_parser('build', help='build static website')
+    parser_build.add_argument('target', nargs='?', default='.',
+        help='python file or folder containing CadQuery script to load (default: ".")')
+    parser_build.add_argument('destination', nargs='?',
+        help='output file path (default: "<module_name>.html").')
+    parser_build.add_argument('-m', '--minify', action='store_true',
+        help='minify output when exporting to html')
+    add_ui_options(parser_build)
 
-    parser.add_argument('--ui-hide', metavar='LIST',
-        help='ui: a comma-separated list of buttons to hide'
-            + ', among: axes, axes0, grid, ortho, more, help, all.')
-    parser.add_argument('--ui-glass', action='store_true',
-        help='ui: activate tree view glass mode.')
-    parser.add_argument('--ui-theme', choices=['light', 'dark'], metavar='THEME',
-        help='ui: set ui theme, light or dark (default: browser config).')
-    parser.add_argument('--ui-trackball', action='store_true',
-        help='ui: set control mode to trackball instead orbit.')
-    parser.add_argument('--ui-perspective', action='store_true',
-        help='ui: set camera view to perspective instead orthogonal.')
-    parser.add_argument('--ui-grid', metavar='AXES',
-        help='ui: display a grid in specified axes (x, y, z, xy, etc.).')
-    parser.add_argument('--ui-transparent', action='store_true',
-        help='ui: make objects semi-transparent.')
-    parser.add_argument('--ui-black-edges', action='store_true',
-        help='ui: make edges black.')
+    parser_list = subparsers.add_parser('info',
+        help='show information about the current target and exit')
+    parser_list.add_argument('target', nargs='?', default='.',
+        help='python file or folder containing CadQuery script to load (default: ".")')
 
     return parser.parse_args()
 
+
+def add_ui_options(parser: argparse.ArgumentParser):
+    parse_ui = parser.add_argument_group('user interface options')
+    parse_ui.add_argument('--ui-hide', metavar='LIST',
+        help='a comma-separated list of buttons to hide'
+            + ', among: axes, axes0, grid, ortho, more, help, all.')
+    parse_ui.add_argument('--ui-glass', action='store_true',
+        help='activate tree view glass mode.')
+    parse_ui.add_argument('--ui-theme', choices=['light', 'dark'], metavar='THEME',
+        help='set ui theme, light or dark (default: browser config).')
+    parse_ui.add_argument('--ui-trackball', action='store_true',
+        help='set control mode to trackball instead orbit.')
+    parse_ui.add_argument('--ui-perspective', action='store_true',
+        help='set camera view to perspective instead orthogonal.')
+    parse_ui.add_argument('--ui-grid', metavar='AXES',
+        help='display a grid in specified axes (x, y, z, xy, etc.).')
+    parse_ui.add_argument('--ui-transparent', action='store_true',
+        help='make objects semi-transparent.')
+    parse_ui.add_argument('--ui-black-edges', action='store_true',
+        help='make edges black.')
 
 def get_ui_options(args: argparse.Namespace) -> dict:
     '''Generate the options dictionnary used in three-cad-viewer, based on cli options.'''
@@ -83,33 +94,38 @@ def get_ui_options(args: argparse.Namespace) -> dict:
 def main() -> None:
     '''Main function, called when using the `cq-server` command.'''
 
-    args = parse_args()
+    parser = argparse.ArgumentParser()
+    args = parse_args(parser)
+
+    if args.version:
+        print(f'CadQuery Server version: { cqs_version }')
+        sys_exit()
+
+    if not args.cmd or args.cmd not in [ 'run', 'build', 'info' ]:
+        parser.print_help()
+        sys_exit()
 
     try:
         module_manager = ModuleManager(args.target)
     except ModuleManagerError as err:
         sys_exit(err)
 
+    if args.cmd == 'info':
+        module_manager.update_ignore_list()
+        print('Ignored modules: ' + '\n'.join(module_manager.get_modules_name()))
+        sys_exit()
+
     ui_options = get_ui_options(args)
 
-    if args.version:
-        print(f'CadQuery Server version: { cqs_version }')
-        sys_exit()
-
-    if args.list:
-        module_manager.update_ignore_list()
-        print('\n'.join(module_manager.get_modules_name()))
-        sys_exit()
-
-    if args.export == '':
+    if args.cmd == 'run':
         run(args.port, module_manager, ui_options, args.dead)
-    else:
 
+    if args.cmd == 'build':
         if module_manager.target_is_dir:
             sys_exit('Exporting a folder to html is not yet possible.')
 
         static_html = get_static_html(module_manager, ui_options, args.minify)
-        file_name = args.export if args.export else f'{ op.splitext(args.target)[0] }.html'
+        file_name = args.destination if args.destination else f'{ op.splitext(args.target)[0] }.html'
 
         with open(file_name, 'w', encoding='utf-8') as html_file:
             html_file.write(static_html)
