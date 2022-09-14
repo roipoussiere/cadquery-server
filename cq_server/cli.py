@@ -38,7 +38,7 @@ def parse_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     parser_build.add_argument('target', nargs='?', default='.',
         help='python file or folder containing CadQuery script to load (default: ".")')
     parser_build.add_argument('destination', nargs='?',
-        help='output file path (default: "<module_name>.html").')
+        help='output file path (default: "<module_name>.html"), or `-` for stdout.')
     parser_build.add_argument('-m', '--minify', action='store_true',
         help='minify output when exporting to html')
     add_ui_options(parser_build)
@@ -130,9 +130,12 @@ def main() -> None:
         static_html = get_static_html(module_manager, ui_options, args.minify)
         file_name = args.destination if args.destination else f'{ op.splitext(args.target)[0] }.html'
 
-        with open(file_name, 'w', encoding='utf-8') as html_file:
-            html_file.write(static_html)
-        print(f'File exported in { file_name }.')
+        if file_name == '-':
+            print(static_html)
+        else:
+            with open(file_name, 'w', encoding='utf-8') as html_file:
+                html_file.write(static_html)
+            print(f'File exported in { file_name }.')
 
 
 if __name__ == '__main__':
