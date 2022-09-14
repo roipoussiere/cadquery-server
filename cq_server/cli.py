@@ -6,7 +6,7 @@ import os.path as op
 
 from .server import run
 from .module_manager import ModuleManager, ModuleManagerError
-from .renderers import get_static_html
+from .renderers import to_html
 from . import __version__ as cqs_version
 
 
@@ -39,6 +39,8 @@ def parse_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         help='python file or folder containing CadQuery script to load (default: ".")')
     parser_build.add_argument('destination', nargs='?',
         help='output file path (default: "<module_name>.html"), or `-` for stdout.')
+    parser_build.add_argument('-f', '--format', choices=[ 'html', 'json' ], metavar='FMT',
+        help='output format: html or json (default: file extension, or html if not given)')
     parser_build.add_argument('-m', '--minify', action='store_true',
         help='minify output when exporting to html')
     add_ui_options(parser_build)
@@ -59,7 +61,7 @@ def add_ui_options(parser: argparse.ArgumentParser):
     parse_ui.add_argument('--ui-glass', action='store_true',
         help='activate tree view glass mode')
     parse_ui.add_argument('--ui-theme', choices=['light', 'dark'], metavar='THEME',
-        help='set ui theme, light or dark (default: browser config)')
+        help='set ui theme: light or dark (default: browser config)')
     parse_ui.add_argument('--ui-trackball', action='store_true',
         help='set control mode to trackball instead orbit')
     parse_ui.add_argument('--ui-perspective', action='store_true',
@@ -127,15 +129,28 @@ def main() -> None:
         if module_manager.target_is_dir:
             sys_exit('Exporting a folder to html is not yet possible.')
 
-        static_html = get_static_html(module_manager, ui_options, args.minify)
-        file_name = args.destination if args.destination else f'{ op.splitext(args.target)[0] }.html'
+        file_ext = op.splitext(args.destination)[1] if args.destination else None
+        if file_ext == '.html' or (not file_ext and not args.format):
+            args.format = 'html'
+        elif file_ext == '.json':
+            args.format = 'json'
 
-        if file_name == '-':
-            print(static_html)
+        if args.format == 'html':
+            output_content = to_html(module_manager, ui_options, args.minify)
+        elif args.format == 'json':
+            raise NotImplementedError()
         else:
-            with open(file_name, 'w', encoding='utf-8') as html_file:
-                html_file.write(static_html)
-            print(f'File exported in { file_name }.')
+            sys_exit('Output format not recognized.')
+
+        if not args.destination:
+             args.destination = f'{ op.splitext(args.target)[0] }.{ args.format }'
+
+        if args.destination == '-':
+            print(output_content)
+        else:
+            with open(args.destination, 'w', encoding='utf-8') as html_file:
+                html_file.write(output_content)
+            print(f'File exported in { args.destination }.')
 
 
 if __name__ == '__main__':
