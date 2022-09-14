@@ -55,9 +55,8 @@ ui = UI()
 def show_object(*models, name: str=None, options: dict={}) -> None:
     '''Store the given model to ui object in order to allow CadQuery Server to render it.'''
 
-    rgb = options.get('color', MODEL_OPTIONS_DEFAULT['color'])
-    alpha = options.get('alpha', MODEL_OPTIONS_DEFAULT['alpha'])
-    color = Color('#{:02x}{:02x}{:02x}{:02x}'.format(*rgb, int(alpha*255)))
+    color = Color(options.get('color', MODEL_OPTIONS_DEFAULT['color']))
+    color.a = options.get('alpha', MODEL_OPTIONS_DEFAULT['alpha'])
 
     for model in models:
         ui.names.append(name)
