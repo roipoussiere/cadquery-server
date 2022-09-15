@@ -106,30 +106,34 @@ class ModuleManager:
 
         return last_updated
 
-    def get_model(self) -> list:
-        '''Return the tesselated model of the object passed in the show_object() function in the
-        user script, as a dictionnary usable by three-cad-viewer.'''
+    def get_assembly(self) -> cadquery.Assembly:
+        '''Return a CQ assembly object composed of all models passed
+        to show_object and debug functions in the CadQuery script.'''
 
-        assembly = self.get_ui_instance().get_assembly()
+        ui_instance = self.get_ui_instance()
+        assembly = ui_instance.get_assembly()
 
         if not assembly.children:
             raise ModuleManagerError('There is no object to show. Missing show_object()?')
 
-        try:
-            assembly_dict = self.tesselate_assembly(assembly)
-        except Exception as error:
-            raise ModuleManagerError('An error occured when tesselating the assembly.') from error
+        return assembly
 
-        return assembly_dict
+    def get_json_model(self) -> list:
+        '''Return the tesselated model of the assembly,
+        as a dictionnary usable by three-cad-viewer.'''
 
-    def tesselate_assembly(self, assembly: cadquery.Assembly):
+        assembly = self.get_assembly()
+
         from jupyter_cadquery.cad_objects import to_assembly
         from jupyter_cadquery.base import _tessellate_group
         from jupyter_cadquery.utils import numpy_to_json
 
-        jcq_assembly = to_assembly(*assembly.children)
-        assembly_tesselated = _tessellate_group(jcq_assembly)
-        assembly_json = numpy_to_json(assembly_tesselated)
+        try:
+            jcq_assembly = to_assembly(*assembly.children)
+            assembly_tesselated = _tessellate_group(jcq_assembly)
+            assembly_json = numpy_to_json(assembly_tesselated)
+        except Exception as error:
+            raise ModuleManagerError('An error occured when tesselating the assembly.') from error
 
         return json.loads(assembly_json)
 
@@ -180,7 +184,7 @@ class ModuleManager:
             try:
                 data = {
                     'module_name': self.module_name,
-                    'model': self.get_model(),
+                    'model': self.get_json_model(),
                     'source': inspect.getsource(self.modules[self.module_name])
                 }
             except ModuleManagerError as error:
