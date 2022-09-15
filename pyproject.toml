@@ -25,6 +25,7 @@ matplotlib = "^3.5.3"
 minify-html = "^0.10.0"
 cadquery = {version = ">=2", optional = true, allow-prereleases = true}
 casadi = {version = "^3.5.6rc2", optional = true, allow-prereleases = true}
+CairoSVG = "^2.5.2"
 
 [tool.poetry.scripts]
 cq-server = "cq_server.cli:main"
