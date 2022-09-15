@@ -1,5 +1,6 @@
 '''Module renderers: define functions that return things, given a module manager.'''
 
+import os
 import os.path as op
 import json
 import tempfile
@@ -98,3 +99,11 @@ class Exporter:
             )
 
         return html
+
+    def build_website(self, destination: str, ui_options = {}, minify=False):
+        if op.isdir(destination):
+            os.removedirs(destination)
+
+        os.makedirs(destination)
+        html_path = op.join(destination, 'index.html')
+        self.save_to_html(html_path, ui_options, minify)

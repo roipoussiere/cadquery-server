@@ -129,23 +129,27 @@ def main() -> None:
         run(args.port, module_manager, ui_options, args.dead)
 
     if args.cmd == 'build':
-        if module_manager.target_is_dir:
-            sys_exit('Exporting a folder to html is not yet possible.')
-
-        file_ext = op.splitext(args.destination)[1] if args.destination else None
-
-        if not args.format:
-            args.format = file_ext[1:] if file_ext else 'html'
-
-        if not args.destination:
-            args.destination = f'{ op.splitext(args.target)[0] }.{ args.format }'
+        has_file_ext = args.destination and not module_manager.target_is_dir
+        file_ext = op.splitext(args.destination)[1] if has_file_ext else None
 
         exporter = Exporter(module_manager)
 
-        if args.format == 'html':
-            exporter.save_to_html(args.destination, ui_options, args.minify)
+        if module_manager.target_is_dir:
+            if args.destination:
+                exporter.build_website(args.destination, ui_options, args.minify)
+            else:
+                sys_exit('Destination is mandatory for folder export')
         else:
-            exporter.save_to(args.destination, args.format)
+            if not args.format:
+                args.format = file_ext[1:] if file_ext else 'html'
+
+            if not args.destination:
+                args.destination = f'{ op.splitext(args.target)[0] }.{ args.format }'
+
+            if args.format == 'html':
+                exporter.save_to_html(args.destination, ui_options, args.minify)
+            else:
+                exporter.save_to(args.destination, args.format)
 
 
 if __name__ == '__main__':

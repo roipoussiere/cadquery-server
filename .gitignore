@@ -4,6 +4,9 @@ __pycache__
 # Generated package files to publish module
 /dist
 
+# Default destination folder used when working on export
+/build
+
 # Files used for development
 ___*
 
