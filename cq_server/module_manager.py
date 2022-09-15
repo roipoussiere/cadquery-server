@@ -8,6 +8,11 @@ import importlib
 from typing import List, Tuple
 import glob
 import inspect
+import json
+
+print('Importing CadQuery...', end=' ', flush=True)
+import cadquery
+print('done.')
 
 from .ui import UI
 
@@ -37,10 +42,6 @@ class ModuleManager:
 
     def init(self) -> None:
         '''Initialize the module manager, in particular import the CadQuery Python module.'''
-
-        print('Importing CadQuery...', end=' ', flush=True)
-        import cadquery # pylint: disable=import-outside-toplevel, unused-import
-        print('done.')
 
         sys.path.insert(1, self.modules_dir)
         self.update_ignore_list()
@@ -109,23 +110,28 @@ class ModuleManager:
         '''Return the tesselated model of the object passed in the show_object() function in the
         user script, as a dictionnary usable by three-cad-viewer.'''
 
-        ui_instance = self.get_ui_instance()
+        assembly = self.get_ui_instance().get_assembly()
 
-        try:
-            model = ui_instance.get_model()
-        except AttributeError as error:
-            model_types = [ type(m).__name__ for m in ui_instance.models ]
-            error_message = f'The type { model_types[0] }' if len(model_types) == 1 \
-                else f"At least one of the types { ', '.join(model_types) }"
-            error_message += ' is not supported by the show function.'
-
-            ui_instance.clear()
-            raise ModuleManagerError(error_message) from error
-
-        if not model:
+        if not assembly.children:
             raise ModuleManagerError('There is no object to show. Missing show_object()?')
 
-        return model
+        try:
+            assembly_dict = self.tesselate_assembly(assembly)
+        except Exception as error:
+            raise ModuleManagerError('An error occured when tesselating the assembly.') from error
+
+        return assembly_dict
+
+    def tesselate_assembly(self, assembly: cadquery.Assembly):
+        from jupyter_cadquery.cad_objects import to_assembly
+        from jupyter_cadquery.base import _tessellate_group
+        from jupyter_cadquery.utils import numpy_to_json
+
+        jcq_assembly = to_assembly(*assembly.children)
+        assembly_tesselated = _tessellate_group(jcq_assembly)
+        assembly_json = numpy_to_json(assembly_tesselated)
+
+        return json.loads(assembly_json)
 
     def load_module(self) -> None:
         '''Load or reload the `self.module_name` module.'''

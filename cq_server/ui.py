@@ -1,6 +1,5 @@
 '''Module ui: define UI class and render functions (show_object, …). Used by the CadQuery script.'''
 
-import json
 from cadquery import Color, Assembly
 
 
@@ -9,36 +8,19 @@ MODEL_COLOR_DEBUG   = Color(1, 0, 0, 0.2)
 
 
 class UI: # pylint: disable=too-few-public-methods
-    '''Holds the model to show and allow CadQuery Server to retrieve the tesselated model.
+    '''Manage an assembly object composed of all models passed to show_object and debug functions,
+    that will be retrieved by CadQuery Server to render it.
     Must be imported by the CadQuery script.'''
 
     def __init__(self) -> None:
         self.assembly = Assembly()
 
-    # pylint: disable=import-outside-toplevel
-    def get_model(self) -> list:
-        '''Return the tesselated model of the object passed in the show_object() function,
-        as a dictionnary usable by three-cad-viewer.'''
+    def get_assembly(self):
+        '''Clear assembly and return the old one.'''
 
-        if not self.assembly.children:
-            return ''
-
-        from jupyter_cadquery.cad_objects import to_assembly
-        from jupyter_cadquery.base import _tessellate_group
-        from jupyter_cadquery.utils import numpy_to_json
-
-        assembly = to_assembly(*self.assembly.children)
-        assembly_tesselated = _tessellate_group(assembly)
-        assembly_json = numpy_to_json(assembly_tesselated)
-        assembly_dict = json.loads(assembly_json)
-
-        self.clear()
-        return assembly_dict
-
-    def clear(self):
-        '''Clear assembly.'''
-
+        assembly = self.assembly
         self.assembly = Assembly()
+        return assembly
 
 
 ui = UI()
