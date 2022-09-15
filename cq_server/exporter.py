@@ -20,30 +20,51 @@ class Exporter:
         self.module_manager = module_manager
         self.module_manager.init()
 
-    def to_json(self) -> str:
+    def _save_data(self, destination: str, data: str):
+        if destination == '-':
+            print(data)
+        else:
+            with open(destination, 'w', encoding='utf-8') as file:
+                file.write(data)
+
+    def save_to_html(self, destination: str, ui_options: dict={}, minify: bool=True):
+        html = self.get_html(ui_options, minify)
+        self._save_data(destination, html)
+
+        print(f'File exported in { destination }.')
+
+    def save_to(self, destination: str, format: str):
+        if format == 'json' :
+            self._save_data(self.to_json(), destination)
+        else:
+            self.save(destination, format)
+
+        print(f'File exported in { destination }.')
+
+    def save(self, destination: str, format: str) -> str:
+        '''Save the assembly in the given format.'''
+
+        assembly = self.module_manager.get_assembly()
+
+        if format in [ 'step', 'xml', 'gltf', 'vtkjs', 'vrml' ]:
+            assembly.save(destination, exportType=format.upper())
+        elif format in [ 'dxf', 'svg', 'stl', 'amf', 'tjs', 'vtp', '3mf' ]:
+            exporters.export(assembly.toCompound(), destination, format.upper())
+        elif format in [ 'png' , 'pdf' ]:
+            with tempfile.NamedTemporaryFile() as svg_file:
+                exporters.export(assembly.toCompound(), svg_file.name, 'SVG')
+                export = cairosvg.svg2png if format == 'svg' else cairosvg.svg2pdf
+                export(file_obj=svg_file, write_to=destination)
+        else:
+            raise NameError(f'bad export format: { format }')
+
+    def get_json(self) -> str:
         '''Return model data as json string'''
         
         data = self.module_manager.get_data()
         return json.dumps(data)
 
-    def save(self, path: str, format: str) -> str:
-        '''Save the assembly in the given format.'''
-
-        assembly = self.module_manager.get_assembly()
-
-        if format in [ 'STEP', 'XML', 'GLTF', 'VTKJS', 'VRML' ]:
-            assembly.save(path, exportType=format)
-        elif format in [ 'DXF', 'SVG', 'STL', 'AMF', 'TJS', 'VTP', '3MF' ]:
-            exporters.export(assembly.toCompound(), path, format)
-        elif format in [ 'PNG' , 'PDF' ]:
-            with tempfile.NamedTemporaryFile() as svg_file:
-                exporters.export(assembly.toCompound(), svg_file.name, 'SVG')
-                export = cairosvg.svg2png if format == 'PNG' else cairosvg.svg2pdf
-                export(file_obj=svg_file, write_to=path)
-        else:
-            raise NameError('bad format')
-
-    def to_html(self, ui_options: dict, minify: bool=True) -> str:
+    def get_html(self, ui_options: dict, minify: bool=True) -> str:
         '''Return the html string of a page that renders the target defined in the module manager.'''
 
         viewer_css_path = op.join(STATIC_DIR, 'viewer.css')

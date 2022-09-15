@@ -129,7 +129,6 @@ def main() -> None:
         run(args.port, module_manager, ui_options, args.dead)
 
     if args.cmd == 'build':
-        exporter = Exporter(module_manager)
         if module_manager.target_is_dir:
             sys_exit('Exporting a folder to html is not yet possible.')
 
@@ -141,21 +140,12 @@ def main() -> None:
         if not args.destination:
             args.destination = f'{ op.splitext(args.target)[0] }.{ args.format }'
 
-        output_data = ''
-        if args.format in [ 'html', 'json' ]:
-            output_data = exporter.to_json() if args.format == 'json' \
-                else exporter.to_html(ui_options, args.minify)
+        exporter = Exporter(module_manager)
 
-            if args.destination == '-':
-                print(output_data)
-                return
-            else:
-                with open(args.destination, 'w', encoding='utf-8') as html_file:
-                    html_file.write(output_data)
+        if args.format == 'html':
+            exporter.save_to_html(args.destination, ui_options, args.minify)
         else:
-            exporter.save(args.destination, args.format.upper())
-
-        print(f'File exported in { args.destination }.')
+            exporter.save_to(args.destination, args.format)
 
 
 if __name__ == '__main__':
