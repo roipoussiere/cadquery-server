@@ -10,7 +10,7 @@ from typing import Tuple
 from flask import Flask, request, render_template, make_response, Response
 
 from .module_manager import ModuleManager
-from .renderers import to_html
+from .exporter import Exporter
 
 
 WATCH_PERIOD = 0.3
@@ -40,7 +40,8 @@ def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: boo
         if module_manager.target_is_dir:
             module_manager.module_name = request.args.get('m')
 
-        return to_html(module_manager, ui_options)
+        exporter = Exporter(module_manager)
+        return exporter.to_html(ui_options)
 
     @app.route('/json', methods = [ 'GET' ])
     def _json() -> Tuple[str, int]:

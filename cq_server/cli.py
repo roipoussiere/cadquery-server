@@ -6,7 +6,7 @@ import os.path as op
 
 from .server import run
 from .module_manager import ModuleManager, ModuleManagerError
-from .renderers import to_html, to_json, save
+from .exporter import Exporter
 from . import __version__ as cqs_version
 
 
@@ -129,6 +129,7 @@ def main() -> None:
         run(args.port, module_manager, ui_options, args.dead)
 
     if args.cmd == 'build':
+        exporter = Exporter(module_manager)
         if module_manager.target_is_dir:
             sys_exit('Exporting a folder to html is not yet possible.')
 
@@ -142,8 +143,8 @@ def main() -> None:
 
         output_data = ''
         if args.format in [ 'html', 'json' ]:
-            output_data = to_json(module_manager) if args.format == 'json' \
-                else to_html(module_manager, ui_options, args.minify)
+            output_data = exporter.to_json() if args.format == 'json' \
+                else exporter.to_html(ui_options, args.minify)
 
             if args.destination == '-':
                 print(output_data)
@@ -152,7 +153,7 @@ def main() -> None:
                 with open(args.destination, 'w', encoding='utf-8') as html_file:
                     html_file.write(output_data)
         else:
-            save(module_manager, args.destination, args.format.upper())
+            exporter.save(args.destination, args.format.upper())
 
         print(f'File exported in { args.destination }.')
 
