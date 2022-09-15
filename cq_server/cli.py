@@ -109,7 +109,7 @@ def main() -> None:
         parser.print_help()
         sys_exit()
 
-    should_raise = (args.cmd == 'run' and args.should_raise)
+    should_raise = (args.cmd != 'run' or args.should_raise)
     try:
         module_manager = ModuleManager(args.target, should_raise)
     except ModuleManagerError as err:
