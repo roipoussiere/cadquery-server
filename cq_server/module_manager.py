@@ -110,6 +110,7 @@ class ModuleManager:
         '''Return a CQ assembly object composed of all models passed
         to show_object and debug functions in the CadQuery script.'''
 
+        self.load_module()
         ui_instance = self.get_ui_instance()
         assembly = ui_instance.get_assembly()
 
@@ -178,7 +179,6 @@ class ModuleManager:
         '''Return the data to send to the client, that includes the tesselated model.'''
 
         data = {}
-        self.load_module()
 
         if self.module_name:
             try:

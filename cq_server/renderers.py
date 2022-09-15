@@ -5,6 +5,7 @@ import json
 
 from jinja2 import Template
 import minify_html
+from cadquery import exporters
 
 from .module_manager import ModuleManager
 
@@ -20,6 +21,24 @@ def to_json(module_manager: ModuleManager) -> str:
     module_manager.init()
     data = module_manager.get_data()
     return json.dumps(data)
+
+def save(module_manager: ModuleManager, path: str, format: str) -> str:
+    '''Save the assembly in the given format.'''
+
+    module_manager.init()
+    assembly = module_manager.get_assembly()
+
+    if format in [ 'STEP', 'XML', 'GLTF', 'VTKJS', 'VRML' ]:
+        assembly.save(path, exportType=format)
+    elif format in [ 'DXF', 'SVG', 'STL', 'AMF', 'TJS', 'VTP', '3MF' ]:
+        exporters.export(assembly.toCompound(), path, format)
+    else:
+        raise NameError('bad format')
+
+def save_stl(module_manager: ModuleManager, path: str) -> str:
+    '''Save the assembly to stl.'''
+    
+    save(module_manager, path, 'STL')
 
 def to_html(module_manager: ModuleManager, ui_options: dict, minify: bool=True) -> str:
     '''Return the html string of a page that renders the target defined in the module manager.'''
