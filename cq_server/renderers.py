@@ -2,11 +2,12 @@
 
 import os.path as op
 import json
+import tempfile
 
 from jinja2 import Template
 import minify_html
 from cadquery import exporters
-
+import cairosvg
 from .module_manager import ModuleManager
 
 
@@ -32,6 +33,11 @@ def save(module_manager: ModuleManager, path: str, format: str) -> str:
         assembly.save(path, exportType=format)
     elif format in [ 'DXF', 'SVG', 'STL', 'AMF', 'TJS', 'VTP', '3MF' ]:
         exporters.export(assembly.toCompound(), path, format)
+    elif format in [ 'PNG' , 'PDF' ]:
+        with tempfile.NamedTemporaryFile() as svg_file:
+            exporters.export(assembly.toCompound(), svg_file.name, 'SVG')
+            export = cairosvg.svg2png if format == 'PNG' else cairosvg.svg2pdf
+            export(file_obj=svg_file, write_to=path)
     else:
         raise NameError('bad format')
 

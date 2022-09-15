@@ -40,10 +40,10 @@ def parse_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     parser_build.add_argument('destination', nargs='?',
         help='output file path (default: "<module_name>.html"), or `-` for stdout.')
     parser_build.add_argument('-f', '--format', metavar='FMT',
-        choices=[ 'html', 'json', 'step', 'xml', 'gltf', 'vtkjs',
-            'vrml', 'dxf', 'svg', 'stl', 'amf', 'tjs', 'vtp', '3mf' ],
+        choices=[ 'html', 'json', 'step', 'xml', 'gltf', 'vtkjs', 'vrml', 'dxf',
+            'svg', 'stl', 'amf', 'tjs', 'vtp', '3mf', 'png', 'pdf' ],
         help='output format: html, json, step, xml, gltf, vtkjs, vrml, dxf, svg, stl, amf, tjs, ' +
-            'vtp, 3mf (default: file extension, or html if not given)')
+            'vtp, 3mf, png, pdf (default: file extension, or html if not given)')
     parser_build.add_argument('-m', '--minify', action='store_true',
         help='minify output when exporting to html')
     add_ui_options(parser_build)
