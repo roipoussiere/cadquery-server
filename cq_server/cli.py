@@ -6,7 +6,7 @@ import os.path as op
 
 from .server import run
 from .module_manager import ModuleManager, ModuleManagerError
-from .renderers import to_html, to_json, save_stl
+from .renderers import to_html, to_json, save
 from . import __version__ as cqs_version
 
 
@@ -39,8 +39,11 @@ def parse_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
         help='python file or folder containing CadQuery script to load (default: ".")')
     parser_build.add_argument('destination', nargs='?',
         help='output file path (default: "<module_name>.html"), or `-` for stdout.')
-    parser_build.add_argument('-f', '--format', choices=[ 'html', 'json', 'stl' ], metavar='FMT',
-        help='output format: html, json or stl (default: file extension, or html if not given)')
+    parser_build.add_argument('-f', '--format', metavar='FMT',
+        choices=[ 'html', 'json', 'step', 'xml', 'gltf', 'vtkjs',
+            'vrml', 'dxf', 'svg', 'stl', 'amf', 'tjs', 'vtp', '3mf' ],
+        help='output format: html, json, step, xml, gltf, vtkjs, vrml, dxf, svg, stl, amf, tjs, ' +
+            'vtp, 3mf (default: file extension, or html if not given)')
     parser_build.add_argument('-m', '--minify', action='store_true',
         help='minify output when exporting to html')
     add_ui_options(parser_build)
@@ -130,34 +133,28 @@ def main() -> None:
             sys_exit('Exporting a folder to html is not yet possible.')
 
         file_ext = op.splitext(args.destination)[1] if args.destination else None
-        if file_ext == '.html' or (not file_ext and not args.format):
-            args.format = 'html'
-        elif file_ext == '.json':
-            args.format = 'json'
-        elif file_ext == '.stl':
-            args.format = 'stl'
+
+        if not args.format:
+            args.format = file_ext[1:] if file_ext else 'html'
 
         if not args.destination:
             args.destination = f'{ op.splitext(args.target)[0] }.{ args.format }'
 
-        output_content = ''
-        if args.format == 'html':
-            output_content = to_html(module_manager, ui_options, args.minify)
-        elif args.format == 'json':
-            output_content = to_json(module_manager)
-        elif args.format == 'stl':
-            save_stl(module_manager, args.destination)
-            print(f'File exported in { args.destination }.')
-        else:
-            sys_exit('Output format not recognized.')
+        output_data = ''
+        if args.format in [ 'html', 'json' ]:
+            output_data = to_json(module_manager) if args.format == 'json' \
+                else to_html(module_manager, ui_options, args.minify)
 
-        if output_content:
             if args.destination == '-':
-                print(output_content)
+                print(output_data)
+                return
             else:
                 with open(args.destination, 'w', encoding='utf-8') as html_file:
-                    html_file.write(output_content)
-                print(f'File exported in { args.destination }.')
+                    html_file.write(output_data)
+        else:
+            save(module_manager, args.destination, args.format.upper())
+
+        print(f'File exported in { args.destination }.')
 
 
 if __name__ == '__main__':

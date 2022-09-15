@@ -35,11 +35,6 @@ def save(module_manager: ModuleManager, path: str, format: str) -> str:
     else:
         raise NameError('bad format')
 
-def save_stl(module_manager: ModuleManager, path: str) -> str:
-    '''Save the assembly to stl.'''
-    
-    save(module_manager, path, 'STL')
-
 def to_html(module_manager: ModuleManager, ui_options: dict, minify: bool=True) -> str:
     '''Return the html string of a page that renders the target defined in the module manager.'''
 
