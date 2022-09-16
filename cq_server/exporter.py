@@ -21,7 +21,15 @@ class Exporter:
         self.module_manager = module_manager
         self.module_manager.init()
 
-    def _save_data(self, destination: str, data: str):
+    def _saving(self, destination: str, format: str, save: callable):
+        if op.dirname(destination) and not op.isdir(op.dirname(destination)):
+            os.makedirs(op.dirname(destination))
+
+        save()
+
+        print(f'{ format } file exported in { destination }.')
+
+    def _save_data_to(self, destination: str, format: str, data: str):
         if destination == '-':
             print(data)
         else:
@@ -29,18 +37,20 @@ class Exporter:
                 file.write(data)
 
     def save_to_html(self, destination: str, ui_options: dict={}, minify: bool=True):
-        html = self.get_html(ui_options, minify)
-        self._save_data(destination, html)
+        def save():
+            html = self.get_html(ui_options, minify)
+            self._save_data_to(destination, 'html', html)
 
-        print(f'File exported in { destination }.')
+        self._saving(destination, 'html', save)
 
     def save_to(self, destination: str, format: str):
-        if format == 'json' :
-            self._save_data(self.to_json(), destination)
-        else:
-            self.save(destination, format)
+        def save():
+            if format == 'json' :
+                self._save_data_to(destination, format, self.get_json())
+            else:
+                self.save(destination, format)
 
-        print(f'File exported in { destination }.')
+        self._saving(destination, format, save)
 
     def save(self, destination: str, format: str) -> str:
         '''Save the assembly in the given format.'''
@@ -104,6 +114,5 @@ class Exporter:
         if op.isdir(destination):
             os.removedirs(destination)
 
-        os.makedirs(destination)
         html_path = op.join(destination, 'index.html')
         self.save_to_html(html_path, ui_options, minify)
