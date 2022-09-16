@@ -1,6 +1,6 @@
 # CadQuery Server
 
-A web server used to render 3d models from CadQuery code loaded dynamically.
+A web server used to render 3d models from CadQuery code loaded dynamically, and eventually build a static website as a showcase for your CadQuery projects.
 
 Example usage with Kate on the left and Firefox on the right:
 
@@ -14,6 +14,7 @@ Demonstration video:
 
 ### Features
 
+- build-in static website builder
 - fast response time
 - multi-file support
 - built-in file-watcher
@@ -21,8 +22,7 @@ Demonstration video:
 - use your favorite text editor or IDE
 - display model on an external monitor or other device
 - compatible with VSCode built-in browser
-- option to customize ui
-- option to export to static html file
+- options to customize ui
 
 ### Functionning
 
@@ -86,56 +86,101 @@ If you want to install both cq-server and CadQuery:
 
 ## Usage
 
-### Starting the server
-
 Once installed, the `cq-server` command should be available on your system (or on your virtual env).
 
-It takes only one optional argument: the target, which can be a folder or a file. Defaults to the current directory (`.`).
+CLI usage is detailled here but might be not up to date. Type `cq-server -h` to get last instructions.
 
-Then the root endpoint (ie. `http://127.0.0.1`) will display:
-- if `target` is a folder: an index page from which you can select a file to render;
-- if `target` is a file: the root endpoint will render the corresponding file.
+#### Global options
 
-### CLI options
+- `-h`, `--help`: show main cq-server help message and exit
+- `-V`, `--version`: print CadQuery Server version and exit
 
-Use `cq-server -h` to list all available options.
+### `run`
 
-#### General
+Run the server
 
-- `-V`, `--version`: Print CadQuery Server version and exit.
-- `-l`, `--list`: List available modules for the current target and exit.
+#### Usage
 
-#### Server
+    cq-server run [-h] [-p PORT] [-r] [-d] [ui options] [target]
 
-- `-p`, `--port`: Server port (default: `5000`).
-- `-d`, `--dead`: Disable live reloading.
+#### Positional arguments
 
-#### Export
+- `target`: python file or folder containing CadQuery script to load (default: ".")
 
-- `-e [FILE]`, `--export [FILE]`: Export a static html file that work without server (default: "<module_name>.html").
-- `-m`, `--minify`: Minify output when exporting to html.
+#### Options
 
-> **Note 1**: The `html` endpoint could eventually be used to export a model to html from a running CadQueryServer instance (see below).
+- `-h`, `--help`: show the help message of the run command and exit
+- `-p PORT`, `--port PORT`: server port (default: 5000)
+- `-r`, `--raise`: when an error happen, raise it instead showing its title
+- `-d`, `--dead`: disable live reloading
 
-> **Note 2**. Order of parameters might be important when using `-e`:
-- `cq-server ./examples --list` is similar to `cq-server ./examples --list`;
-- but `cq-server ./examples --export` is **not** similar to `cq-server --export ./examples`.
-> In this last case, the target will be the current folder and the file will be stored as `examples`.
+As well as the UI options, listed in the dedicated section below.
 
-#### User interface
+#### Examples
 
-Other cli options are available to change the UI appearence:
+```bash
+cq-server run # run cq-server with current folder as target on port 5000
+cq-server run -p 8080 ./examples # run cq-server with "examples" as target on port 8080
+cq-server run ./examples/box.py # run cq-server with only box.py as target
+```
 
-- `--ui-hide`: a comma-separated list of buttons to disable, among: `axes`, `axes0`, `grid`, `ortho`, `more`, `help` and `all`;
-- `--ui-glass`: activate tree view glass mode;
-- `--ui-theme`: set ui theme, `light` or `dark` (default: browser config);
-- `--ui-trackball`: set control mode to trackball instead orbit;
-- `--ui-perspective`: set camera view to perspective instead orthogonal;
-- `--ui-grid`: display a grid in specified axes (`x`, `y`, `z`, `xy`, etc.);
-- `--ui-transparent`: make objects semi-transparent;
-- `--ui-black-edges`: make edges black.
+### `build`
 
-### Writing a CadQuery code
+Build static website
+
+#### Usage
+
+    cq-server build [-h] [-f FMT] [-m] [ui options] [target] [destination]
+
+#### Positional arguments
+
+- `target`: python file or folder containing CadQuery script to load (default: ".")
+- `destination`: output file path (default: `<module_name>.html`), or `-` for stdout
+
+#### Options
+
+- `-h`, `--help`: show the help message of the build command and exit
+- `-f FMT`, `--format FMT`: output format: html, json, step, xml, gltf, vtkjs, vrml, dxf, svg, stl, amf, tjs, vtp, 3mf, png, pdf (default: file extension, or html if not given)
+- `-m`, `--minify`: minify output when exporting to html
+
+As well as the UI options, listed in the dedicated section below.
+
+#### Examples
+
+```bash
+cq-server build examples docs # build website of "example" project in "docs"
+cq-server build examples/box.py # build web page of box.py in examples/box.html
+cq-server build examples/box.py -f stl # build stl file in examples/box.stl
+cq-server build examples/box.png build # build web page in build/box.html
+cq-server build examples/box.png build/box.step # build step file in build/box.step
+```
+
+### `info`
+
+Show information about the current target and exit
+
+#### Usage
+
+    cq-server info [-h] [target]
+
+#### Positional arguments
+
+- `target`: python file or folder containing CadQuery script to load (default: ".")
+
+### UI options
+
+You can configure the user interface via CLI options:
+
+- `--ui-hide`: a comma-separated list of buttons to disable, among: `axes`, `axes0`, `grid`, `ortho`, `more`, `help` and `all`
+- `--ui-glass`: activate tree view glass mode
+- `--ui-theme`: set ui theme, `light` or `dark` (default: browser config)
+- `--ui-trackball`: set control mode to trackball instead orbit
+- `--ui-perspective`: set camera view to perspective instead orthogonal
+- `--ui-grid`: display a grid in specified axes (`x`, `y`, `z`, `xy`, etc.)
+- `--ui-transparent`: make objects semi-transparent
+- `--ui-black-edges`: make edges black
+
+## Writing a CadQuery code
 
 CadQuery Server renders the model defined in the `show_object()` function (like in CadQuery Editor).
 
@@ -152,7 +197,7 @@ show_object(cq.Workplane('XY').box(1, 2, 3))
 
 Please read the [CadQuery documentation](https://cadquery.readthedocs.io/en/latest/) for more details about the CadQuery library.
 
-### Using with the web server
+## Using the web server
 
 Once the server is started, go to its url (ie. `http://127.0.0.1`).
 
@@ -167,7 +212,7 @@ Optional url parameters, available for all listed endpoints:
 
 Examples: `/?m=box`, `/json?m=box`, `/html?m=box`.
 
-### Using with VSCode
+### Integration with VSCode
 
 The web page can be displayed within VSCode IDE using [LivePreview extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server):
 
