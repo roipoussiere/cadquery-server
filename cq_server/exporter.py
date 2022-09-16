@@ -10,7 +10,7 @@ import minify_html
 from cadquery import exporters
 import cairosvg
 from .module_manager import ModuleManager
-
+from shutil import rmtree
 
 APP_DIR = op.dirname(__file__)
 STATIC_DIR = op.join(APP_DIR, 'static')
@@ -112,7 +112,13 @@ class Exporter:
 
     def build_website(self, destination: str, ui_options = {}, minify=False):
         if op.isdir(destination):
-            os.removedirs(destination)
+            rmtree(destination)
 
-        html_path = op.join(destination, 'index.html')
-        self.save_to_html(html_path, ui_options, minify)
+        html_path = op.join(destination, 'html')
+        stl_path = op.join(destination, 'stl')
+
+        for module_name in self.module_manager.get_modules_name():
+            self.module_manager.module_name = module_name
+
+            self.save_to_html(op.join(html_path, f'{ module_name }.html'), ui_options, minify)
+            self.save_to(op.join(stl_path, f'{ module_name }.stl'), 'stl')
