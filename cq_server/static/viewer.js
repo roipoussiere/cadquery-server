@@ -131,12 +131,14 @@ function render(_data) {
 }
 
 function render_from_name(module_name) {
-	const input = sse ? `json?m=${ module_name }` : `json/${ module_name }.json`
-
-	fetch(input)
-		.then(response => response.json())
-		.then(_data => render(_data))
-		.catch(error => console.error(error));
+	if(sse) {
+		fetch(`json?m=${ module_name }`)
+			.then(response => response.json())
+			.then(_data => render(_data))
+			.catch(error => console.error(error));
+	} else {
+		render(modules[module_name]);
+	}
 }
 
 window.addEventListener('resize', () => {

@@ -50,6 +50,8 @@ class Exporter:
         def save():
             if format == 'json' :
                 self._save_data_to(destination, format, self.get_json())
+            elif format == 'js' :
+                self._save_data_to(destination, format, self.get_js())
             else:
                 self.save(destination, format)
 
@@ -73,10 +75,16 @@ class Exporter:
             raise NameError(f'bad export format: { format }')
 
     def get_json(self) -> str:
-        '''Return model data as json string'''
+        '''Return model data as json string.'''
         
         data = self.module_manager.get_data()
         return json.dumps(data)
+
+    def get_js(self) -> str:
+        '''Return model data as js file containing the json.'''
+
+        json_data = self.get_json()
+        return f"modules['{ self.module_manager.module_name }'] = { json_data }"
 
     def get_html(self, ui_options: dict, minify: bool=True) -> str:
         '''Return the html string of a page that renders the target defined in the module manager.'''
@@ -121,13 +129,13 @@ class Exporter:
 
         self.save_to_html(op.join(destination, 'index.html'), ui_options, minify)
 
-        json_path = op.join(destination, 'json')
+        js_path = op.join(destination, 'js')
         png_path = op.join(destination, 'png')
         stl_path = op.join(destination, 'stl')
 
         for module_name in self.module_manager.get_modules_name():
             self.module_manager.module_name = module_name
 
-            self.save_to(op.join(json_path, f'{ module_name }.json'), 'json')
+            self.save_to(op.join(js_path, f'{ module_name }.js'), 'js')
             self.save_to(op.join(png_path, f'{ module_name }.png'), 'png')
             self.save_to(op.join(stl_path, f'{ module_name }.stl'), 'stl')

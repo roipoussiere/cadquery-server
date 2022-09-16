@@ -9,6 +9,10 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/three-cad-viewer/dist/three-cad-viewer.css" />
 	<style>{{ viewer_css | safe }}</style>
 	<script src="https://cdn.jsdelivr.net/npm/three-cad-viewer@1.6.4/dist/three-cad-viewer.js"></script>
+	<script>const modules = {}</script>
+	{% for module_name in modules_name %}
+	<script src="./js/{{ module_name }}.js"></script>
+	{% endfor %}
 	{% else %}
 	<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/icon_cq.png') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='vendor/three-cad-viewer.css') }}" />
