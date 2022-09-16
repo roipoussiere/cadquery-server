@@ -4,17 +4,20 @@ import os
 import os.path as op
 import json
 import tempfile
+from shutil import rmtree
 
 from jinja2 import Template
 import minify_html
 from cadquery import exporters
 import cairosvg
+
 from .module_manager import ModuleManager
-from shutil import rmtree
+
 
 APP_DIR = op.dirname(__file__)
 STATIC_DIR = op.join(APP_DIR, 'static')
 TEMPLATES_DIR = op.join(APP_DIR, 'templates')
+
 
 class Exporter:
     def __init__(self, module_manager: ModuleManager):
@@ -110,15 +113,21 @@ class Exporter:
 
         return html
 
-    def build_website(self, destination: str, ui_options = {}, minify=False):
+    def build_website(self, destination: str, ui_options: dict, minify=False):
+        '''Build static website containing index page and static files for all modules.'''
+
         if op.isdir(destination):
             rmtree(destination)
 
-        html_path = op.join(destination, 'html')
+        self.save_to_html(op.join(destination, 'index.html'), ui_options, minify)
+
+        json_path = op.join(destination, 'json')
+        png_path = op.join(destination, 'png')
         stl_path = op.join(destination, 'stl')
 
         for module_name in self.module_manager.get_modules_name():
             self.module_manager.module_name = module_name
 
-            self.save_to_html(op.join(html_path, f'{ module_name }.html'), ui_options, minify)
+            self.save_to(op.join(json_path, f'{ module_name }.json'), 'json')
+            self.save_to(op.join(png_path, f'{ module_name }.png'), 'png')
             self.save_to(op.join(stl_path, f'{ module_name }.stl'), 'stl')

@@ -131,12 +131,12 @@ function render(_data) {
 }
 
 function render_from_name(module_name) {
-	if (sse) {
-		fetch(`json?m=${ module_name }`)
-			.then(response => response.json())
-			.then(_data => render(_data))
-			.catch(error => console.error(error));
-	}
+	const input = sse ? `json?m=${ module_name }` : `json/${ module_name }.json`
+
+	fetch(input)
+		.then(response => response.json())
+		.then(_data => render(_data))
+		.catch(error => console.error(error));
 }
 
 window.addEventListener('resize', () => {
