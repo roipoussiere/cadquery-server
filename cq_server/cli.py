@@ -37,7 +37,7 @@ def parse_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     parser_build = subparsers.add_parser('build', help='build static website')
     parser_build.add_argument('target', nargs='?', default='.',
         help='python file or folder containing CadQuery script to load (default: ".")')
-    parser_build.add_argument('destination', nargs='?',
+    parser_build.add_argument('dest', metavar='destination', nargs='?',
         help='output file path (default: "<module_name>.html"), or `-` for stdout.')
     parser_build.add_argument('-f', '--format', metavar='FMT',
         choices=[ 'html', 'json', 'step', 'xml', 'gltf', 'vtkjs', 'vrml', 'dxf',
@@ -129,27 +129,31 @@ def main() -> None:
         run(args.port, module_manager, ui_options, args.dead)
 
     if args.cmd == 'build':
-        has_file_ext = args.destination and not module_manager.target_is_dir
-        file_ext = op.splitext(args.destination)[1] if has_file_ext else None
-
         exporter = Exporter(module_manager)
 
         if module_manager.target_is_dir:
-            if args.destination:
-                exporter.build_website(args.destination, ui_options, args.minify)
-            else:
-                sys_exit('Destination is mandatory for folder export')
+            if not args.dest:
+                sys_exit('Destination is mandatory for folder export.')
+            if args.format:
+                sys_exit('Format option is not required when target is a directory.')
+            exporter.build_website(args.dest, ui_options, args.minify)
+            return
+
+        if not args.format:
+            has_file_ext = args.dest and '.' in args.dest
+            file_ext = op.splitext(args.dest)[1] if has_file_ext else None
+
+            args.format = file_ext[1:] if file_ext else 'html'
+
+        if not args.dest or not '.' in args.dest:
+            file_name = f'{ op.splitext(args.target)[0] }.{ args.format }'
+            is_dir = args.dest and not '.' in args.dest
+            args.dest = op.join(args.dest, op.split(file_name)[1]) if is_dir else file_name
+
+        if args.format == 'html':
+            exporter.save_to_html(args.dest, ui_options, args.minify)
         else:
-            if not args.format:
-                args.format = file_ext[1:] if file_ext else 'html'
-
-            if not args.destination:
-                args.destination = f'{ op.splitext(args.target)[0] }.{ args.format }'
-
-            if args.format == 'html':
-                exporter.save_to_html(args.destination, ui_options, args.minify)
-            else:
-                exporter.save_to(args.destination, args.format)
+            exporter.save_to(args.dest, args.format)
 
 
 if __name__ == '__main__':
