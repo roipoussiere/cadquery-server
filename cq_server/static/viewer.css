@@ -35,21 +35,25 @@ body {
 	background-color: grey;
 }
 
-.modal ul {
-    list-style-type: none;
-    padding-left: 1em;
+.cqs_module_item {
+    margin: 0.5em;
+	display: inline-block;
+    padding: 0.5em;
+    background-color: beige;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 0.5em;
+	border-color: black;
+	cursor: pointer;
+	min-width: 7em;
+	text-align: center;
 }
 
-.modal li button {
-    margin: 3px;
-    padding-left: 5px;
-    width: 10em;
-    display: block;
-    background-color: gray;
-    border-style: solid;
-    border-width: 1px;
-    border-radius: 3px;
-	border-color: black;
-    text-decoration: none;
-	cursor: pointer;
+.cqs_module_item:hover {
+    background-color: darkkhaki;
+}
+
+.cqs_module_item div {
+	margin-left: 0.5em;
+	float: right;
 }

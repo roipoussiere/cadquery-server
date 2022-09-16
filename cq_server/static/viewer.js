@@ -78,16 +78,33 @@ function show_index() {
     }
 
 	for(let module_name of modules_name) {
-		const list_item_dom = document.createElement('li');
+		const item_dom = document.createElement('div');
+		item_dom.classList = 'cqs_module_item'
 
-		const button_dom = document.createElement('button');
-		button_dom.innerText = module_name;
-		button_dom.addEventListener('click', event => {
+		const text_dom = document.createElement('p');
+		text_dom.innerText = module_name;
+		if (sse) {
+			item_dom.append(text_dom);
+		} else {
+			const img_dom = document.createElement('img');
+			img_dom.setAttribute('src', `png/${ module_name }.png`)
+
+			const info_dom = document.createElement('div');
+			const svg_link_dom = document.createElement('a');
+			svg_link_dom.setAttribute('href', `stl/${ module_name }.stl`)
+			svg_link_dom.innerText = 'get svg'
+			info_dom.append(text_dom);
+			info_dom.append(svg_link_dom);
+
+			item_dom.append(img_dom);
+			item_dom.append(info_dom);
+		}
+
+		item_dom.addEventListener('click', event => {
 			render_from_name(event.target.innerText);
 		});
 
-		list_item_dom.append(button_dom);
-		modules_list_dom.append(list_item_dom);
+		modules_list_dom.append(item_dom);
 	}
 
 	document.getElementById('cqs_no_modules').style.display = modules_name.length == 0 ? 'block' : 'none';
