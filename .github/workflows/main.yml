@@ -8,7 +8,7 @@ on:
 jobs:
 
   push_to_docker_hub:
-    name: Push Docker image to Docker Hub
+    name: Publish Docker image to Docker Hub
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -35,13 +35,22 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   push_to_pypi:
-    name: Push Python module to PyPI
+    name: Publish Python package to PyPI
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-
-      - name: Publish a Python distribution to PyPI
+      - name: Get Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10' 
+      - name: Get Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: '1.2'
+      - name: Build Python package
+        run: poetry build
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
