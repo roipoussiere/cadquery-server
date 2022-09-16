@@ -1,0 +1,6 @@
+# ignore all...
+/*
+
+# ...except build folder and gitignore
+!/build
+!.gitignore
