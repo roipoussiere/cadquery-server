@@ -23,18 +23,34 @@ def parse_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     subparsers = parser.add_subparsers(title='subcommands', dest='cmd',
         description='type <command> -h for subcommand usage')
 
-    parser_run = subparsers.add_parser('run', help='run the server')
+    parser_run = subparsers.add_parser('run',
+        help='run the server',
+        formatter_class=argparse.RawTextHelpFormatter,
+        epilog='''examples:
+cq-server run                    # run cq-server with current folder as target on port 5000
+cq-server run -p 8080 ./examples # run cq-server with "examples" as target on port 8080
+cq-server run ./examples/box.py  # run cq-server with only box.py as target
+''')
+
     parser_run.add_argument('target', nargs='?', default='.',
         help='python file or folder containing CadQuery script to load (default: ".")')
     parser_run.add_argument('-p', '--port', type=int, default=DEFAULT_PORT,
         help=f'server port (default: { DEFAULT_PORT })')
     parser_run.add_argument('-r', '--raise', dest='should_raise', action='store_true',
-        help=f'when an error happen, raise it instead showing its title')
+        help='when an error happen, raise it instead showing its title')
     parser_run.add_argument('-d', '--dead', action='store_true',
         help='disable live reloading')
     add_ui_options(parser_run)
 
-    parser_build = subparsers.add_parser('build', help='build static website')
+    parser_build = subparsers.add_parser('build',
+        help='build static website',
+        formatter_class=argparse.RawTextHelpFormatter,
+        epilog='''examples:
+cq-server build examples docs                   # build website of "example" project in "docs"
+cq-server build examples/box.py                 # build web page of box.py in examples/box.html
+cq-server build examples/box.py -f stl          # build stl file in examples/box.stl
+cq-server build examples/box.png build          # build web page in build/box.html
+cq-server build examples/box.png build/box.step # build step file in build/box.step''')
     parser_build.add_argument('target', nargs='?', default='.',
         help='python file or folder containing CadQuery script to load (default: ".")')
     parser_build.add_argument('dest', metavar='destination', nargs='?',
