@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>CadQuery Server</title>
+
+	
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/three-cad-viewer/dist/three-cad-viewer.css" />
+	<style>
+body {
+	margin: 0;
+	overflow: hidden;
+}
+
+.tcv_cad_viewer {
+	margin: 0;
+}
+
+.modal {
+	opacity: 0.8;
+	border-style: solid;
+	border-width: 2px;
+	border-radius: 5px;
+	position: absolute;
+	left: 10%;
+	top: 10%;
+	right: 10%;
+	bottom: 10%;
+	padding: 1em;
+	font-family: sans-serif;
+	z-index: 1000;
+	overflow: scroll;
+}
+
+.modal.error {
+	background-color: #fdd;
+}
+
+.modal.info {
+	background-color: #ddf;
+}
+
+.modal pre {
+	background-color: grey;
+}
+
+.cqs_module_item {
+    margin: 0.5em;
+	display: inline-block;
+    padding: 0.5em;
+    background-color: beige;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 0.5em;
+	border-color: black;
+	cursor: pointer;
+	min-width: 7em;
+	text-align: center;
+}
+
+.cqs_module_item:hover {
+    background-color: darkkhaki;
+}
+
+.cqs_module_item div {
+	margin-left: 0.5em;
+	float: right;
+}
+</style>
+	<script src="https://cdn.jsdelivr.net/npm/three-cad-viewer@1.6.4/dist/three-cad-viewer.js"></script>
+	<script>const modules = {}</script>
+	
+	<script src="./js/box.js"></script>
+	
+	<script src="./js/cq_tutorial.js"></script>
+	
+	
+
+</head>
+
+<body>
+	<div id="cad_view"></div>
+
+	<div class="modal error" id="cqs_error" style="display: none">
+		<h2>Oops! An error occured.</h2>
+		<p id="cqs_error_message"></p>
+		<pre id="cqs_stacktrace"></pre>
+	</div>
+
+	<div class="modal info" id="cqs_index" style="display: none">
+		<h2>Available modules:</h2>
+		<p id="cqs_no_modules" style="display: none">There is no module available in the target directory.</p>
+		<div id="cqs_modules_list"></div>
+	</div>
+
+	
+	<script>
+'use strict';
+
+const tcv = window.CadViewer;
+const cad_view_dom = document.getElementById('cad_view');
+
+let data = {};
+let options = {};
+let modules_name = [];
+let viewer = null;
+let timer = null;
+let sse = null;
+
+
+function init_sse() {
+	sse = new EventSource('events');
+	sse.addEventListener('file_update', event => {
+		render(JSON.parse(event.data));
+	})
+	sse.onerror = error => {
+		if (sse.readyState == 2) {
+			setTimeout(init_sse, 1000);
+		}
+	};	
+}
+
+function update_size_options() {
+	options.height = window.innerHeight - 44;
+	options.treeWidth = window.innerWidth > 400 ? window.innerWidth / 3 : 200;
+	options.cadWidth = window.innerWidth - (options.glass ? 8 : options.treeWidth + 10);
+}
+
+function load_camera_position() {
+	if (viewer != null) {
+		options.position = viewer.getCameraPosition();
+		options.quaternion = viewer.getCameraQuaternion();
+		options.target = viewer.getCameraTarget();
+		options.zoom = viewer.getCameraZoom();
+	}
+}
+
+function init_viewer(_options, _modules_name) {
+	options = _options;
+	modules_name = _modules_name;
+	update_size_options();
+	load_camera_position();
+
+	viewer = new tcv.Viewer(cad_view_dom, options, () => {});
+	add_modules_dropdown();
+
+	if ('hideButtons' in options) {
+		viewer.trimUI(options.hideButtons, false);
+	}
+}
+
+function show_error() {
+	document.title = 'error | CadQuery Server';
+	document.getElementById('cqs_index').style.display = 'none';
+
+	document.getElementById('cqs_error_message').innerText = data.error;
+	document.getElementById('cqs_stacktrace').innerText = data.stacktrace;
+	document.getElementById('cqs_stacktrace').style.display = data.stacktrace ? 'block' : 'none';
+
+	document.getElementById('cqs_error').style.display = 'block';
+}
+
+function show_index() {
+	document.title = 'index | CadQuery Server';
+	document.getElementById('cqs_error').style.display = 'none';
+
+	if (sse) {
+		window.history.pushState('/', '', window.location.origin);
+	}
+
+	const modules_list_dom = document.getElementById('cqs_modules_list');
+
+	while (modules_list_dom.firstChild) {
+        modules_list_dom.removeChild(modules_list_dom.firstChild);
+    }
+
+	for(let module_name of modules_name) {
+		const item_dom = document.createElement('div');
+		item_dom.classList = 'cqs_module_item'
+
+		const text_dom = document.createElement('p');
+		text_dom.innerText = module_name;
+		if (sse) {
+			item_dom.append(text_dom);
+		} else {
+			const img_dom = document.createElement('img');
+			img_dom.setAttribute('src', `png/${ module_name }.png`)
+
+			const info_dom = document.createElement('div');
+			const svg_link_dom = document.createElement('a');
+			svg_link_dom.setAttribute('href', `stl/${ module_name }.stl`)
+			svg_link_dom.innerText = 'get svg'
+			info_dom.append(text_dom);
+			info_dom.append(svg_link_dom);
+
+			item_dom.append(img_dom);
+			item_dom.append(info_dom);
+		}
+
+		item_dom.addEventListener('click', event => {
+			render_from_name(event.target.innerText);
+		});
+
+		modules_list_dom.append(item_dom);
+	}
+
+	document.getElementById('cqs_no_modules').style.display = modules_name.length == 0 ? 'block' : 'none';
+	document.getElementById('cqs_index').style.display = 'block';
+}
+
+function show_model() {
+	document.title = data.module_name + ' | CadQuery Server';
+	document.getElementById('cqs_error').style.display = 'none';
+	document.getElementById('cqs_index').style.display = 'none';
+
+	if (sse) {
+		const url = new URL(window.location.href);
+		url.searchParams.set('m', data.module_name);
+		window.history.pushState(url.pathname, '', url.href);
+	}
+
+	const [ shapes, states ] = data.model;
+	const [ group, tree ] = viewer.renderTessellatedShapes(shapes, states, options);
+	viewer.render(group, tree, states, options);
+}
+
+function render(_data) {
+	data = _data;
+
+	if ( ! viewer) {
+		init_viewer(options, modules_name);
+	} else {
+		viewer.clear();
+	}
+
+	update_modules_dropdown();
+
+	if ('error' in data) {
+		show_error();
+	} else if (data.module_name) {
+		show_model();
+	} else {
+		show_index();
+	}
+}
+
+function render_from_name(module_name) {
+	if(sse) {
+		fetch(`json?m=${ module_name }`)
+			.then(response => response.json())
+			.then(_data => render(_data))
+			.catch(error => console.error(error));
+	} else {
+		render(modules[module_name]);
+	}
+}
+
+window.addEventListener('resize', () => {
+	if (timer) {
+		clearTimeout(timer);
+	}
+	timer = setTimeout(() => {
+		viewer = init_viewer(options, modules_name);
+		render(data);
+	}, 500);
+});
+
+function update_modules_dropdown() {
+	const modules_dropdown_dom = document.getElementById('modules_dropdown');
+
+	while (modules_dropdown_dom.firstChild) {
+        modules_dropdown_dom.removeChild(modules_dropdown_dom.firstChild);
+    }
+
+	const option_dom = document.createElement('option');
+	option_dom.setAttribute('selected', 'selected');
+	option_dom.innerText = 'Index page';
+	modules_dropdown_dom.appendChild(option_dom);
+
+	for(let module_name of modules_name) {
+		const option_dom = document.createElement('option');
+		if (module_name == data.module_name) {
+			option_dom.setAttribute('selected', 'selected');
+		}
+		option_dom.innerText = module_name;
+		modules_dropdown_dom.appendChild(option_dom);
+	}
+
+	modules_dropdown_dom.style.display = data.module_name == undefined ? 'none' : 'inline';
+}
+
+function add_modules_dropdown() {
+	const modules_dropdown_dom = document.createElement('select');
+	modules_dropdown_dom.id = 'modules_dropdown';
+
+	modules_dropdown_dom.addEventListener('change', event => {
+		if (event.target.value == 'Index page') {
+			render({});
+		} else {
+			render_from_name(event.target.value);
+		}		
+	});
+
+	document.getElementsByClassName('tcv_cad_toolbar')[0].prepend(modules_dropdown_dom);
+}
+
+
+</script>
+	
+
+	<script>
+		window.addEventListener('DOMContentLoaded', () => {
+			
+			init_viewer({"blackEdges": false, "control": "orbit", "glass": false, "grid": [false, false, false], "hideButtons": [], "ortho": true, "theme": null, "transparent": false}, ["box", "cq_tutorial"]);
+			render({});
+		});
+	</script>
+</body>
+
+</html>
