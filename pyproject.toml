@@ -32,6 +32,8 @@ cq-server = "cq_server.cli:main"
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^2.15.0"
+PyAutoGUI = "^0.9.53"
+paperclip = "^2.6.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
