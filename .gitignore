@@ -5,7 +5,7 @@ __pycache__
 /dist
 
 # Default destination folder used when working on export
-/build
+/docs
 
 # Files used for development
 ___*
