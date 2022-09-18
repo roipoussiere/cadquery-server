@@ -92,7 +92,7 @@ function show_index() {
 			const info_dom = document.createElement('div');
 			const svg_link_dom = document.createElement('a');
 			svg_link_dom.setAttribute('href', `stl/${ module_name }.stl`)
-			svg_link_dom.innerText = 'get svg'
+			svg_link_dom.innerText = 'get stl'
 			info_dom.append(text_dom);
 			info_dom.append(svg_link_dom);
 
@@ -101,7 +101,7 @@ function show_index() {
 		}
 
 		item_dom.addEventListener('click', event => {
-			render_from_name(event.target.innerText);
+			render_from_name(module_name);
 		});
 
 		modules_list_dom.append(item_dom);
