@@ -197,9 +197,31 @@ show_object(cq.Workplane('XY').box(1, 2, 3))
 
 Please read the [CadQuery documentation](https://cadquery.readthedocs.io/en/latest/) for more details about the CadQuery library.
 
+### Added Python functions
+
+`cq_server.ui` module tend to be as compatible as possible to the CQ Editor behaviour and thus accept the same Python functions:
+
+#### `show_object()`
+
+Tell CQ server to render this object in the UI. Can be used several times.
+
+Parameters:
+
+- `name`: the name of the object, displayed in the UI tree view
+- `options`: a dictionary of options, as:
+  - `alpha`: the alpha value of the object, between 0 and 1
+  - `color`: object color, can be defined as:
+    - an html color name (`red`, `khaki`, etc.)
+    - a tuple of 3 or 4 numbers between 0 and 1
+    - a CQ `Color` object
+
+#### `debug`
+
+Same as `show_object()` but predefined to a semi-transparent red.
+
 ## Using the web server
 
-Once the server is started, go to its url (ie. `http://127.0.0.1`).
+Once the server is started, go to its url (ie. `http://127.0.0.1:5000`).
 
 Other endpoints:
 
