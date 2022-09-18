@@ -54483,7 +54483,7 @@
 	}
 
 	class Grid {
-	  constructor(display, bbox, ticks, axes0, grid) {
+	  constructor(display, bbox, ticks, axes0, grid, flipY) {
 	    if (ticks === undefined) {
 	      ticks = 10;
 	    }
@@ -54520,7 +54520,7 @@
 	    this.gridHelper[1].rotateY(Math.PI / 2);
 	    this.gridHelper[2].rotateZ(Math.PI / 2);
 
-	    this.setCenter(axes0);
+	    this.setCenter(axes0, flipY);
 
 	    this.setVisible();
 	  }
@@ -54616,13 +54616,13 @@
 	    this.computeGrid();
 	  }
 
-	  setCenter(axes0) {
+	  setCenter(axes0, flipY) {
 	    if (axes0) {
 	      for (var i = 0; i < 3; i++) {
 	        this.gridHelper[i].position.set(0, 0, 0);
 	      }
 	      this.gridHelper[0].position.z = -this.size / 2;
-	      this.gridHelper[1].position.y = -this.size / 2;
+	      this.gridHelper[1].position.y = ((flipY ? 1 : -1) * this.size) / 2;
 	      this.gridHelper[2].position.x = -this.size / 2;
 	    } else {
 	      const c = this.bbox.center();
@@ -54630,7 +54630,7 @@
 	        this.gridHelper[i].position.set(...c);
 	      }
 	      this.gridHelper[0].position.z = -this.size / 2 + c[2];
-	      this.gridHelper[1].position.y = -this.size / 2 + c[1];
+	      this.gridHelper[1].position.y = ((flipY ? 1 : -1) * this.size) / 2 + c[1];
 	      this.gridHelper[2].position.x = -this.size / 2 + c[0];
 	    }
 	  }
@@ -57392,29 +57392,39 @@
 	}
 
 	const defaultDirections = {
-	  y_up: {
-	    iso: new Vector3(1, 1, 1),
-	    front: new Vector3(0, 0, 1),
-	    rear: new Vector3(0, 0, -1),
-	    left: new Vector3(-1, 0, 0), // compatible to fusion 360
-	    right: new Vector3(1, 0, 0), // compatible to fusion 360
-	    top: new Vector3(0, 1, 0),
-	    bottom: new Vector3(0, -1, 0),
+	  y_up: {                              // compatible to fusion 360
+	    iso: { pos: new Vector3(1, 1, 1), z_rot: 0 },
+	    front: { pos: new Vector3(0, 0, 1), z_rot: 0 },
+	    rear: { pos: new Vector3(0, 0, -1), z_rot: 0 },
+	    left: { pos: new Vector3(-1, 0, 0), z_rot: 0 },
+	    right: { pos: new Vector3(1, 0, 0), z_rot: 0 },
+	    top: { pos: new Vector3(0, 1, 0), z_rot: 0 },
+	    bottom: { pos: new Vector3(0, -1, 0), z_rot: 0 },
 	  },
-	  z_up: {
-	    iso: new Vector3(1, 1, 1),
-	    front: new Vector3(1, 0, 0),
-	    rear: new Vector3(-1, 0, 0),
-	    left: new Vector3(0, 1, 0),
-	    right: new Vector3(0, -1, 0),
-	    top: new Vector3(0, 0, 1),
-	    bottom: new Vector3(0, 0, -1),
+	  z_up: {                              // compatible to FreeCAD, OnShape
+	    iso: { pos: new Vector3(1, -1, 1), z_rot: 0 },
+	    front: { pos: new Vector3(0, -1, 0), z_rot: 0 },
+	    rear: { pos: new Vector3(0, 1, 0), z_rot: 0 },
+	    left: { pos: new Vector3(-1, 0, 0), z_rot: 0 },
+	    right: { pos: new Vector3(1, 0, 0), z_rot: 0 },
+	    top: { pos: new Vector3(0, 0, 1), z_rot: -Math.PI / 2 },
+	    bottom: { pos: new Vector3(0, 0, -1), z_rot: -Math.PI / 2 },
+	  },
+	  legacy: {                            // legacy Z up
+	    iso: { pos: new Vector3(1, 1, 1), z_rot: 0 },
+	    front: { pos: new Vector3(1, 0, 0), z_rot: 0 },
+	    rear: { pos: new Vector3(-1, 0, 0), z_rot: 0 },
+	    left: { pos: new Vector3(0, 1, 0), z_rot: 0 },
+	    right: { pos: new Vector3(0, -1, 0), z_rot: 0 },
+	    top: { pos: new Vector3(0, 0, 1), z_rot: 0 },
+	    bottom: { pos: new Vector3(0, 0, -1), z_rot: 0 },
 	  }
 	};
 
 	const cameraUp = {
 	  y_up: [0, 1, 0],
 	  z_up: [0, 0, 1],
+	  legacy: [0, 0, 1],
 	};
 
 	class Camera {
@@ -57428,9 +57438,14 @@
 	   * @param {string} up - Z or Y to define whether Z or Y direction is camera up.
 	   **/
 	  constructor(width, height, distance, target, ortho, up) {
+	    const mapping = {
+	      "Y": "y_up",
+	      "Z": "z_up",
+	      "L": "legacy"
+	    };
 	    this.target = new Vector3(...target);
 	    this.ortho = ortho;
-	    this.up = (up == "Y") ? "y_up" : "z_up";
+	    this.up = mapping[up];
 	    this.yaxis = new Vector3(0, 1, 0);
 	    this.zaxis = new Vector3(0, 0, 1);
 
@@ -57537,10 +57552,10 @@
 	    if (position != null) {
 	      var cameraPosition = relative
 	        ? position
-	            .clone()
-	            .normalize()
-	            .multiplyScalar(this.camera_distance)
-	            .add(this.target)
+	          .clone()
+	          .normalize()
+	          .multiplyScalar(this.camera_distance)
+	          .add(this.target)
 	        : position;
 
 	      this.camera.position.set(...cameraPosition.toArray());
@@ -57566,8 +57581,14 @@
 	      zoom = this.camera.zoom;
 	    }
 	    // For the default directions quaternion can be ignored, it will be reset automatically
-	    this.setupCamera(true, defaultDirections[this.up][dir], null, zoom);
+	    this.setupCamera(true, defaultDirections[this.up][dir].pos, null, zoom);
 	    this.lookAtTarget();
+	    if (defaultDirections[this.up][dir].z_rot != 0) {
+	      var quaternion = new Quaternion();
+	      quaternion.setFromAxisAngle(new Vector3(0, 0, 1), defaultDirections[this.up][dir].z_rot);
+	      quaternion.multiply(this.getQuaternion());
+	      this.setQuaternion(quaternion);
+	    }
 	  }
 
 	  /**
@@ -57671,11 +57692,11 @@
 
 	    this.pCamera.aspect = aspect;
 
-	    this.camera.updateProjectionMatrix();    
+	    this.camera.updateProjectionMatrix();
 	  }
 	}
 
-	const version="1.6.4";
+	const version="1.7.0";
 
 	class Viewer {
 	  /**
@@ -58370,6 +58391,7 @@
 	      this.ticks,
 	      this.axes0,
 	      this.grid,
+	      options.up == "Z",
 	    );
 	    this.gridHelper.computeGrid();
 
@@ -58723,7 +58745,7 @@
 	      this.treeview.removeLabelHighlight();
 	    }
 	  }
-	  
+
 	  /**
 	   * Handle bounding box and notifications for picked elements
 	   * @function
@@ -58744,7 +58766,7 @@
 	    const object = this.nestedGroup.groups[id];
 	    const boundingBox = new BoundingBox().setFromObject(object, true);
 
-	    if(this.lastBbox != null && this.lastBbox.id === id && !meta && !shift){
+	    if (this.lastBbox != null && this.lastBbox.id === id && !meta && !shift) {
 	      this.removeLastBbox();
 	    } else {
 	      if (highlight) {
@@ -58898,7 +58920,7 @@
 	   */
 	  setAxes0 = (flag, notify = true) => {
 	    this.axes0 = flag;
-	    this.gridHelper.setCenter(flag);
+	    this.gridHelper.setCenter(flag, this.up == "Z");
 	    this.display.setAxes0Check(flag);
 	    this.axesHelper.setCenter(flag);
 
@@ -59582,23 +59604,27 @@
 	   * @param {number} treeWidth - new width of navigation tree
 	   * @param {number} height - new height of CAD View
 	   * @param {boolean} [glass=false] - Whether to use glass mode or not
-	   */  
-	  resizeCadView(cadWidth, treeWidth, height, glass=false) {
+	   */
+	  resizeCadView(cadWidth, treeWidth, height, glass = false) {
 	    this.cadWidth = cadWidth;
 	    this.height = height;
-	    
+
 	    // Adapt renderer dimensions
 	    this.renderer.setSize(cadWidth, height);
 
 	    // Adapt display dimensions
-	    this.display.setSizes({"treeWidth": treeWidth, "cadWidth": cadWidth, "height": height});
+	    this.display.setSizes({
+	      treeWidth: treeWidth,
+	      cadWidth: cadWidth,
+	      height: height,
+	    });
 	    this.display.cadView.children[2].style.width = `${cadWidth}px`;
 	    this.display.cadView.children[2].style.height = `${height}px`;
 	    this.display.glassMode(glass);
-	    
+
 	    const fullWidth = cadWidth + (glass ? 0 : treeWidth);
 	    this.display.handleMoreButton(fullWidth);
-	    
+
 	    // Adapt camers to new dimensions
 	    this.camera.changeDimensions(this.bb_radius, cadWidth, height);
 
