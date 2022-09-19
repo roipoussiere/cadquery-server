@@ -1,3 +1,5 @@
+'AutoScreencast is a tool used to automatically create screencasts by reading instructions.'
+
 import os
 import os.path as op
 from subprocess import Popen
@@ -10,69 +12,93 @@ import pyautogui as ag
 import pyperclip
 
 
-ag.PAUSE = 0
-KEYS_INTERVAL = 0.1
-TEXT_INTERVAL = 0.5
-HR_SCREEN_SIZE = (1680, 1050)
-LR_SCREEN_SIZE = (1440, 900)
-VIDEO_DIR = op.abspath('./screencasts')
+# Changing screen resolution:
+#     xrandr --output DP-1 --mode 1440x900
+#     xrandr --output DP-1 --mode 1680x1050
 
 
-class ScreencastHelper:
-    def __init__(self):
+class AutoScreencast:
+    'Main class of the AutoScreencast tool.'
+
+    keys_interval = 0.1
+    text_interval = 0.5
+
+    def __init__(self, video_dir: str):
+        self.video_dir = op.abspath(video_dir)
+
+        ag.PAUSE = 0
         file_name_prefix = f"demo_{ datetime.now().strftime('%Y-%m-%d_%H:%M:%S') }"
-        self.file_path_prefix = op.join(VIDEO_DIR, file_name_prefix)
+        self.video_path_prefix = op.join(self.video_dir, file_name_prefix)
         self.proc = None
         self.subtitles = ''
         self.startup = None
         self.sub_counter = 0
 
-    def write_text(self, text: str, slow=True):
-        '''workaround to support special characters'''
+    def type(self, text: str, slow=True):
+        'type text, with a workaround to support special characters'
 
         for char in text:
             pyperclip.copy(char)
             ag.hotkey('ctrl', 'shift', 'v')
             if slow:
-                sleep(KEYS_INTERVAL * random())
+                sleep(self.keys_interval * random())
                 if char == ' ':
-                    sleep(TEXT_INTERVAL * random())
+                    sleep(self.text_interval * random())
 
-        sleep(KEYS_INTERVAL)
+        sleep(self.keys_interval)
         ag.hotkey('enter')
-        sleep(KEYS_INTERVAL)
+        sleep(self.keys_interval)
         if slow:
-            sleep(TEXT_INTERVAL)
+            sleep(self.text_interval)
 
     def screencast(self):
-        comand = 'ffmpeg -f x11grab -s %dx%d -r 25 -i :0.0 %s' \
-            % (*HR_SCREEN_SIZE, self.file_path_prefix + '.mp4')
+        'function to start screencast using ffmpeg, called in an other thread.'
+
+        str_size = '%dx%d' % ag.size()
+        video_path = self.video_path_prefix + '.mp4'
+        comand = f'ffmpeg -loglevel error -f x11grab -s { str_size } -r 25 -i :0.0 { video_path }'
 
         self.proc = Popen(comand.split(' '))
 
-    def start(self):
-        if not op.isdir(VIDEO_DIR):
-            os.makedirs(VIDEO_DIR)
+    def init(self):
+        'init the screencast'
+
+        if not op.isdir(self.video_dir):
+            os.makedirs(self.video_dir)
 
         daemon = Thread(target=self.screencast, daemon=True)
         daemon.start()
         self.startup = timedelta(seconds=time())
 
         sleep(1)
-        ag.hotkey('ctrl', 'shift', 't')
 
     def end(self):
+        'exit the screencast properly'
+
         sleep(0.5)
         self.proc.terminate()
         sleep(0.5)
         ag.hotkey('enter')
 
-        sleep(0.5)
-        with open(self.file_path_prefix + '.srt', 'w', encoding='utf-8') as sub_file:
+        with open(self.video_path_prefix + '.srt', 'w', encoding='utf-8') as sub_file:
             sub_file.write(self.subtitles)
 
-    def subtitle(self, text: str):
-        delta_to_str = lambda time: str(time)[:-3].replace('.', ',')
+    def move(self, pos: str):
+        'move cursor'
+
+        pos_x, pos_y = pos.replace(' ', '').split(',')
+        ag.moveTo(int(pos_x), int(pos_y), duration=1.5)
+
+    def keys(self, keys: str):
+        'hit keys'
+
+        ag.hotkey(*keys.split('+'))
+
+    def subt(self, text: timedelta):
+        'add a subtitle'
+
+        def delta_to_str(delta: str):
+            return str(delta)[:-3].replace('.', ',')
 
         start = timedelta(seconds=time()) - self.startup
         end = start + timedelta(seconds=1)
@@ -82,21 +108,29 @@ class ScreencastHelper:
         self.subtitles += f'{ text }\n\n'
         self.sub_counter += 1
 
+    def read(self, instructions_path: str):
+        'read instructions file'
 
-# if ag.size() == HR_SCREEN_SIZE:
-#     write_text('xrandr --output DP-1 --mode %dx%d' % LR_SCREEN_SIZE)
-#     sleep(3)
+        with open(op.abspath(instructions_path), encoding='utf-8') as md_file:
+            try:
+                for line in md_file.readlines():
+                    line = line.strip('\n')
+                    if line == '' or line.startswith('>'):
+                        pass
+                    if line.startswith('    '):
+                        self.type(line[4:])
+                    elif line.startswith('- `'):
+                        self.keys(line[3:-1])
+                    elif line.startswith('- *'):
+                        self.move(line[3:-1])
+                    else:
+                        self.subt(line)
+            except Exception as error:
+                self.end()
+                raise error
 
 
-sch = ScreencastHelper()
-sch.start()
-sch.subtitle('echoing some text')
-sch.write_text("echo 'hello world! :)'")
-sch.subtitle('moving pointer')
-ag.moveTo(200, 200, duration=1.5)
-sch.subtitle('echoing some text again')
-sch.write_text("echo 'hellooooo'")
-ag.hotkey('ctrl', 'shift', 'w')
+sch = AutoScreencast('./screencasts')
+sch.init()
+sch.read('./screencast.md')
 sch.end()
-
-# write_text('xrandr --output DP-1 --mode %dx%d' % HR_SCREEN_SIZE)
