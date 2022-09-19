@@ -12,7 +12,8 @@ import pyautogui as ag
 import pyperclip
 
 
-# Changing screen resolution:
+# Exit script: slam the cursor into a corner
+# Changing screen resolution before and after recording (better visibility):
 #     xrandr --output DP-1 --mode 1440x900
 #     xrandr --output DP-1 --mode 1680x1050
 
