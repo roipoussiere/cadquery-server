@@ -35,6 +35,8 @@ function load_camera_position() {
 		options.quaternion = viewer.getCameraQuaternion();
 		options.target = viewer.getCameraTarget();
 		options.zoom = viewer.getCameraZoom();
+	} else {
+		options.up = 'Z'
 	}
 }
 
