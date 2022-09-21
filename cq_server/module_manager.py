@@ -10,12 +10,6 @@ import glob
 import inspect
 import json
 
-print('Importing CadQuery...', end=' ', flush=True)
-import cadquery
-print('done.')
-
-from .ui import UI
-
 
 IGNORE_FILE_NAME = '.cqsignore'
 
@@ -42,6 +36,12 @@ class ModuleManager:
 
     def init(self) -> None:
         '''Initialize the module manager, in particular import the CadQuery Python module.'''
+        # pylint: disable=unused-import, import-outside-toplevel
+
+        print('Importing CadQuery...', end=' ', flush=True)
+        import cadquery
+        from .ui import UI
+        print('done.')
 
         sys.path.insert(1, self.modules_dir)
         self.update_ignore_list()
@@ -106,7 +106,7 @@ class ModuleManager:
 
         return last_updated
 
-    def get_assembly(self) -> cadquery.Assembly:
+    def get_assembly(self) -> 'cadquery.Assembly':
         '''Return a CQ assembly object composed of all models passed
         to show_object and debug functions in the CadQuery script.'''
 
@@ -203,7 +203,7 @@ class ModuleManager:
 
         return [ op.basename(path)[:-3] for path in self.get_modules_path() ]
 
-    def get_ui_instance(self) -> UI:
+    def get_ui_instance(self) -> 'UI':
         '''Retrieve the ui object imported in the CadQuery script, used to retrieve the model.'''
 
         try:
