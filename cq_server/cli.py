@@ -129,14 +129,11 @@ def main() -> None:
         sys_exit()
 
     should_raise = (args.cmd != 'run' or args.should_raise)
-    try:
-        module_manager = ModuleManager(args.target, should_raise)
-    except ModuleManagerError as err:
-        sys_exit(err)
+    module_manager = ModuleManager(args.target, should_raise)
 
     if args.cmd == 'info':
         module_manager.update_ignore_list()
-        print('Ignored modules: ' + '\n'.join(module_manager.get_modules_name()))
+        print('Available modules: \n- ' + '\n- '.join(module_manager.get_modules_name()))
         sys_exit()
 
     ui_options = get_ui_options(args)
