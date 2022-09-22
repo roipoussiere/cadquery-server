@@ -9,8 +9,7 @@ body {
 
 .modal {
 	opacity: 0.8;
-	border-style: solid;
-	border-width: 2px;
+	border: 2px solid black;
 	border-radius: 5px;
 	position: absolute;
 	left: 10%;
@@ -24,11 +23,11 @@ body {
 }
 
 .modal.error {
-	background-color: #fdd;
+	background-color: pink;
 }
 
 .modal.info {
-	background-color: #ddf;
+	background-color: lightblue;
 }
 
 .modal pre {
@@ -40,23 +39,20 @@ body {
 	display: inline-block;
     padding: 0.5em;
     background-color: beige;
-    border-style: solid;
-    border-width: 2px;
+    border: 2px solid black;
     border-radius: 0.5em;
-	border-color: black;
-	cursor: pointer;
 	min-width: 7em;
 	text-align: center;
-}
-
-.cqs_module_item:hover {
-    background-color: darkkhaki;
 }
 
 .cqs_module_item img {
     border-radius: 0.5em;
 	display: block;
 	float: left;
+}
+
+.cqs_module_item img:hover {
+	filter: sepia(100%) drop-shadow(2px 2px 5px gray);
 }
 
 .cqs_module_item div {
@@ -73,5 +69,9 @@ body {
 }
 
 .cqs_module_item div a:hover {
-	background-color: beige;
+	background-color: darkkhaki;
+}
+
+.cqs_module_item_link {
+	cursor: pointer;
 }

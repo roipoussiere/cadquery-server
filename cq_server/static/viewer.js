@@ -81,30 +81,31 @@ function show_index() {
 
 	for(let module_name of modules_name) {
 		const item_dom = document.createElement('div');
-		item_dom.classList = 'cqs_module_item'
+		item_dom.classList.add('cqs_module_item');
 
 		const text_dom = document.createElement('p');
 		text_dom.innerText = module_name;
 		if (sse) {
 			item_dom.append(text_dom);
+			item_dom.classList.add('cqs_module_item_link');
+			item_dom.addEventListener('click', event => render_from_name(module_name));
+	
 		} else {
 			const img_dom = document.createElement('img');
-			img_dom.setAttribute('src', `png/${ module_name }.png`)
+			img_dom.setAttribute('src', `png/${ module_name }.png`);
+			img_dom.addEventListener('click', event => render_from_name(module_name));
+			img_dom.classList.add('cqs_module_item_link');
 
 			const info_dom = document.createElement('div');
-			const svg_link_dom = document.createElement('a');
-			svg_link_dom.setAttribute('href', `stl/${ module_name }.stl`)
-			svg_link_dom.innerText = 'get stl'
+			const stl_link_dom = document.createElement('a');
+			stl_link_dom.setAttribute('href', `stl/${ module_name }.stl`)
+			stl_link_dom.innerText = 'get stl';
 			info_dom.append(text_dom);
-			info_dom.append(svg_link_dom);
+			info_dom.append(stl_link_dom);
 
 			item_dom.append(img_dom);
 			item_dom.append(info_dom);
 		}
-
-		item_dom.addEventListener('click', event => {
-			render_from_name(module_name);
-		});
 
 		modules_list_dom.append(item_dom);
 	}
