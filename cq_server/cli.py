@@ -4,9 +4,6 @@ from sys import exit as sys_exit
 import argparse
 import os.path as op
 
-from .server import run
-from .module_manager import ModuleManager, ModuleManagerError
-from .exporter import Exporter
 from . import __version__ as cqs_version
 
 
@@ -16,7 +13,8 @@ DEFAULT_PORT = 5000
 def parse_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
     '''Parse cli arguments with argparse.'''
 
-    parser.description = 'A web server that renders a 3d model of a CadQuery script loaded dynamically.'
+    parser.description = 'A web server used to render 3d models from CadQuery code, ' \
+        + 'and eventually build a static website as a showcase for your projects.'
     parser.add_argument('-V', '--version', action='store_true',
         help='print CadQuery Server version and exit')
 
@@ -73,6 +71,8 @@ cq-server build examples/box.png build/box.step # build step file in build/box.s
 
 
 def add_ui_options(parser: argparse.ArgumentParser):
+    '''Add ui option to the parser, that can be used in both run and build sub-commands.'''
+
     parse_ui = parser.add_argument_group('user interface options')
     parse_ui.add_argument('--ui-hide', metavar='LIST',
         help='a comma-separated list of buttons to hide'
@@ -116,6 +116,7 @@ def get_ui_options(args: argparse.Namespace) -> dict:
 
 def main() -> None:
     '''Main function, called when using the `cq-server` command.'''
+    # pylint: disable=import-outside-toplevel
 
     parser = argparse.ArgumentParser()
     args = parse_args(parser)
@@ -129,6 +130,9 @@ def main() -> None:
         sys_exit()
 
     should_raise = (args.cmd != 'run' or args.should_raise)
+
+    from .module_manager import ModuleManager
+
     module_manager = ModuleManager(args.target, should_raise)
 
     if args.cmd == 'info':
@@ -139,9 +143,13 @@ def main() -> None:
     ui_options = get_ui_options(args)
 
     if args.cmd == 'run':
+        from .server import run
+
         run(args.port, module_manager, ui_options, args.dead)
 
     if args.cmd == 'build':
+        from .exporter import Exporter
+
         exporter = Exporter(module_manager)
 
         if module_manager.target_is_dir:
