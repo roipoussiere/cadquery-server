@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "cadquery-server"
-version = "0.4.0"
-description = "A web server used to render 3d models from CadQuery code loaded dynamically."
+version = "0.4.1"
+description = "A web server used to render 3d models from CadQuery code, and eventually build a static website as a showcase for your projects."
 license = "MIT"
 authors = ["Roipoussiere"]
 readme = "./README.md"
-homepage = "https://open-vsx.org/extension/roipoussiere/cadquery"
-repository = "https://framagit.org/roipoussiere/cadquery-vscode"
+homepage = "https://github.com/roipoussiere/cadquery-server"
+repository = "https://github.com/roipoussiere/cadquery-server"
 keywords = ["cad", "cadquery", "3d", "parametric", "modeling"]
 packages = [
     { include = "cq_server" }
