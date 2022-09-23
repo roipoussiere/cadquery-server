@@ -1,6 +1,6 @@
 # CadQuery Server
 
-A web server used to render 3d models from CadQuery code loaded dynamically, and eventually build a static website as a showcase for your CadQuery projects.
+A web server used to render 3d models from CadQuery code, and eventually build a static website as a showcase for your projects.
 
 Example usage with Kate on the left and Firefox on the right:
 
@@ -8,7 +8,9 @@ Example usage with Kate on the left and Firefox on the right:
 
 Demonstration video:
 
-[![cq-server_v-0-3-1](https://peertube.ethibox.fr/static/thumbnails/a6f01cba-7f53-4ac9-9d2f-c74d0f58abe2.jpg)](https://peertube.ethibox.fr/w/vwBfEkaEdzKiN98mm2jyDz)
+[![cq-server_v-0-3-1](https://peertube.ethibox.fr/static/thumbnails/5ababc8e-c686-481b-a7ee-8e5adbf32202.jpg)](https://peertube.ethibox.fr/w/cRcHfVR1PUcnSQaebsUWw1)
+
+[Demo of generated website](https://roipoussiere.github.io/cadquery-server/)
 
 ## About CadQuery Server
 
@@ -190,7 +192,7 @@ Minimal working example:
 
 ```py
 import cadquery as cq
-from cq_server.ui import UI, show_object
+from cq_server.ui import ui, show_object
 
 show_object(cq.Workplane('XY').box(1, 2, 3))
 ```
