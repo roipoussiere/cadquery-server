@@ -8,7 +8,7 @@ __`ctrl+shift+t`__
 
     clear
 
----
+------
 
     cq-server --help
 
@@ -116,29 +116,31 @@ __`ctrl+s, pgup, down, down, down, end`__
 
 __`left, left, left, backspace, shift+4, ctrl+s`__
 
+UI is updated as soon as a script is saved
+
 ------
 
 __`backspace, shift+6, ctrl+s`__
-
-UI is updated as soon as a script is saved
 
 ------
 
 __`ctrl+tab, ctrl+s`__
 
+if an other file is saved, UI switches the model
+
 ------
 
 __`alt+f4, ctrl+w, pause`__
 
-trying with VSCode
-
 ---
+
+trying with VSCode
 
     codium examples
 
 ------
 
-__`pause, pause, win+pgup`__
+__`pause, pause`__
 
 -------
 
@@ -146,11 +148,11 @@ __`pause, pause, win+pgup`__
 
 __`ctrl+shift+p`__
 
-----
+---
 
 __`enter`__
 
----
+----
 
     http://127.0.0.1:5000
 
@@ -182,6 +184,10 @@ __`pause, ctrl+d, ctrl+c`__
 
 building the showcase website
 
+    cq-server build --help
+
+---
+
     cq-server build examples docs
 
 ----------
@@ -205,6 +211,8 @@ __`enter`__
 ------
 
 __`ctrl+w, pause`__
+
+------
 
 __`ctrl+d`__
 

@@ -25,7 +25,8 @@ class AutoScreencast:
         self.video_dir = op.abspath(video_dir)
 
         ag.PAUSE = 0.2
-        file_name_prefix = f"{ prefix }_{ datetime.now().strftime('%Y-%m-%d_%H:%M:%S') }"
+        ag.MINIMUM_DURATION = 0.05
+        file_name_prefix = f"{ prefix }_{ datetime.now().strftime('%Y-%m-%d_%H-%M-%S') }"
         self.video_path_prefix = op.join(self.video_dir, file_name_prefix)
         self.proc = None
         self.subtitles = ''
@@ -42,7 +43,7 @@ class AutoScreencast:
             ag.hotkey('ctrl', 'shift', 'v')
             if slow:
                 base_delay = pause if char == ' ' else ag.MINIMUM_DURATION
-                sleep(base_delay * 0.25 + base_delay * 0.5 * random())
+                sleep(base_delay * (1 + 0.5 * random()))
 
         ag.PAUSE = pause
         ag.hotkey('enter')
