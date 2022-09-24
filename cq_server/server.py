@@ -30,7 +30,7 @@ def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: boo
         return render_template(
             'viewer.html',
             options=ui_options,
-            modules_name=module_manager.get_modules_name(),
+            modules_name=list(module_manager.available_modules.keys()),
             data=module_manager.get_data()
         )
 

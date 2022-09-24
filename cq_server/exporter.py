@@ -129,7 +129,7 @@ class Exporter:
             viewer_css=viewer_css,
             viewer_js=viewer_js,
             options=ui_options,
-            modules_name=self.module_manager.get_modules_name(),
+            modules_name=list(self.module_manager.available_modules.keys()),
             data=self.module_manager.get_data()
         )
 
@@ -155,7 +155,7 @@ class Exporter:
         png_path = op.join(destination, 'png')
         stl_path = op.join(destination, 'stl')
 
-        for module_name in self.module_manager.get_modules_name():
+        for module_name in self.module_manager.available_modules.keys():
             self.module_manager.module_name = module_name
 
             self.save_to(op.join(js_path, f'{ module_name }.js'), 'js')

@@ -5,7 +5,7 @@ import os.path as op
 import sys
 import traceback
 import importlib
-from typing import List, Tuple
+from typing import List, Dict, Tuple
 import glob
 import inspect
 import json
@@ -32,7 +32,7 @@ class ModuleManager:
         self.should_raise = should_raise
         self.modules = {}
         self.last_timestamp = 0
-        self.ignored_files = []
+        self.available_modules = {}
 
     def init(self) -> None:
         '''Initialize the module manager, in particular import the CadQuery Python module.'''
@@ -43,12 +43,28 @@ class ModuleManager:
         print('done.')
 
         sys.path.insert(1, self.modules_dir)
-        self.update_ignore_list()
+        self.available_modules = self.get_available_modules()
 
-    def update_ignore_list(self) -> None:
+    def get_available_modules(self) -> Dict[str, str]:
+        '''Returns a dictionary of available modules as module name: module path'''
+
+        ignored_files_path = self.get_ignored_files_path()
+
+        modules_path = []
+        for file_name in os.listdir(self.modules_dir):
+            file_path = op.join(self.modules_dir, file_name)
+            if op.isfile(file_path) \
+                    and op.splitext(file_path)[1] == '.py' \
+                    and file_path not in ignored_files_path:
+                modules_path.append(file_path)
+
+        return { op.basename(path)[:-3]: path for path in modules_path }
+
+    def get_ignored_files_path(self) -> List[str]:
         '''Update the list of files ignored, based on the .cqsignore file.'''
 
         ignore_file_path = op.join(self.modules_dir, IGNORE_FILE_NAME)
+        ignored_files_path = []
 
         if op.isfile(ignore_file_path):
             with open(ignore_file_path, encoding='utf-8') as ignore_file:
@@ -56,28 +72,18 @@ class ModuleManager:
                     line = line.strip()
                     if line and not line.startswith('#'):
                         ignore = op.join(self.modules_dir, line)
-                        self.ignored_files += glob.glob(ignore)
+                        ignored_files_path += glob.glob(ignore)
 
-    def get_modules_path(self) -> List[str]:
-        '''Returns the list of available modules'''
+        return ignored_files_path
 
-        modules_path = []
-        for file_name in os.listdir(self.modules_dir):
-            file_path = op.join(self.modules_dir, file_name)
-            if op.isfile(file_path) \
-                    and op.splitext(file_path)[1] == '.py' \
-                    and file_path not in self.ignored_files:
-                modules_path.append(file_path)
-        return modules_path
-
-    def get_most_recent_module_info(self) -> Tuple[str, str]:
+    def get_most_recent_module(self) -> Tuple[str, str]:
         '''Return the last updated module info as a tuple containing its path and timestamp.'''
 
         most_recent_module_path = ''
         most_recent_timestamp = 0
 
         if self.target_is_dir:
-            for module_path in self.get_modules_path():
+            for module_path in self.available_modules.values():
                 timestamp = op.getmtime(module_path)
                 if timestamp > most_recent_timestamp:
                     most_recent_module_path = module_path
@@ -92,7 +98,7 @@ class ModuleManager:
         '''If a file has been updated since the last call of this function call,
         return its path, otherwise return an empty string.'''
 
-        module_path, timestamp = self.get_most_recent_module_info()
+        module_path, timestamp = self.get_most_recent_module()
         last_updated = ''
 
         if self.last_timestamp == 0:
@@ -141,7 +147,7 @@ class ModuleManager:
         '''Load or reload the `self.module_name` module.'''
         # pylint: disable=broad-except
 
-        if self.module_name not in self.get_modules_name():
+        if self.module_name not in self.available_modules:
             raise ModuleManagerError(f'Module "{ self.module_name }" is not available '
                 + 'in the current context.')
 
@@ -196,11 +202,6 @@ class ModuleManager:
                     }
 
         return data
-
-    def get_modules_name(self) -> List[str]:
-        '''Return the list of available modules name.'''
-
-        return [ op.basename(path)[:-3] for path in self.get_modules_path() ]
 
     def get_ui_instance(self):
         '''Retrieve the ui object imported in the CadQuery script, used to retrieve the model.'''
