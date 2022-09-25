@@ -136,8 +136,8 @@ def main() -> None:
     module_manager = ModuleManager(args.target, should_raise)
 
     if args.cmd == 'info':
-        module_manager.update_ignore_list()
-        print('Available modules: \n- ' + '\n- '.join(module_manager.get_modules_name()))
+        modules = module_manager.get_available_modules().keys()
+        print('Available modules: \n- ' + '\n- '.join(modules))
         sys_exit()
 
     ui_options = get_ui_options(args)
