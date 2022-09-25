@@ -128,15 +128,36 @@ class ModuleManager:
     def get_assembly(self):
         from cadquery import Assembly, Color
 
-        results = self.get_result().results
+        MODEL_COLOR_DEFAULT = Color(0.9, 0.7, 0.1)
+        MODEL_COLOR_DEBUG   = Color(1  , 0  , 0  , 0.2)
 
-        if not results:
-            raise ValueError('nothing to export')
+        build_result = self.get_result()
 
         assembly = Assembly()
-        for result in results:
-            color = Color(result.options['color']) if 'color' in result.options else None
-            assembly.add(result.shape, color=color)
+
+        for counter, result in enumerate(build_result.results):
+            rgb   = result.options.get('color', None)
+            alpha = result.options.get('alpha', None)
+            name  = result.options.get('name' , None)
+
+            color = rgb          if isinstance(rgb, Color) \
+                else Color(rgb)  if isinstance(rgb, str) \
+                else Color(*rgb) if isinstance(rgb, tuple) \
+                else MODEL_COLOR_DEFAULT
+
+            if alpha:
+                color = Color(color.toTuple()[:3] + [ alpha ])
+
+            try:
+                assembly.add(result.shape, color=color, name=name)
+            except ValueError:
+                assembly.add(result.shape, color=color, name=f'{ name }_{ counter }')
+
+        for result in build_result.debugObjects:
+            assembly.add(result.shape, color=MODEL_COLOR_DEBUG)
+
+        if not assembly.children:
+            raise ValueError('nothing to show')
 
         return assembly
 
