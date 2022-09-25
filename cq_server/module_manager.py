@@ -3,11 +3,8 @@
 import os
 import os.path as op
 import sys
-import traceback
-import importlib
 from typing import List, Dict, Tuple
 import glob
-import inspect
 import json
 
 
@@ -30,7 +27,6 @@ class ModuleManager:
             raise ModuleManagerError(f'No file or folder found at "{ target }".')
 
         self.should_raise = should_raise
-        self.modules = {}
         self.last_timestamp = 0
         self.available_modules = {}
 
@@ -111,16 +107,36 @@ class ModuleManager:
 
         return last_updated
 
-    def get_assembly(self):
+    def get_result(self):
         '''Return a CQ assembly object composed of all models passed
         to show_object and debug functions in the CadQuery script.'''
 
-        self.load_module()
-        ui_instance = self.get_ui_instance()
-        assembly = ui_instance.get_assembly()
+        from cadquery.cqgi import CQModel
 
-        if not assembly.children:
-            raise ModuleManagerError('There is no object to show. Missing show_object()?')
+        module_script = ''
+        with open(self.available_modules[self.module_name], encoding='utf-8') as module_file:
+            module_script = module_file.read()
+
+        model = CQModel(module_script)
+        result = model.build()
+
+        if not result.success:
+            raise ModuleManagerError('Error in model', result.exception)
+
+        return result
+
+    def get_assembly(self):
+        from cadquery import Assembly, Color
+
+        results = self.get_result().results
+
+        if not results:
+            raise ValueError('nothing to export')
+
+        assembly = Assembly()
+        for result in results:
+            color = Color(result.options['color']) if 'color' in result.options else None
+            assembly.add(result.shape, color=color)
 
         return assembly
 
@@ -128,57 +144,18 @@ class ModuleManager:
         '''Return the tesselated model of the assembly,
         as a dictionnary usable by three-cad-viewer.'''
 
-        assembly = self.get_assembly()
-
         from jupyter_cadquery.cad_objects import to_assembly
         from jupyter_cadquery.base import _tessellate_group
         from jupyter_cadquery.utils import numpy_to_json
 
         try:
-            jcq_assembly = to_assembly(*assembly.children)
+            jcq_assembly = to_assembly(*self.get_assembly().children)
             assembly_tesselated = _tessellate_group(jcq_assembly)
             assembly_json = numpy_to_json(assembly_tesselated)
         except Exception as error:
             raise ModuleManagerError('An error occured when tesselating the assembly.') from error
 
         return json.loads(assembly_json)
-
-    def load_module(self) -> None:
-        '''Load or reload the `self.module_name` module.'''
-        # pylint: disable=broad-except
-
-        if self.module_name not in self.available_modules:
-            raise ModuleManagerError(f'Module "{ self.module_name }" is not available '
-                + 'in the current context.')
-
-        error = None
-        if self.module_name in self.modules:
-            print(f'Reloading module { self.module_name }...')
-
-            try:
-                importlib.reload(self.modules[self.module_name])
-            except Exception:
-                print('Error when reloading module, trying to re-import it...')
-
-                try:
-                    self.modules[self.module_name] = importlib.import_module(self.module_name)
-                    importlib.reload(self.modules[self.module_name])
-                except Exception as err:
-                    error = err
-
-        else:
-            print(f'Importing module { self.module_name }...')
-
-            try:
-                self.modules[self.module_name] = importlib.import_module(self.module_name)
-            except Exception as err:
-                error = err
-
-        if error:
-            error_message = 'Can not load module. ' + type(error).__name__ + ': ' + str(error)
-            raise ModuleManagerError(error_message, traceback.format_exc()) from error
-
-        print('Done.')
 
     def get_data(self) -> dict:
         '''Return the data to send to the client, that includes the tesselated model.'''
@@ -190,16 +167,16 @@ class ModuleManager:
                 data = {
                     'module_name': self.module_name,
                     'model': self.get_json_model(),
-                    'source': inspect.getsource(self.modules[self.module_name])
+                    'source': ''
                 }
             except ModuleManagerError as error:
                 if self.should_raise:
                     raise(error)
-                else:
-                    data = {
-                        'error': error.message,
-                        'stacktrace': error.stacktrace
-                    }
+
+                data = {
+                    'error': error.message,
+                    'stacktrace': error.stacktrace
+                }
 
         return data
 

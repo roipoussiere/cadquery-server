@@ -56,16 +56,20 @@ class Exporter:
         '''Save the assembly in the given format.'''
 
         assembly = self.module_manager.get_assembly()
+
+        if file_format not in [ 'step', 'xml' ]:
+            assembly = assembly.toCompound()
+
         if not options and file_format in [ 'svg', 'png', 'pdf' ]:
             options = DEFAULT_SVG_OPTIONS
 
         if file_format in [ 'step', 'xml', 'gltf', 'vtkjs', 'vrml' ]:
             assembly.save(destination, exportType=file_format.upper())
         elif file_format in [ 'dxf', 'svg', 'stl', 'amf', 'tjs', 'vtp', '3mf' ]:
-            exporters.export(assembly.toCompound(), destination, file_format.upper(), opt=options)
+            exporters.export(assembly, destination, file_format.upper(), opt=options)
         elif file_format in [ 'png' , 'pdf' ]:
             with tempfile.NamedTemporaryFile() as svg_file:
-                exporters.export(assembly.toCompound(), svg_file.name, 'SVG', opt=options)
+                exporters.export(assembly, svg_file.name, 'SVG', opt=options)
                 if file_format == 'png':
                     cairosvg.svg2png(file_obj=svg_file, write_to=destination, scale=2,
                         background_color=options.get('backgroundColor', None))
