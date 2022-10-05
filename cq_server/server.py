@@ -7,7 +7,7 @@ from time import sleep
 import os.path as op
 from typing import Tuple
 
-from flask import Flask, request, render_template, make_response, Response
+from flask import Flask, request, render_template, make_response, Response, send_file
 
 from .module_manager import ModuleManager
 
@@ -46,6 +46,19 @@ def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: boo
         exporter = Exporter(module_manager)
         return exporter.get_html(ui_options)
 
+    @app.route('/download', methods = [ 'GET' ])
+    def _download():
+        module = request.args.get("m")
+        file_format = request.args.get("format")
+        from .exporter import Exporter
+        exporter = Exporter(module_manager)
+        exported_file = exporter.export(module, file_format)
+        try:
+            return send_file(exported_file, as_attachment=True)
+        except FileNotFoundError:
+            abort(404)
+
+
     @app.route('/json', methods = [ 'GET' ])
     def _json() -> Tuple[str, int]:
         if module_manager.target_is_dir:
@@ -67,6 +80,8 @@ def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: boo
         response.headers['Cache-Control'] = 'no-store, must-revalidate'
         response.headers['Expires'] = 0
         return response
+
+
 
     def watchdog() -> None:
         while True:

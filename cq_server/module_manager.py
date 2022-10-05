@@ -41,6 +41,13 @@ class ModuleManager:
         sys.path.insert(1, self.modules_dir)
         self.available_modules = self.get_available_modules()
 
+    def get_module(self) -> (str,str):
+        return (self.modules_dir, self.module_name)
+
+    def set_module(self, modules_dir: str, module_name: str):
+        self.modules_dir = modules_dir
+        self.module_name = module_name
+
     def get_available_modules(self) -> Dict[str, str]:
         '''Returns a dictionary of available modules as module name: module path'''
 

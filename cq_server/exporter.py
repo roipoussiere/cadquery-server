@@ -165,3 +165,15 @@ class Exporter:
             self.save_to(op.join(js_path, f'{ module_name }.js'), 'js')
             self.save_to(op.join(png_path, f'{ module_name }.png'), 'png')
             self.save_to(op.join(stl_path, f'{ module_name }.stl'), 'stl')
+
+    def export(self, module: str, file_format: str) -> str:
+        mm = self.module_manager.get_module()
+        self.module_manager.set_module(mm[0], module)
+        name = module.split(".")[0]
+        tmpdir = tempfile.mkdtemp()
+        file = name+"."+file_format
+        destination = op.join(tmpdir, file)
+        self._save(destination, file_format)
+        self.module_manager.set_module(mm[0], mm[1])
+        return destination
+
