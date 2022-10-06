@@ -7,7 +7,7 @@ from time import sleep
 import os.path as op
 from typing import Tuple
 
-from flask import Flask, request, render_template, make_response, Response, send_file
+from flask import Flask, request, render_template, make_response, Response, send_file, abort
 
 from .module_manager import ModuleManager
 
@@ -47,16 +47,23 @@ def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: boo
         return exporter.get_html(ui_options)
 
     @app.route('/download', methods = [ 'GET' ])
-    def _download():
+    def _download() -> Response:
+        '''Export specified module in the requested format and send it to the requester'''
         module = request.args.get("m")
-        file_format = request.args.get("format")
+        if module is None or module not in module_manager.get_available_modules().keys():
+            abort(Response("Module not found", 400))
+
         from .exporter import Exporter
         exporter = Exporter(module_manager)
-        exported_file = exporter.export(module, file_format)
+        file_format = request.args.get("format")
+        if file_format is None or file_format not in exporter.valid_export_formats:
+            abort(Response("File format not supported", 400))
+
         try:
+            exported_file = exporter.export(module, file_format)
             return send_file(exported_file, as_attachment=True)
         except FileNotFoundError:
-            abort(404)
+            abort(500)
 
 
     @app.route('/json', methods = [ 'GET' ])
@@ -80,8 +87,6 @@ def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: boo
         response.headers['Cache-Control'] = 'no-store, must-revalidate'
         response.headers['Expires'] = 0
         return response
-
-
 
     def watchdog() -> None:
         while True:

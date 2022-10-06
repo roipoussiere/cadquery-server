@@ -32,6 +32,7 @@ DEFAULT_SVG_OPTIONS = {
 
 class Exporter:
     '''Class used to export the target in many formats.'''
+    valid_export_formats = ['step', 'xml', 'gltf', 'vtkjs', 'vrml', 'dxf', 'svg', 'stl', 'amf', 'tjs', 'vtp', '3mf', 'png' , 'pdf']
 
     def __init__(self, module_manager: ModuleManager):
         self.module_manager = module_manager
@@ -167,13 +168,17 @@ class Exporter:
             self.save_to(op.join(stl_path, f'{ module_name }.stl'), 'stl')
 
     def export(self, module: str, file_format: str) -> str:
-        mm = self.module_manager.get_module()
-        self.module_manager.set_module(mm[0], module)
-        name = module.split(".")[0]
-        tmpdir = tempfile.mkdtemp()
-        file = name+"."+file_format
-        destination = op.join(tmpdir, file)
-        self._save(destination, file_format)
-        self.module_manager.set_module(mm[0], mm[1])
-        return destination
+        '''Export module with given format
+            Resets to whatever module was selected before exporting this module
+        '''
+        old_module = self.module_manager.get_module()
+        # Set new module so we can export it
+        self.module_manager.set_module(old_module[0], module)
 
+        name = module.split(".")[0]
+        # Make the export to a tmp-dir so it can be cleaned up later
+        destination = op.join(tempfile.mkdtemp(), f'{ name }.{ file_format}')
+        self._save(destination, file_format)
+        # Reset to the old module
+        self.module_manager.set_module(old_module[0], old_module[1])
+        return destination
