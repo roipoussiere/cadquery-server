@@ -22,7 +22,7 @@ Flask = "^2.2.2"
 jupyter-cadquery = "^3.2.2"
 cadquery-massembly = "^0.9.0"
 matplotlib = "^3.5.3"
-minify-html = "^0.10.0"
+minify-html = "^0.9.0"
 cadquery = {version = "2.2.0b0", optional = true, allow-prereleases = true}
 casadi = {version = "^3.5.6rc2", optional = true, allow-prereleases = true}
 CairoSVG = "^2.5.2"

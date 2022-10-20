@@ -132,10 +132,14 @@ function show_model() {
 
 function render(_data) {
 	data = _data;
+	let cameraSettings
 
 	if ( ! viewer) {
 		init_viewer(options, modules_name);
 	} else {
+		try {
+			cameraSettings = viewer.getCameraLocationSettings();
+		} catch(error) { console.log(error) }
 		viewer.clear();
 	}
 
@@ -145,6 +149,9 @@ function render(_data) {
 		show_error();
 	} else if (data.module_name) {
 		show_model();
+		try {
+			viewer.setCameraLocationSettings(cameraSettings.position, cameraSettings.quaternion, cameraSettings.target, cameraSettings.zoom);
+		} catch(error) { console.log(error) }
 	} else {
 		show_index();
 	}
