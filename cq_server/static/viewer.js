@@ -22,7 +22,9 @@ function init_sse() {
 		const data = JSON.parse(event.data);
 		render(data);
 		hide_toast();
-		console.log(`${data.module_name}: model reloaded in ${data.time_elapsed.toFixed(2)} seconds`);
+		if (data.time_elapsed !== undefined) {
+			console.log(`${data.module_name}: model reloaded in ${data.time_elapsed.toFixed(2)} seconds`);
+		}
 	})
 	sse.onerror = error => {
 		if (sse.readyState == 2) {
