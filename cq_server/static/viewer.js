@@ -9,12 +9,20 @@ let modules_name = [];
 let viewer = null;
 let timer = null;
 let sse = null;
+let toast_timeout = null;
 
 
 function init_sse() {
 	sse = new EventSource('events');
+	sse.addEventListener('loading_model', event => {
+		const message = "Reloading model: " + event.data;
+		show_toast(message);
+	})
 	sse.addEventListener('file_update', event => {
-		render(JSON.parse(event.data));
+		const data = JSON.parse(event.data);
+		render(data);
+		hide_toast();
+		console.log(`${data.module_name}: model reloaded in ${data.time_elapsed.toFixed(2)} seconds`);
 	})
 	sse.onerror = error => {
 		if (sse.readyState == 2) {
@@ -52,6 +60,29 @@ function init_viewer(_options, _modules_name) {
 	if ('hideButtons' in options) {
 		viewer.trimUI(options.hideButtons, false);
 	}
+}
+
+function show_toast(message, duration = -1) {
+    if (toast_timeout) {
+        clearTimeout(toast_timeout);
+        toast_timeout = null;
+    }
+
+    document.getElementById('cqs_toast_message').innerText = message;
+    document.getElementById('cqs_toast').style.display = 'block';
+
+    if (duration !== -1) {
+        toast_timeout = setTimeout(hide_toast, duration);
+    }
+}
+
+function hide_toast() {
+    if (toast_timeout) {
+        clearTimeout(toast_timeout);
+        toast_timeout = null;
+    }
+
+    document.getElementById('cqs_toast').style.display = 'none';
 }
 
 function show_error() {
