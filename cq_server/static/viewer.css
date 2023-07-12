@@ -15,11 +15,11 @@ body {
 	left: 10%;
 	top: 10%;
 	right: 10%;
-	bottom: 10%;
+	max-height: 80%;
 	padding: 1em;
 	font-family: sans-serif;
 	z-index: 1000;
-	overflow: scroll;
+	overflow: auto;
 }
 
 .modal.error {
@@ -31,7 +31,14 @@ body {
 }
 
 .modal pre {
-	background-color: grey;
+	display: inline-block;
+	padding: 10px;
+	background-color: #565656;
+	color: white;
+	box-sizing: border-box;
+	overflow: visible;
+	white-space: pre;
+	min-width: 100%;
 }
 
 .cqs_module_item {
