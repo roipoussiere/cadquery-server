@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "*.html": "jinja-html"
-    },
-    "python.linting.pylintEnabled": true,
-    "editor.rulers": [
-        100
-    ]
-}
