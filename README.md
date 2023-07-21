@@ -1,5 +1,7 @@
 # CadQuery Server
 
+**This project is no longer actively supported. You might be interested by [vscode OCP CAD viewer](https://github.com/bernhard-42/vscode-ocp-cad-viewer), an extension to show [CadQuery](https://github.com/cadquery/cadquery) and [build123d](https://github.com/gumyr/build123d) objects in VS Code via the [three-cad-viewer](https://github.com/bernhard-42/three-cad-viewer) viewer component. You can also contact me if you want to continue to maintain this project.**
+
 A web server used to render 3d models from CadQuery code, and eventually build a static website as a showcase for your projects.
 
 Example usage with Kate on the left and Firefox on the right:
