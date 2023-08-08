@@ -146,7 +146,8 @@ class ModuleManager:
                 else MODEL_COLOR_DEFAULT
 
             if alpha:
-                color = Color(color.toTuple()[:3] + [ alpha ])
+                r, g, b = color.toTuple()[:3]
+                color = Color(r, g, b, alpha)
 
             try:
                 assembly.add(result.shape, color=color, name=name)
