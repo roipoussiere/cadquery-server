@@ -60,7 +60,6 @@ function show_error() {
 
 	document.getElementById('cqs_error_message').innerText = data.error;
 	document.getElementById('cqs_stacktrace').innerText = data.stacktrace;
-	document.getElementById('cqs_stacktrace').style.display = data.stacktrace ? 'block' : 'none';
 
 	document.getElementById('cqs_error').style.display = 'block';
 }
