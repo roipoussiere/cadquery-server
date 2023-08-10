@@ -6,7 +6,7 @@ import sys
 from typing import List, Dict, Tuple
 import glob
 import json
-
+import time
 
 IGNORE_FILE_NAME = '.cqsignore'
 
@@ -185,9 +185,13 @@ class ModuleManager:
 
         if self.module_name:
             try:
+                start_time = time.perf_counter()
+                model = self.get_json_model()
+                end_time = time.perf_counter()
                 data = {
                     'module_name': self.module_name,
-                    'model': self.get_json_model(),
+                    'model': model,
+                    'time_elapsed': end_time - start_time,
                     'source': ''
                 }
             except ModuleManagerError as error:

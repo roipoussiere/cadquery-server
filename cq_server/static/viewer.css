@@ -34,6 +34,24 @@ body {
 	background-color: grey;
 }
 
+.toast {
+	position: absolute;
+	z-index: 1000;
+	left: 50%;
+	top: 56px;
+	transform: translate(-50%, -50%);
+	padding: 5px 20px;
+	border: 1px solid black;
+	border-radius: 5px;
+	background-color: #444;
+	opacity: 0.8;
+	font-family: sans-serif;
+	color: white;
+	font-weight: 100;
+	font-size: 14px;
+	text-align: center;
+}
+
 .cqs_module_item {
     margin: 0.5em;
 	display: inline-block;

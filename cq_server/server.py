@@ -13,7 +13,8 @@ from .module_manager import ModuleManager
 
 
 WATCH_PERIOD = 0.3
-SSE_MESSAGE_TEMPLATE = 'event: file_update\ndata: %s\n\n'
+SSE_FILE_UPDATE_MESSAGE_TEMPLATE = 'event: file_update\ndata: %s\n\n'
+SSE_LOADING_MODEL_MESSAGE_TEMPLATE = 'event: loading_model\ndata: %s\n\n'
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -74,8 +75,9 @@ def run(port: int, module_manager: ModuleManager, ui_options: dict, is_dead: boo
 
             if last_updated_file:
                 module_manager.module_name = op.basename(last_updated_file)[:-3]
+                events_queue.put(SSE_LOADING_MODEL_MESSAGE_TEMPLATE % module_manager.module_name)
                 data = module_manager.get_data()
-                events_queue.put(SSE_MESSAGE_TEMPLATE % json.dumps(data))
+                events_queue.put(SSE_FILE_UPDATE_MESSAGE_TEMPLATE % json.dumps(data))
             sleep(WATCH_PERIOD)
 
     events_queue = Queue(maxsize = 3)
